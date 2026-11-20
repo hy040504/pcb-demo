@@ -16,7 +16,7 @@
   --font: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
   --bg-app: #f6f7f6; --bg-card: #ffffff; --bg-muted: #f1f2f1; --bg-hover: #ecefec; --bg-input: #ffffff;
   --border: #e4e7e4; --border-strong: #cfd4cf;
-  --text-1: #141816; --text-2: #3b423d; --text-3: #6b736d; --text-4: #9aa19b;
+  --text-1: #141816; --text-2: #3b423d; --text-3: #6b736d;
   --primary: #46745f; --primary-hover: #3b6350; --primary-fg: #ffffff;
   --danger: #a8504a; --danger-hover: #92423d;
   --good: #2f6b3a; --warn: #8a4a1c; --bad: #c0463e;
@@ -27,11 +27,12 @@
   --shadow: 0 1px 2px rgba(20, 24, 22, .05);
   --shadow-float: 0 18px 48px -8px rgba(20, 24, 22, .22);
   --bar-normal: #6fa384; --bar-defect: #c0463e; --bar-pending: #d49a5c;
+  --role-insp: #3b7bbf; --ease: cubic-bezier(.22, .8, .3, 1);
 }
 html[data-theme="dark"] {
   --bg-app: #0e1210; --bg-card: #161c19; --bg-muted: #1d2521; --bg-hover: #232d28; --bg-input: #121714;
   --border: #26302b; --border-strong: #3a4740;
-  --text-1: #f1f4f2; --text-2: #cdd5d0; --text-3: #92a098; --text-4: #6a776f;
+  --text-1: #f1f4f2; --text-2: #cdd5d0; --text-3: #92a098;
   --primary: #5b9378; --primary-hover: #6aa388; --primary-fg: #0b100d;
   --danger: #c46a63; --danger-hover: #d27b74;
   --good: #7fcf94; --warn: #e5a76c; --bad: #f08a82;
@@ -42,6 +43,7 @@ html[data-theme="dark"] {
   --shadow: 0 1px 3px rgba(0, 0, 0, .4);
   --shadow-float: 0 22px 54px rgba(0, 0, 0, .6);
   --bar-normal: #5b9378; --bar-defect: #e0766d; --bar-pending: #d49a5c;
+  --role-insp: #86b4e8;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
@@ -81,8 +83,6 @@ button.pill:hover:not(.active) { border-color: var(--border-strong); }
 .nav-item { text-align: left; }
 .vw-seg button { display: inline-flex; align-items: center; justify-content: center; }
 /* 역할 구분 — 관리자: 진한 그린 배지 · 검사원: 블루 배지 + 헤더 하단 포인트 라인 */
-:root { --role-insp: #3b7bbf; }
-html[data-theme="dark"] { --role-insp: #86b4e8; }
 .pill.role-admin { background: var(--primary); color: var(--primary-fg); font-weight: 700; }
 .pill.role-insp { background: color-mix(in srgb, var(--role-insp) 16%, transparent); color: var(--role-insp); font-weight: 700; }
 .pill .ic { width: 13px; height: 13px; }
@@ -220,6 +220,7 @@ textarea.inp { min-height: 84px; resize: vertical; line-height: 1.5; }
 .kpi .v { font-size: 32px; font-weight: 800; letter-spacing: -.02em; margin-top: 4px; }
 .kpi .v.good { color: var(--good); } .kpi .v.bad { color: var(--bad); } .kpi .v.warn { color: var(--warn); }
 .split { display: grid; grid-template-columns: 1.15fr 1fr; gap: 14px; align-items: start; }
+.split.eq { align-items: stretch; }
 .photo { position: relative; width: 100%; aspect-ratio: 475 / 350; border-radius: 12px; overflow: hidden; background: #0f1512; border: 1px solid var(--border); }
 .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .photo .ov { position: absolute; inset: 0; pointer-events: none; }
@@ -257,7 +258,6 @@ details > summary { cursor: pointer; font-weight: 600; color: var(--text-2); pad
    · 화면 진입(.rise/.enter)은 메뉴 이동·로그인 때만 재생 (상태 갱신으로 다시 그릴 때는 재생하지 않음)
    · 호버·눌림·모달·토스트·상태 점은 항상 부드럽게 전환
    · prefers-reduced-motion 사용자는 모든 모션 제거 */
-:root { --ease: cubic-bezier(.22, .8, .3, 1); }
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
 @keyframes rise-s { from { opacity: 0; transform: translateY(6px); } }
 @keyframes fadein { from { opacity: 0; } }
@@ -318,6 +318,25 @@ button.pill.api.green .dot { animation: ringg 2.2s ease-out infinite; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
 
+/* 공통 페이지 헤더 · 차트 툴팁 · 표로 보기 · 더보기 시트 · 간격 유틸 */
+.page-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+.page-head .page-sub { margin-bottom: 0; }
+.page-act { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.mt4 { margin-top: 4px; } .mb4 { margin-bottom: 4px; } .mt6 { margin-top: 6px; } .mb6 { margin-bottom: 6px; } .mt8 { margin-top: 8px; } .mb8 { margin-bottom: 8px; } .mt10 { margin-top: 10px; } .mb10 { margin-bottom: 10px; } .mt12 { margin-top: 12px; } .mb12 { margin-bottom: 12px; } .mt14 { margin-top: 14px; } .mb14 { margin-bottom: 14px; } .mt16 { margin-top: 16px; } .mb16 { margin-bottom: 16px; }
+#tip { position: fixed; z-index: 300; pointer-events: none; background: var(--text-1); color: var(--bg-card); padding: 6px 10px; border-radius: 8px; font-size: 12px; line-height: 1.45; box-shadow: var(--shadow-float); opacity: 0; transform: translateY(4px); transition: opacity .12s, transform .12s; white-space: nowrap; }
+#tip.on { opacity: 1; transform: none; }
+.hit { fill: transparent; }
+.hr { cursor: pointer; } .hr:hover .bar { filter: brightness(1.1); }
+circle.arc { transition: opacity .15s, stroke-width .15s; } circle.arc:hover { stroke-width: 28; }
+.tbl-toggle { margin-top: 6px; font-size: 12.5px; color: var(--text-3); }
+.tbl-toggle summary { cursor: pointer; display: inline-block; padding: 4px 0; }
+.tbl-toggle table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+.tbl-toggle th, .tbl-toggle td { padding: 4px 8px; border-bottom: 1px solid var(--border); text-align: right; } .tbl-toggle th:first-child, .tbl-toggle td:first-child { text-align: left; }
+.nav-more { display: none; }
+.more-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.more-item { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 16px 8px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-card); font-weight: 600; position: relative; }
+.more-item.on { border-color: var(--primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 22%, transparent); }
+.more-item .lk2 { position: absolute; top: 8px; right: 10px; color: var(--text-3); } .more-item .lk2 .ic { width: 14px; height: 14px; }
 /* UI 개선 패치 — 차트 보조선 · 목록 · 빈 상태 · 단계 안내 */
 .rv-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .rv-item .small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -375,7 +394,7 @@ button.pill.api.green .dot { animation: ringg 2.2s ease-out infinite; }
 .vw-dev.phone iframe { border-radius: 28px; }
 .vw-cap { color: var(--text-3); font-size: 12.5px; text-align: center; margin-top: 8px; }
 @media (max-width: 440px) { .brand-t { display: none; } .topbar { padding: 0 10px; } .icon-btn { width: 38px !important; } }
-@media (max-width: 700px) { .lbl-s { display: inline; } .lbl-f { display: none; } .sub-hint { display: none; } svg .ct { font-size: 14px; } }
+@media (max-width: 700px) { .lbl-s { display: inline; } .lbl-f { display: none; } .sub-hint { display: none; } svg .ct { font-size: 14px; } .nav-item.sec { display: none; } .nav-more { display: flex; } }
 @media (max-width: 520px) { .api-name { display: none; } .rank-row { grid-template-columns: 18px 72px 1fr 58px; } .topbar { gap: 6px; } .main { padding: 14px 12px 20px; } .rv-list { max-height: 360px; } }
 </style>
 </head>
@@ -401,10 +420,10 @@ const MENUS = [
   { id: 'inspect',   label: 'PCB 검사', short: '검사', icon: 'scan' },
   { id: 'review',    label: '검사 관리', short: '관리', icon: 'check' },
   { id: 'history',   label: '검사 이력', short: '이력', icon: 'history' },
-  { id: 'stats',     label: '통계 분석', short: '통계', icon: 'chart' },
-  { id: 'data',      label: '데이터 관리', short: '데이터', icon: 'folder' },
-  { id: 'models',    label: '모델 관리', short: '모델', icon: 'db', adminEdit: true },
-  { id: 'settings',  label: '시스템 설정', short: '설정', icon: 'gear', adminEdit: true }
+  { id: 'stats',     label: '통계 분석', short: '통계', icon: 'chart', sec: true },
+  { id: 'data',      label: '데이터 관리', short: '데이터', icon: 'folder', sec: true },
+  { id: 'models',    label: '모델 관리', short: '모델', icon: 'db', adminEdit: true, sec: true },
+  { id: 'settings',  label: '시스템 설정', short: '설정', icon: 'gear', adminEdit: true, sec: true }
 ];
 /** 로그인 시연 프리셋 (역할: inspector=검사원 / admin=관리자) */
 const PRESETS = {
@@ -432,6 +451,7 @@ const ICONS = {
   lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
   chart: '<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',
   folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+  dots: '<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
   x: '<path d="M6 6l12 12M18 6L6 18"/>'
 };
@@ -591,7 +611,11 @@ function mdhm(ms) { const d = new Date(ms); return String(d.getMonth() + 1).padS
  * @param {object} r 검사 레코드
  * @returns {string} inline style 문자열
  */
-function thumbStyle(r) { return `background-image:url('${r.img}');background-size:280%;background-position:${r.spot.x}% ${r.spot.y}%;`; }
+function thumbStyle(r) {
+  // 같은 원본 이미지를 건별로 다른 크롭 배율·밝기·색조로 보여 줘 여러 제품을 검사한 느낌을 낸다(시연용, 원본 파일은 불변).
+  const size = 240 + (r.n * 37) % 90, br = (0.9 + (r.n * 13 % 21) / 100).toFixed(2), hue = ((r.n * 29) % 17) - 8;
+  return `background-image:url('${r.img}');background-size:${size}%;background-position:${r.spot.x}% ${r.spot.y}%;filter:brightness(${br}) hue-rotate(${hue}deg);`;
+}
 
 /* ═══════════════════════════════════════════════════════════════════════════
    3. 공통 UI — 토스트 · 모달 · 테마 · 라우팅
@@ -752,7 +776,7 @@ function openApiStatus() {
     <div class="row" style="justify-content:flex-end;margin-top:16px">${adm
       ? `<button class="btn outline" onclick="checkApi()">연결 확인</button><button class="btn ${on ? 'danger' : 'primary'}" onclick="toggleApi()">${on ? '오프라인으로 전환 (시연)' : '온라인으로 복구 (시연)'}</button>`
       : `<button class="btn outline" onclick="checkApi()">연결 확인</button>`}</div>
-    ${adm ? '' : '<div class="note" style="margin-top:8px">서버 상태 전환은 관리자만 시연할 수 있습니다.</div>'}`);
+    ${adm ? '' : '<div class="note mt8">서버 상태 전환은 관리자만 시연할 수 있습니다.</div>'}`);
 }
 
 /** 연결 확인: 응답 시간과 확인 시각을 갱신한다 (시연용 난수). */
@@ -781,7 +805,7 @@ function viewLogin() {
     <div class="field"><label>비밀번호</label><input class="inp" type="password" value="••••••••" readonly></div>
     <button class="btn primary block" onclick="login(document.getElementById('preset').value)">로그인</button>
     <p class="note">시연용 계정입니다. 관리자 계정은 AI 판단 근거(Heatmap) · 모델 · 사용자 관리 기능이 열립니다.</p>
-    <div class="row between" style="margin-top:10px"><span class="small muted">KhakiSketch · 2026</span><button class="icon-btn" onclick="toggleTheme()" aria-label="테마 전환">${ic(S.theme === 'dark' ? 'sun' : 'moon')}</button></div>
+    <div class="row between mt10"><span class="small muted">KhakiSketch · 2026</span><button class="icon-btn" onclick="toggleTheme()" aria-label="테마 전환">${ic(S.theme === 'dark' ? 'sun' : 'moon')}</button></div>
   </div></div>`;
 }
 
@@ -807,7 +831,8 @@ function shell(content) {
     </header>
     <div class="body-wrap">
       <nav class="side" aria-label="주 메뉴">
-        ${MENUS.map(m => `<button class="nav-item ${U.route === m.id ? 'active' : ''}" onclick="go('${m.id}')">${ic(m.icon, 'lg')}<span><span class="lbl-f">${m.label}</span><span class="lbl-s">${m.short}</span></span>${m.id === 'review' && st.pending ? `<span class="cnt">${st.pending}</span>` : ''}${m.adminEdit && !adm ? `<span class="lk" title="조회 전용">${ic('lock')}</span>` : ''}</button>`).join('')}
+        ${MENUS.map(m => `<button class="nav-item ${U.route === m.id ? 'active' : ''} ${m.sec ? 'sec' : ''}" onclick="go('${m.id}')">${ic(m.icon, 'lg')}<span><span class="lbl-f">${m.label}</span><span class="lbl-s">${m.short}</span></span>${m.id === 'review' && st.pending ? `<span class="cnt">${st.pending}</span>` : ''}${m.adminEdit && !adm ? `<span class="lk" title="조회 전용">${ic('lock')}</span>` : ''}</button>`).join('')}
+        <button class="nav-item nav-more ${MENUS.some(m => m.sec && m.id === U.route) ? 'active' : ''}" onclick="openMore()" aria-label="더보기">${ic('dots', 'lg')}<span><span class="lbl-f">더보기</span><span class="lbl-s">더보기</span></span></button>
         <div class="side-foot">${perm}
           <div class="sys-card" role="button" tabindex="0" onclick="openApiStatus()" onkeydown="if(event.key==='Enter')openApiStatus()" title="누르면 서버 상태 상세"><span class="sc-t">시스템 상태</span>
             <span class="sys-row">AI 모델 <span class="st ${S.api.online ? 'ok' : 'off'}"><i></i>${S.api.online ? '정상' : '중단'}</span></span>
@@ -841,10 +866,10 @@ function hourlyChart() {
     [['n', 'var(--bar-normal)'], ['d', 'var(--bar-defect)'], ['p', 'var(--bar-pending)']].forEach(([k, c]) => {
       const h = x[k] / max * (H - 40); if (h > 0) { y -= h; out += `<rect class="bar" style="animation-delay:${i * 50}ms" x="${X}" y="${y}" width="${bw}" height="${h}" rx="2" fill="${c}"/>`; }
     });
-    return out + `<text class="ct" x="${X + bw / 2}" y="${H - 6}" text-anchor="middle" font-size="10" fill="${x.h === curH ? 'var(--primary)' : 'var(--text-3)'}" font-weight="${x.h === curH ? 800 : 400}">${x.h}</text><text class="bar-l ct" x="${X + bw / 2}" y="${y - 4}" text-anchor="middle" font-size="10" fill="var(--text-2)">${x.n + x.d + x.p}</text>`;
+    return `<g class="hr" role="button" aria-label="${x.h}시 ${x.n + x.d + x.p}건, 누르면 검사 이력으로 이동" data-tip="${x.h}시 · 정상 ${x.n} · 불량 ${x.d} · 대기 ${x.p} (합계 ${x.n + x.d + x.p}) — 클릭: 이력 보기" onclick="gotoHour(${x.h})">` + out + `<text class="ct" x="${X + bw / 2}" y="${H - 6}" text-anchor="middle" font-size="10" fill="${x.h === curH ? 'var(--primary)' : 'var(--text-3)'}" font-weight="${x.h === curH ? 800 : 400}">${x.h}</text><text class="bar-l ct" x="${X + bw / 2}" y="${y - 4}" text-anchor="middle" font-size="10" fill="var(--text-2)">${x.n + x.d + x.p}</text><rect class="hit" x="${X - gap / 2}" y="0" width="${bw + gap}" height="${H - 16}"/></g>`;
   }).join('');
   return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="시간대별 검사 건수">${grid}${bars}</svg>
-    <div class="row small muted" style="gap:14px"><span><span class="dot" style="color:var(--bar-normal);display:inline-block"></span> 정상</span><span><span class="dot" style="color:var(--bar-defect);display:inline-block"></span> 불량</span><span><span class="dot" style="color:var(--bar-pending);display:inline-block"></span> 검토 대기</span></div>`;
+    <div class="row small muted" style="gap:14px"><span><span class="dot" style="color:var(--bar-normal);display:inline-block"></span> 정상</span><span><span class="dot" style="color:var(--bar-defect);display:inline-block"></span> 불량</span><span><span class="dot" style="color:var(--bar-pending);display:inline-block"></span> 검토 대기</span></div>${chartTable(['시간', '정상', '불량', '검토 대기', '합계'], data.map(x => [x.h + '시', x.n, x.d, x.p, x.n + x.d + x.p]))}`;
 }
 
 /**
@@ -867,17 +892,17 @@ function viewDashboard() {
     : `<div class="role-strip insp"><span class="rs-t">${ic('user', 'lg')}내 작업</span>
         <span class="rs-i"><small>검토 대기</small><b style="color:var(--warn)">${st.pending}건</b></span><span class="rs-i"><small>오늘 검사</small><b>${st.total}건</b></span>
         <span class="rs-act">${first ? `<button class="btn sm primary" onclick="openReview(${first.n})">바로 판정하기</button>` : ''}<button class="btn sm outline" onclick="go('inspect')">새 검사 시작</button></span></div>`;
-  return `<h1 class="page-title">오늘의 검사 현황</h1><p class="page-sub">2026-11-20<span class="sub-hint"> · 카드를 누르면 해당 조건의 검사 이력으로 이동합니다.</span></p>
+  return `${pageHead('오늘의 검사 현황', '2026-11-20<span class="sub-hint"> · 카드를 누르면 해당 조건의 검사 이력으로 이동합니다.</span>')}
     ${roleStrip}
     <div class="kpi-grid">${kpi('전체 검사', st.total, '', 'all', '오늘 08~19시 · 이력 보기')}${kpi('정상 확정', st.normal, 'good', 'NORMAL', '전체의 ' + pc(st.normal))}${kpi('불량 확정', st.defect, 'bad', 'DEFECT', '전체의 ' + pc(st.defect))}${kpi('검토 대기', st.pending, 'warn', 'PENDING', '전체의 ' + pc(st.pending))}</div>
-    <div class="split">
+    <div class="split eq">
       <div class="card"><div class="card-title">시간대별 검사 건수</div>${hourlyChart()}<div class="divider"></div><div class="card-title">불량 유형별 분포 <span class="pill">최근 7일</span><span class="sp"></span><button class="btn sm" onclick="go('stats')">통계 분석</button></div>${defectDist(statsData(7).byType)}</div>
       <div class="card"><div class="card-title">검토 대기 <span class="pill orange">${st.pending}건</span><span class="sp"></span><button class="btn sm" onclick="go('review')">검토하기</button></div>
-        ${pend.length ? pend.map(r => `<div class="ver-row"><div class="thumb" style="${thumbStyle(r)}"></div><div style="flex:1"><b>${r.id}</b><div class="small muted">${r.pcb} · 점수 ${r.score.toFixed(2)} · ${hhmm(r.at)}</div></div><button class="btn sm outline" onclick="openReview(${r.n})">판정</button></div>`).join('') : `<div class="empty">검토 대기 건이 없습니다.<br><button class="btn sm outline" style="margin-top:10px" onclick="go('inspect')">새 검사 시작</button></div>`}
+        ${pend.length ? pend.map(r => `<div class="ver-row"><div class="thumb" style="${thumbStyle(r)}"></div><div style="flex:1"><b>${r.id}</b><div class="small muted">${r.pcb} · 점수 ${r.score.toFixed(2)} · ${hhmm(r.at)}</div></div><button class="btn sm outline" onclick="openReview(${r.n})">판정</button></div>`).join('') : `<div class="empty">검토 대기 건이 없습니다.<br><button class="btn sm outline mt10" onclick="go('inspect')">새 검사 시작</button></div>`}
         <div class="divider"></div><div class="row between"><span class="muted">AI-검사원 판정 일치율</span><b style="font-size:20px">${st.match}%</b></div>
-        <div class="note" style="margin-top:4px">검사원 확정 건 중 AI 최초 판정과 같은 비율 (AI 원본 판정은 보존)</div></div>
+        <div class="note mt4">검사원 확정 건 중 AI 최초 판정과 같은 비율 (AI 원본 판정은 보존)</div></div>
     </div>
-    <div class="card" style="margin-top:14px"><div class="card-title">최근 검사<span class="sp"></span><button class="btn sm" onclick="go('history')">전체 이력</button></div>
+    <div class="card mt14"><div class="card-title">최근 검사<span class="sp"></span><button class="btn sm" onclick="go('history')">전체 이력</button></div>
       <div class="tbl-wrap"><table class="tbl"><thead><tr><th>번호</th><th>PCB</th><th>AI 점수</th><th>AI 판정</th><th>최종 판정</th><th>시각</th></tr></thead><tbody>
       ${recent.map(r => `<tr class="click" onclick="openDetail(${r.n})"><td>${r.n}</td><td>${r.pcb}</td><td>${r.score.toFixed(2)}</td><td>${aiBadge(r.ai)}</td><td>${finalBadge(r)}</td><td>${hhmm(r.at)}</td></tr>`).join('')}</tbody></table></div></div>`;
 }
@@ -947,18 +972,18 @@ function viewInspect() {
   const res = r ? JSON.stringify({ anomaly_score: r.score, threshold: r.thr, is_anomaly: r.ai === 'ANOMALY', elapsed_ms: r.ms }, null, 2) : '(검사 시작 후 표시)';
   const result = U.running ? `<span class="pill lg"><span class="spin"></span>PatchCore 분석 중…</span><div class="skel w60"></div><div class="skel"></div><div class="skel w80"></div><div class="skel w60"></div>` : r ? `<div class="fresh">
       <span class="pill ${r.ai === 'ANOMALY' ? 'orange' : 'green'} lg">${r.ai === 'ANOMALY' ? '이상 의심' : '정상'}</span>
-      <div class="muted" style="margin-top:12px">이상 점수</div><div class="score-big">${r.score.toFixed(2)}</div>
+      <div class="muted mt12">이상 점수</div><div class="score-big">${r.score.toFixed(2)}</div>
       <div class="muted" style="margin:6px 0">기본 임계값: ${r.thr.toFixed(2)}</div>
       <div class="bar-track"><div class="bar-fill ${r.ai === 'NORMAL' ? 'ok' : ''}" style="width:${Math.round(r.score * 100)}%"></div><div class="bar-thr" style="left:${Math.round(r.thr * 100)}%" title="임계값"></div></div>
       <div class="divider"></div>
       <div class="muted">추론 모델</div><div style="font-weight:600;margin-bottom:6px">Industrial PatchCore <span class="muted small">${r.ver}</span></div>
       <div class="muted">처리 시간: ${r.ms}ms</div>
-      ${r.ai === 'ANOMALY' ? `<button class="btn outline sm" style="margin-top:12px" onclick="openReview(${r.n})">검사 관리에서 판정하기</button>` : `<div class="note">정상 판정은 자동 확정됩니다. 이상 의심 건만 검사원 검토가 필요합니다.</div>`}</div>`
+      ${r.ai === 'ANOMALY' ? `<button class="btn outline sm mt12" onclick="openReview(${r.n})">검사 관리에서 판정하기</button>` : `<div class="note">정상 판정은 자동 확정됩니다. 이상 의심 건만 검사원 검토가 필요합니다.</div>`}</div>`
     : `<span class="pill lg">검사 대기</span><ul class="steps"><li class="${U.pcb ? 'ok' : ''}"><span class="n">1</span>PCB 선택 <span class="muted small">${esc(U.pcb || '')}</span></li><li class="${U.img ? 'ok' : ''}"><span class="n">2</span>이미지 준비 (촬영 또는 업로드)</li><li><span class="n">3</span>검사 시작 → PatchCore API 결과가 여기에 표시됩니다</li></ul>`;
   const off = !S.api.online;
-  return `<h1 class="page-title">PCB 외관 검사</h1>
+  return `${pageHead('PCB 외관 검사', 'PCB 선택 → 이미지 준비 → 검사 시작')}
     ${off ? `<div class="banner-off">${ic('lock', 'lg')}<span>PatchCore API 서버 오프라인 — 검사를 시작할 수 없습니다. 상단의 상태 배지를 눌러 연결을 확인하세요.</span></div>` : ''}
-    <div class="row" style="margin-bottom:14px">
+    <div class="row mb14">
       <select class="inp" style="width:auto" onchange="U.pcb=this.value;render()">${S.pcbs.filter(p => p.status === '검사 가능').map(p => `<option ${p.id === U.pcb ? 'selected' : ''}>${esc(p.id)}</option>`).join('')}</select>
       <span class="pill">일반 검사</span><span class="pill green">모델 준비 완료</span>
     </div>
@@ -969,9 +994,9 @@ function viewInspect() {
         <div class="grid2"><button class="btn" onclick="capture()">${ic('camera')}촬영</button><button class="btn" onclick="pickFile()">${ic('upload')}업로드</button></div></div>
       <div class="card"><div class="card-title">AI 검사 결과</div>${result}</div>
     </div>
-    <button class="btn primary block" style="margin-top:14px" onclick="runInspection()" ${U.running || off ? 'disabled' : ''}>${U.running ? '<span class="spin"></span>PatchCore API 호출 중…' : off ? 'API 오프라인 — 검사 불가' : '검사 시작'}</button>
+    <button class="btn primary block mt14" onclick="runInspection()" ${U.running || off ? 'disabled' : ''}>${U.running ? '<span class="spin"></span>PatchCore API 호출 중…' : off ? 'API 오프라인 — 검사 불가' : '검사 시작'}</button>
     <p class="note">검사 화면 목업 · Heatmap은 API 확장 이후 추가 (현재는 관리자의 검토 화면에서 AI 판단 근거 시뮬레이션 제공)</p>
-    ${isAdmin() ? `<div class="card" style="margin-top:14px"><details><summary>외부 PatchCore API 호출 계약(안) 보기 <span class="pill role-admin">관리자 전용</span></summary>
+    ${isAdmin() ? `<div class="card mt14"><details><summary>외부 PatchCore API 호출 계약(안) 보기 <span class="pill role-admin">관리자 전용</span></summary>
       <div class="note" style="margin:6px 0 8px">자체 모델 구현 없이 공개 Industrial PatchCore API를 호출만 합니다. 아래는 어댑터가 사용할 요청·응답 계약(안)입니다.</div>
       <div class="grid2"><div><div class="small muted">요청</div><div class="code">${esc(req)}</div></div><div><div class="small muted">응답</div><div class="code">${esc(res)}</div></div></div></details></div>` : ''}`;
 }
@@ -1017,29 +1042,29 @@ function viewReview() {
     const f = finalState(cur);
     const modes = [['orig', '원본'], ['heat', 'Heatmap'], ['mask', 'Mask'], ['overlay', 'Overlay']];
     const evidence = isAdmin() ? `
-      <div class="card-title" style="margin-top:16px">AI 판단 근거 <span class="pill">관리자 전용</span></div>
-      <div class="row" style="margin-bottom:8px">${modes.map(([k, l]) => `<button class="pill ${U.evMode === k ? 'active' : ''}" onclick="U.evMode='${k}';render()">${l}</button>`).join('')}
+      <div class="card-title mt16">AI 판단 근거 <span class="pill">관리자 전용</span></div>
+      <div class="row mb8">${modes.map(([k, l]) => `<button class="pill ${U.evMode === k ? 'active' : ''}" onclick="U.evMode='${k}';render()">${l}</button>`).join('')}
         <label class="small muted" style="margin-left:auto">투명도 <input type="range" min="20" max="100" value="${U.evOpacity}" oninput="U.evOpacity=+this.value;document.getElementById('evLayer').innerHTML=evidenceLayer(S.inspections.find(r=>r.n===U.rvSel),U.evMode,U.evOpacity)"></label></div>
       <div class="photo"><img src="${cur.img}" alt="AI 판단 근거 원본" style="${U.evMode === 'mask' && cur.ai === 'ANOMALY' ? 'visibility:hidden' : ''}"><div id="evLayer">${evidenceLayer(cur, U.evMode, U.evOpacity)}</div></div>
       <div class="note">${cur.ai === 'ANOMALY' ? 'AI가 어떤 영역을 근거로 이상으로 판단했는지 보여주는 자료입니다 (시안: 위치는 시뮬레이션).' : 'AI 정상 판정 — 표시할 이상 영역이 없습니다.'} 실제 Heatmap · Mask · Overlay는 API 확장 이후 연동됩니다.</div>`
-      : `<div class="locked" style="margin-top:16px">${ic('lock', 'lg')}<div><b>AI 판단 근거(Heatmap · Mask · Overlay)</b><br>관리자 전용 화면에서 제공됩니다. 검사원은 점수와 원본 이미지로 판정합니다.</div></div>`;
+      : `<div class="locked mt16">${ic('lock', 'lg')}<div><b>AI 판단 근거(Heatmap · Mask · Overlay)</b><br>관리자 전용 화면에서 제공됩니다. 검사원은 점수와 원본 이미지로 판정합니다.</div></div>`;
     detail = `
       <div class="row" style="align-items:flex-start;flex-wrap:nowrap;gap:16px">
         <div style="width:46%;min-width:0"><div class="photo"><img src="${cur.img}" alt="${cur.id} 원본"></div></div>
         <div style="flex:1;min-width:0"><div style="font-size:20px;font-weight:800">${cur.id}</div>
           <div class="muted" style="margin:2px 0 8px">${cur.pcb} · Industrial PatchCore ${cur.ver}</div>
           <span class="pill ${cur.ai === 'ANOMALY' ? 'orange' : 'green'}">${cur.ai === 'ANOMALY' ? 'AI 이상 의심' : 'AI 정상'}</span>
-          <div style="margin-top:10px">이상 점수: <b>${cur.score.toFixed(2)}</b></div><div>임계값: <b>${cur.thr.toFixed(2)}</b> <span class="muted small">(검사 당시)</span></div>
+          <div class="mt10">이상 점수: <b>${cur.score.toFixed(2)}</b></div><div>임계값: <b>${cur.thr.toFixed(2)}</b> <span class="muted small">(검사 당시)</span></div>
           <div class="note">현재 상태: ${finalBadge(cur)}</div></div></div>
       <div class="divider"></div>
       <div style="font-weight:700;margin-bottom:8px">검사원 최종 판정</div>
       <div class="grid2"><button class="btn primary block" style="font-size:15px;padding:12px" onclick="submitReview(${cur.n},'NORMAL')">정상</button><button class="btn danger block" style="font-size:15px;padding:12px" onclick="submitReview(${cur.n},'DEFECT')">불량</button></div>
-      <div class="field" style="margin-top:12px"><label>판정 사유 및 검사원 메모</label>
+      <div class="field mt12"><label>판정 사유 및 검사원 메모</label>
         <textarea class="inp" id="rvMemo" placeholder="판정 사유를 입력하는 영역 (정상 확정 시 가불량 사유, 불량 확정 시 불량 내용)" oninput="U.rvMemo=this.value">${esc(U.rvMemo || cur.memo)}</textarea></div>
       <div class="note">${f === 'PENDING' ? '' : '이미 확정된 건입니다. 다시 누르면 최종 판정을 변경하며, AI 최초 판정은 그대로 보존됩니다. '}확정 판정과 사유는 피드백 데이터로 누적되어 추후 자체 모델(Custom PatchCore) 학습에 활용됩니다.</div>
       ${evidence}`;
   }
-  return `<div class="row between"><h1 class="page-title">검사 관리</h1><span class="pill orange lg">${st.pending}건 대기</span></div>
+  return `${pageHead('검사 관리', '이상 의심 건 확인 · 최종 판정 · 사유 기록', `<span class="pill orange lg">${st.pending}건 대기</span>`)}
     <div class="row" style="margin:6px 0 14px">${chip('all', '전체')}${chip('pending', '검토 대기')}${chip('done', '검토 완료')}</div>
     <div class="split rv">
       <div class="rv-list">${list.map(r => `<button class="rv-item ${r.n === U.rvSel ? 'sel' : ''}" onclick="U.rvSel=${r.n};U.rvMemo='';U.evMode='orig';render()"><div class="thumb" style="${thumbStyle(r)}"></div><div style="flex:1;min-width:0"><div class="rv-h"><span class="t">${r.id}</span>${finalBadge(r)}</div><div class="small muted">${r.pcb} · 점수 <b>${r.score.toFixed(2)}</b> · ${hhmm(r.at)}</div></div></button>`).join('') || '<div class="empty">항목이 없습니다.</div>'}</div>
@@ -1075,6 +1100,7 @@ function filteredHistory() {
     if (f.period === 'am' && h >= 12) return false;
     if (f.period === 'pm' && (h < 12 || h >= 18)) return false;
     if (f.period === 'eve' && h < 18) return false;
+    if (f.hour != null && h !== f.hour) return false;
     if (f.pcb !== 'all' && r.pcb !== f.pcb) return false;
     if (f.result !== 'all' && finalState(r) !== f.result) return false;
     if (f.q && !(r.id.toLowerCase().includes(f.q.toLowerCase()) || String(r.n) === f.q.trim())) return false;
@@ -1090,15 +1116,15 @@ function viewHistory() {
   const all = filteredHistory(), per = 10, pages = Math.max(1, Math.ceil(all.length / per));
   U.hpage = Math.min(U.hpage, pages); const rows = all.slice((U.hpage - 1) * per, U.hpage * per);
   const sel = (key, opts) => `<select class="inp" style="width:auto" onchange="U.hf.${key}=this.value;U.hpage=1;render()">${opts.map(([v, l]) => `<option value="${v}" ${U.hf[key] === v ? 'selected' : ''}>${l}</option>`).join('')}</select>`;
-  return `<h1 class="page-title">검사 이력</h1><p class="page-sub">결과 조회 · 검색 · 이미지 및 CSV 다운로드</p>
-    <div class="card"><div class="row" style="margin-bottom:12px">
+  return `${pageHead('검사 이력', '결과 조회 · 검색 · 이미지 및 CSV 다운로드')}
+    <div class="card"><div class="row mb12">
       ${sel('period', [['all', '기간: 전체'], ['am', '기간: 오전'], ['pm', '기간: 오후'], ['eve', '기간: 저녁']])}
       ${sel('pcb', [['all', 'PCB: 전체'], ...S.pcbs.map(p => [p.id, 'PCB: ' + p.id])])}
       ${sel('result', [['all', '결과: 전체'], ['NORMAL', '결과: 정상'], ['DEFECT', '결과: 불량'], ['PENDING', '결과: 검토 대기']])}
       <input class="inp" style="width:170px" placeholder="검사 ID · 번호 검색" value="${esc(U.hf.q)}" onchange="U.hf.q=this.value;U.hpage=1;render()">
-      <span class="muted small">${all.length}건</span><button class="btn sm outline" style="margin-left:auto" onclick="exportCsv()">${ic('download')}CSV 다운로드</button></div>
+      ${U.hf.hour != null ? `<button class="pill" onclick="U.hf.hour=null;U.hpage=1;render()" title="시간 필터 해제">${U.hf.hour}시대 ✕</button>` : ''}<span class="muted small">${all.length}건</span><button class="btn sm outline" style="margin-left:auto" onclick="exportCsv()">${ic('download')}CSV 다운로드</button></div>
       <div class="tbl-wrap"><table class="tbl"><thead><tr><th>번호</th><th>PCB</th><th>AI 점수</th><th>AI 판정</th><th>최종 판정</th><th>검사 시각</th>${isAdmin() ? '<th>당시 임계값</th><th>모델</th>' : ''}</tr></thead><tbody>
-      ${rows.map(r => `<tr class="click ${r.ai === 'ANOMALY' ? 'anom' : ''}" onclick="openDetail(${r.n})"><td>${r.n}</td><td>${r.pcb}</td><td><span class="sc">${r.score.toFixed(2)}<i class="${r.score >= r.thr ? 'hi' : ''}"><b style="width:${Math.round(r.score * 100)}%"></b></i></span></td><td>${aiBadge(r.ai)}</td><td>${finalBadge(r)}</td><td>${mdhm(r.at)}</td>${isAdmin() ? `<td>${r.thr.toFixed(2)}</td><td>${r.ver}</td>` : ''}</tr>`).join('') || `<tr><td colspan="${isAdmin() ? 8 : 6}" class="empty">${ic('history')}조건에 맞는 검사가 없습니다.<br><button class="btn sm outline" style="margin-top:10px" onclick="U.hf={period:'all',pcb:'all',result:'all',q:''};U.hpage=1;render()">필터 초기화</button></td></tr>`}</tbody></table></div>
+      ${rows.map(r => `<tr class="click ${r.ai === 'ANOMALY' ? 'anom' : ''}" onclick="openDetail(${r.n})"><td>${r.n}</td><td>${r.pcb}</td><td><span class="sc">${r.score.toFixed(2)}<i class="${r.score >= r.thr ? 'hi' : ''}"><b style="width:${Math.round(r.score * 100)}%"></b></i></span></td><td>${aiBadge(r.ai)}</td><td>${finalBadge(r)}</td><td>${mdhm(r.at)}</td>${isAdmin() ? `<td>${r.thr.toFixed(2)}</td><td>${r.ver}</td>` : ''}</tr>`).join('') || `<tr><td colspan="${isAdmin() ? 8 : 6}" class="empty">${ic('history')}조건에 맞는 검사가 없습니다.<br><button class="btn sm outline mt10" onclick="U.hf={period:'all',pcb:'all',result:'all',q:''};U.hpage=1;render()">필터 초기화</button></td></tr>`}</tbody></table></div>
       <div class="pager"><button class="btn sm" ${U.hpage <= 1 ? 'disabled' : ''} onclick="U.hpage--;render()">이전</button><span class="small muted">${U.hpage} / ${pages}</span><button class="btn sm" ${U.hpage >= pages ? 'disabled' : ''} onclick="U.hpage++;render()">다음</button></div>
     </div>`;
 }
@@ -1177,21 +1203,73 @@ function statsData(days) {
 /** 통계 기간 선택(7일/14일)을 바꾼다. */
 function setStatDays(d) { U.statDays = d; render(); }
 
+/**
+ * 모든 화면이 공유하는 페이지 헤더(제목 · 부제 | 우측 액션 슬롯)를 생성한다.
+ * @param {string} title 화면 제목
+ * @param {string} [sub] 부제(HTML 허용)
+ * @param {string} [act] 우측 액션 영역 HTML(버튼 · 배지 · 기간 토글 등)
+ * @returns {string} 헤더 HTML
+ */
+function pageHead(title, sub, act) {
+  return `<div class="page-head"><div><h1 class="page-title">${title}</h1>${sub ? `<p class="page-sub">${sub}</p>` : ''}</div>${act ? `<div class="page-act">${act}</div>` : ''}</div>`;
+}
+
+/**
+ * 차트 수치를 접근 가능한 데이터 표로 제공한다(화면 낭독기 · 정확한 값 확인용, 기본은 접힘).
+ * @param {string[]} head 열 제목
+ * @param {Array<Array<string|number>>} rows 행 데이터
+ * @returns {string} details 요소 HTML
+ */
+function chartTable(head, rows) {
+  return `<details class="tbl-toggle"><summary>표로 보기</summary><table><thead><tr>${head.map(x => `<th>${x}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></details>`;
+}
+
+/** 대시보드 시간대 막대 클릭: 해당 시간대의 검사 이력으로 이동한다. @param {number} hr 시(0~23) */
+function gotoHour(hr) { U.hf = { period: 'all', pcb: 'all', result: 'all', q: '', hour: hr }; go('history'); }
+
+/** 도넛 범례에 마우스를 올리면 해당 유형의 호만 강조한다. @param {string} [k] 유형명(없으면 해제) */
+function hiArc(k) { document.querySelectorAll('circle.arc').forEach(c => { c.style.opacity = !k || c.dataset.k === k ? '' : '.3'; }); }
+
+/** 모바일(700px 이하) 하단 탭의 '더보기': 통계·데이터·모델·설정 시트를 연다. */
+function openMore() {
+  const adm = isAdmin();
+  openModal(`<div class="row between"><b style="font-size:18px">더보기</b><button class="icon-btn" onclick="closeModal()" aria-label="닫기">${ic('x')}</button></div>
+    <div class="more-grid">${MENUS.filter(m => m.sec).map(m => `<button class="more-item ${U.route === m.id ? 'on' : ''}" onclick="closeModal();go('${m.id}')">${ic(m.icon, 'lg')}<span>${m.label}</span>${m.adminEdit && !adm ? `<span class="lk2" title="조회 전용">${ic('lock')}</span>` : ''}</button>`).join('')}</div>`);
+}
+
+/* 차트 툴팁: data-tip 속성이 있는 요소 위(터치는 누르는 동안)에 말풍선을 띄운다. */
+(function initTip() {
+  let el = null;
+  const tip = () => el || (el = Object.assign(document.createElement('div'), { id: 'tip' }), document.body.appendChild(el), el);
+  const show = e => {
+    const t = e.target.closest && e.target.closest('[data-tip]'), box = tip();
+    if (!t) { box.classList.remove('on'); return; }
+    box.textContent = t.dataset.tip; box.classList.add('on');
+    const w = box.offsetWidth, hgt = box.offsetHeight;
+    box.style.left = Math.min(window.innerWidth - w - 8, Math.max(8, e.clientX + 12)) + 'px';
+    box.style.top = (e.clientY - hgt - 12 < 8 ? e.clientY + 18 : e.clientY - hgt - 12) + 'px';
+  };
+  const hide = () => { if (el) el.classList.remove('on'); };
+  document.addEventListener('pointermove', show); document.addEventListener('pointerdown', show);
+  document.addEventListener('pointerup', e => { if (e.pointerType === 'touch') setTimeout(hide, 1200); });
+  document.addEventListener('scroll', hide, true); window.addEventListener('blur', hide);
+})();
+
 /** 일별 검사 추이 라인 차트(SVG): 전체 검사 · 불량. */
 function trendChart(d) {
   const W = 520, H = 220, L = 50, R = 18, T = 16, B = 28, n = d.labels.length;
   const max = Math.ceil(Math.max(...d.tot) / 40) * 40, X = i => L + (W - L - R) * i / (n - 1), Y = v => T + (H - T - B) * (1 - v / max);
-  const line = (arr, c) => `<polyline class="draw" fill="none" stroke="${c}" stroke-width="2.4" stroke-linejoin="round" points="${arr.map((v, i) => `${X(i)},${Y(v)}`).join(' ')}"/>${arr.map((v, i) => `<circle class="pt" style="animation-delay:${0.35 + i * 0.12}s" cx="${X(i)}" cy="${Y(v)}" r="3.2" fill="${c}"/>${n <= 8 ? `<text class="pt ct" style="animation-delay:${0.35 + i * 0.12}s" x="${X(i) + (i === 0 ? 4 : i === n - 1 ? -4 : 0)}" y="${Y(v) - 8}" text-anchor="${i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle'}" font-size="10.5" fill="var(--text-2)">${v}</text>` : ''}`).join('')}`;
+  const line = (arr, c, nm) => `<polyline class="draw" fill="none" stroke="${c}" stroke-width="2.4" stroke-linejoin="round" points="${arr.map((v, i) => `${X(i)},${Y(v)}`).join(' ')}"/>${arr.map((v, i) => `<circle class="pt" style="animation-delay:${0.35 + i * 0.12}s" cx="${X(i)}" cy="${Y(v)}" r="3.2" fill="${c}"/><circle class="hit" cx="${X(i)}" cy="${Y(v)}" r="13" data-tip="${d.labels[i]} · ${nm} ${v}건"/>${n <= 8 ? `<text class="pt ct" style="animation-delay:${0.35 + i * 0.12}s" x="${X(i) + (i === 0 ? 4 : i === n - 1 ? -4 : 0)}" y="${Y(v) - 8}" text-anchor="${i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle'}" font-size="10.5" fill="var(--text-2)">${v}</text>` : ''}`).join('')}`;
   const grid = [0, .25, .5, .75, 1].map(f => `<line x1="${L}" x2="${W - R}" y1="${Y(max * f)}" y2="${Y(max * f)}" stroke="var(--border)"/><text class="ct" x="${L - 8}" y="${Y(max * f) + 4}" text-anchor="end" font-size="10.5" fill="var(--text-3)">${Math.round(max * f)}</text>`).join('');
   const xl = d.labels.map((l, i) => (n <= 8 || i % 2 === 0) ? `<text class="ct" x="${X(i)}" y="${H - 8}" text-anchor="middle" font-size="10.5" fill="var(--text-3)">${l}</text>` : '').join('');
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="일별 검사 건수 추이">${grid}${xl}${line(d.tot, 'var(--bar-normal)')}${line(d.bad, 'var(--bar-defect)')}</svg>
-    <div class="row small muted" style="gap:14px"><span><span class="dot" style="color:var(--bar-normal);display:inline-block"></span> 전체 검사</span><span><span class="dot" style="color:var(--bar-defect);display:inline-block"></span> 불량·대기</span></div>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="일별 검사 건수 추이">${grid}${xl}${line(d.tot, 'var(--bar-normal)', '전체 검사')}${line(d.bad, 'var(--bar-defect)', '불량·대기')}</svg>
+    <div class="row small muted" style="gap:14px"><span><span class="dot" style="color:var(--bar-normal);display:inline-block"></span> 전체 검사</span><span><span class="dot" style="color:var(--bar-defect);display:inline-block"></span> 불량·대기</span></div>${chartTable(['일자', '전체 검사', '불량·대기'], d.labels.map((l, i) => [l, d.tot[i], d.bad[i]]))}`;
 }
 
 /** 불량 유형 도넛 차트(SVG). */
 function donutChart(byType) {
   const total = byType.reduce((a, t) => a + t.n, 0) || 1, R = 62, C = 2 * Math.PI * R; let off = 0;
-  const arcs = byType.map(t => { const len = C * t.n / total, s = `<circle data-len="${len}" data-off="${off}" data-c="${C}" r="${R}" cx="80" cy="80" fill="none" stroke="${t.c}" stroke-width="24" stroke-dasharray="${len} ${C - len}" stroke-dashoffset="${-off}" transform="rotate(-90 80 80)"/>`; off += len; return s; }).join('');
+  const arcs = byType.map(t => { const len = C * t.n / total, s = `<circle class="arc" data-k="${t.k}" data-tip="${t.k} · ${t.n}건 (${(t.n / total * 100).toFixed(1)}%)" data-len="${len}" data-off="${off}" data-c="${C}" r="${R}" cx="80" cy="80" fill="none" stroke="${t.c}" stroke-width="24" stroke-dasharray="${len} ${C - len}" stroke-dashoffset="${-off}" transform="rotate(-90 80 80)"/>`; off += len; return s; }).join('');
   return `<svg viewBox="0 0 160 160" width="170" role="img" aria-label="불량 유형별 분포">${arcs}<text x="80" y="76" text-anchor="middle" font-size="11" fill="var(--text-3)">불량 건수</text><text x="80" y="98" text-anchor="middle" font-size="20" font-weight="800" fill="var(--text-1)">${total}</text></svg>`;
 }
 
@@ -1202,7 +1280,7 @@ function donutChart(byType) {
  */
 function defectDist(byType) {
   const tot = byType.reduce((a, t) => a + t.n, 0) || 1;
-  return `<div class="donut-wrap">${donutChart(byType)}<div>${byType.map(t => `<div class="legend-row"><i style="background:${t.c}"></i>${t.k} <b>${t.n}</b> <span class="muted">${(t.n / tot * 100).toFixed(1)}%</span></div>`).join('')}</div></div>`;
+  return `<div class="donut-wrap">${donutChart(byType)}<div>${byType.map(t => `<div class="legend-row" data-k="${t.k}" onmouseenter="hiArc(this.dataset.k)" onmouseleave="hiArc()"><i style="background:${t.c}"></i>${t.k} <b>${t.n}</b> <span class="muted">${(t.n / tot * 100).toFixed(1)}%</span></div>`).join('')}</div></div>`;
 }
 
 /**
@@ -1213,9 +1291,8 @@ function viewStats() {
   const days = U.statDays || 7, d = statsData(days), st = getStats();
   const rate = (d.badSum / d.sum * 100).toFixed(1), avgMs = Math.round(S.inspections.reduce((a, r) => a + r.ms, 0) / S.inspections.length);
   const sorted = [...d.byType].sort((a, b) => b.n - a.n), top = sorted[0].n || 1;
-  const kpi = (l, v, sub) => `<div class="kpi" style="cursor:default"><div class="l">${l}</div><div class="v">${v}</div>${sub ? `<div class="small muted" style="margin-top:4px">${sub}</div>` : ''}</div>`;
-  return `<div class="row between"><div><h1 class="page-title">통계 분석</h1><p class="page-sub">기간별 검사 추이 · 불량 유형 분포 · 품질 지표 (시연용 합성 이력 포함)</p></div>
-      <div class="seg-row"><button class="btn sm ${days === 7 ? 'primary' : 'outline'}" onclick="setStatDays(7)">7일</button><button class="btn sm ${days === 14 ? 'primary' : 'outline'}" onclick="setStatDays(14)">14일</button><button class="btn sm outline" onclick="exportStatsCsv()">${ic('download')}통계 CSV</button></div></div>
+  const kpi = (l, v, sub) => `<div class="kpi" style="cursor:default"><div class="l">${l}</div><div class="v">${v}</div>${sub ? `<div class="small muted mt4">${sub}</div>` : ''}</div>`;
+  return `${pageHead('통계 분석', '기간별 검사 추이 · 불량 유형 분포 · 품질 지표 (시연용 합성 이력 포함)', `<div class="seg-row"><button class="btn sm ${days === 7 ? 'primary' : 'outline'}" onclick="setStatDays(7)">7일</button><button class="btn sm ${days === 14 ? 'primary' : 'outline'}" onclick="setStatDays(14)">14일</button><button class="btn sm outline" onclick="exportStatsCsv()">${ic('download')}통계 CSV</button></div>`)}
     <div class="kpi-grid">${kpi('기간 검사 건수', d.sum.toLocaleString(), `${days}일 합계`)}${kpi('불량·대기 비율', rate + '%', '불량 확정 + 검토 대기')}${kpi('AI-검사원 일치율', st.match + '%', '확정 건 기준')}${kpi('평균 응답 시간', avgMs + 'ms', 'PatchCore API')}</div>
     <div class="split"><div class="card"><div class="card-title">일별 검사 추이</div>${trendChart(d)}</div>
       <div class="card"><div class="card-title">불량 유형별 분포</div>${defectDist(d.byType)}</div></div>
@@ -1289,17 +1366,17 @@ function purgeExpired() { toast(`보관 기간 ${S.settings.retention} 초과 �
  */
 function viewData() {
   const adm = isAdmin(), n = S.inspections.length, gb = n * 0.153, imp = U.imp;
-  const kpi = (l, v, sub) => `<div class="kpi" style="cursor:default"><div class="l">${l}</div><div class="v">${v}</div><div class="small muted" style="margin-top:4px">${sub}</div></div>`;
-  const preview = imp ? `<div class="divider"></div><div class="small muted" style="margin-bottom:8px">${esc(imp.name)} · ${imp.rows.length}행 · 컬럼 ${imp.head.length}개 — 표준 항목에 컬럼을 연결하세요.</div>
+  const kpi = (l, v, sub) => `<div class="kpi" style="cursor:default"><div class="l">${l}</div><div class="v">${v}</div><div class="small muted mt4">${sub}</div></div>`;
+  const preview = imp ? `<div class="divider"></div><div class="small muted mb8">${esc(imp.name)} · ${imp.rows.length}행 · 컬럼 ${imp.head.length}개 — 표준 항목에 컬럼을 연결하세요.</div>
       <div class="grid2">${IMPORT_FIELDS.map(([k, l]) => `<div class="field"><label>${l}</label><select class="inp" onchange="setImportMap('${k}',this.value)"><option value="-1">선택 안 함</option>${imp.head.map((h, i) => `<option value="${i}" ${imp.map[k] === i ? 'selected' : ''}>${esc(h)}</option>`).join('')}</select></div>`).join('')}</div>
       <div class="tbl-wrap"><table class="tbl"><thead><tr>${imp.head.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${imp.rows.slice(0, 3).map(r => `<tr>${imp.head.map((_, i) => `<td>${esc(r[i] ?? '')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
       <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn primary" onclick="runImport()">매핑 검증 · 가져오기</button></div>` : '';
-  return `<h1 class="page-title">데이터 관리</h1><p class="page-sub">검사 데이터 현황 · CSV 가져오기 · 내보내기 · 보관 정책</p>
+  return `${pageHead('데이터 관리', '검사 데이터 현황 · CSV 가져오기 · 내보내기 · 보관 정책')}
     <div class="kpi-grid">${kpi('검사 레코드', n.toLocaleString() + '건', '정상 · 불량 · 대기 포함')}${kpi('저장 이미지', n + '장', '원본 촬영 이미지')}${kpi('사용 용량', gb.toFixed(1) + ' GB', '100 GB 중')}${kpi('보관 기간', S.settings.retention, adm ? '시스템 설정에서 변경' : '관리자 설정')}</div>
     <div class="split"><div class="card"><div class="card-title">${ic('upload', 'lg')}CSV 가져오기<span class="sp"></span><button class="btn sm outline" onclick="downloadSampleCsv()">샘플 CSV</button></div>
-        <label class="drop" style="display:block;cursor:pointer">${ic('folder', 'lg')}<div style="margin-top:6px"><b>CSV 파일 선택</b></div><div class="small">기업별 컬럼명이 달라도 표준 항목(PCB ID · 검사 일시 · 판정 · 점수)에 연결합니다</div><input type="file" accept=".csv,text/csv" style="display:none" onchange="onImportFile(this)"></label>${preview}</div>
+        <label class="drop" style="display:block;cursor:pointer">${ic('folder', 'lg')}<div class="mt6"><b>CSV 파일 선택</b></div><div class="small">기업별 컬럼명이 달라도 표준 항목(PCB ID · 검사 일시 · 판정 · 점수)에 연결합니다</div><input type="file" accept=".csv,text/csv" style="display:none" onchange="onImportFile(this)"></label>${preview}</div>
       <div class="card"><div class="card-title">${ic('download', 'lg')}내보내기</div>
-        <div class="muted small" style="margin-bottom:10px">검사 이력 전체를 UTF-8(BOM) CSV로 내려받습니다. 엑셀에서 한글이 깨지지 않습니다.</div>
+        <div class="muted small mb10">검사 이력 전체를 UTF-8(BOM) CSV로 내려받습니다. 엑셀에서 한글이 깨지지 않습니다.</div>
         <button class="btn primary block" onclick="exportCsv(true)">${ic('download')}전체 검사 이력 CSV (${n}건)</button>
         <div style="height:8px"></div><button class="btn outline block" onclick="exportStatsCsv()">${ic('chart')}통계 요약 CSV</button>
         <div class="note">.xlsx 출력은 후속 확장(OpenPyXL) 항목입니다.</div></div></div>
@@ -1314,7 +1391,7 @@ function viewData() {
 /** PCB 등록 모달을 연다 (관리자). */
 function openPcbForm() {
   openModal(`<div class="row between"><b style="font-size:18px">PCB 등록</b><button class="icon-btn" onclick="closeModal()" aria-label="닫기">${ic('x')}</button></div>
-    <div class="field" style="margin-top:12px"><label>PCB 이름</label><input class="inp" id="pcbName" placeholder="예: PCB2"></div>
+    <div class="field mt12"><label>PCB 이름</label><input class="inp" id="pcbName" placeholder="예: PCB2"></div>
     <div class="field"><label>연결 모델</label><select class="inp" id="pcbModel"><option>Industrial PatchCore</option></select></div>
     <div class="note">Custom PatchCore는 추후 지원 예정입니다.</div>
     <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn" onclick="closeModal()">취소</button><button class="btn primary" onclick="addPcb()">등록</button></div>`);
@@ -1347,17 +1424,17 @@ function applyThreshold() {
  */
 function viewModels() {
   const adm = isAdmin();
-  return `<h1 class="page-title">PCB 및 모델 관리</h1><p class="page-sub">PCB 등록 · 모델 연결 · 모델 버전 관리</p>
+  return `${pageHead('PCB 및 모델 관리', 'PCB 등록 · 모델 연결 · 모델 버전 관리', adm ? `<button class="btn sm primary" onclick="openPcbForm()">${ic('plus')}PCB 등록</button>` : '')}
     ${adm ? '' : `<div class="mode-note">${ic('lock', 'lg')}<span><b>조회 전용</b> — 검사원 계정은 현재 설정을 확인만 할 수 있습니다. 변경은 관리자에게 요청하세요.</span></div>`}
-    <div class="card"><div class="card-title">등록된 PCB<span class="sp"></span>${adm ? `<button class="btn sm primary" onclick="openPcbForm()">${ic('plus')}PCB 등록</button>` : ''}</div>
+    <div class="card"><div class="card-title">등록된 PCB</div>
       <div class="pcb-grid">${S.pcbs.map(p => `<div class="pcb-card"><div class="photo"><img src="${SAMPLE_IMG}" alt=""></div><div class="row between"><b style="font-size:16px">${esc(p.id)}</b><span class="pill green">${p.status}</span></div><div class="muted small">연결 모델: ${p.model}</div></div>`).join('')}${adm ? `<button class="pcb-card add" onclick="openPcbForm()">${ic('plus', 'lg')}PCB 등록</button>` : ''}</div></div>
     <div class="card"><div class="card-title">등록된 추론 모델</div>
-      <div class="card" style="box-shadow:none"><div class="card-title" style="margin-bottom:6px">${ic('db', 'lg')}Industrial PatchCore<span class="sp"></span><span class="pill green">활성화</span></div>
+      <div class="card" style="box-shadow:none"><div class="card-title mb6">${ic('db', 'lg')}Industrial PatchCore<span class="sp"></span><span class="pill green">활성화</span></div>
         <div class="muted">${S.model.active} · 공개 Memory Bank</div><div class="muted">특징 추출기: ResNet18 | 입력: 256 × 256</div>
         <div class="divider"></div>
         <div class="row between"><div><b>기본 임계값</b><div class="small muted">이상 점수가 이 값 이상이면 AI 이상 의심 (이후 검사부터 적용)</div></div>
           <div class="row"><input class="inp" id="thrInput" type="number" min="0.3" max="0.9" step="0.05" value="${S.model.threshold.toFixed(2)}" style="width:90px" ${adm ? '' : 'disabled'}>${adm ? '<button class="btn sm primary" onclick="applyThreshold()">적용</button>' : ''}</div></div></div>
-      <div class="card" style="box-shadow:none;opacity:.8"><div class="card-title" style="margin-bottom:6px">${ic('db', 'lg')}Custom PatchCore<span class="sp"></span><span class="pill">추후 지원</span></div><div class="muted">자체 PCB 데이터 기반 모델</div></div></div>
+      <div class="card" style="box-shadow:none;opacity:.8"><div class="card-title mb6">${ic('db', 'lg')}Custom PatchCore<span class="sp"></span><span class="pill">추후 지원</span></div><div class="muted">자체 PCB 데이터 기반 모델</div></div></div>
     <div class="card"><div class="card-title">모델 버전 관리</div>
       ${S.model.versions.map(x => `<div class="ver-row"><div style="flex:1"><b>${x.v}</b> <span class="muted small">${x.date}</span><div class="small muted">${x.note}</div></div>${x.v === S.model.active ? '<span class="pill green">활성화</span>' : (adm ? `<button class="btn sm outline" onclick="activateVersion('${x.v}')">이 버전으로 전환</button>` : '<span class="pill">대기</span>')}</div>`).join('')}
       ${adm ? '' : '<div class="note">버전 전환 · 임계값 변경 · PCB 등록은 관리자 권한이 필요합니다.</div>'}</div>
@@ -1378,7 +1455,7 @@ function setSetting(key, v) { S.settings[key] = v; toast('설정을 저장했습
 /** 사용자 추가 모달을 연다 (관리자). */
 function openUserForm() {
   openModal(`<div class="row between"><b style="font-size:18px">사용자 추가</b><button class="icon-btn" onclick="closeModal()" aria-label="닫기">${ic('x')}</button></div>
-    <div class="field" style="margin-top:12px"><label>이름</label><input class="inp" id="uName"></div>
+    <div class="field mt12"><label>이름</label><input class="inp" id="uName"></div>
     <div class="field"><label>소속</label><input class="inp" id="uCo"></div>
     <div class="field"><label>역할</label><select class="inp" id="uRole"><option>검사원</option><option>관리자</option></select></div>
     <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn" onclick="closeModal()">취소</button><button class="btn primary" onclick="addUser()">추가</button></div>`);
@@ -1406,7 +1483,7 @@ function toggleUser(i) {
 function viewSettings() {
   const adm = isAdmin(), opt = (arr, cur) => arr.map(x => `<option ${x === cur ? 'selected' : ''}>${x}</option>`).join('');
   const bytes = S.inspections.length * 0.153;
-  return `<h1 class="page-title">시스템 설정</h1><p class="page-sub">카메라 · 저장소 · 사용자 관리</p>
+  return `${pageHead('시스템 설정', '카메라 · 저장소 · 사용자 관리')}
     ${adm ? '' : `<div class="mode-note">${ic('lock', 'lg')}<span><b>부분 조회</b> — 카메라 설정만 변경할 수 있고, 보관 기간·사용자 관리는 관리자만 수정할 수 있습니다.</span></div>`}
     <div class="grid2"><div class="card"><div class="card-title">${ic('camera', 'lg')}카메라</div>
         <div class="field"><label>촬영 장치</label><select class="inp" onchange="setSetting('camera',this.value)">${opt(['기본 카메라 (USB 현미경)', '노트북 내장 카메라', '이미지 업로드만 사용'], S.settings.camera)}</select></div>
