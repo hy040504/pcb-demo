@@ -371,6 +371,14 @@ circle.arc { transition: opacity .15s, stroke-width .15s; } circle.arc:hover { s
 .vz-in { position: absolute; inset: 0; transform-origin: 0 0; will-change: transform; }
 .vz-in img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
 .vz-in .ov { position: absolute; inset: 0; pointer-events: none; }
+/* 이상 의심 영역 표시(박스) — 모든 역할에 공통, 켜기/끄기 가능 */
+.mk { position: absolute; border: 2px solid #ef4444; border-radius: 4px; box-shadow: 0 0 0 1px rgba(255,255,255,.75), 0 0 10px rgba(239,68,68,.65); pointer-events: none; z-index: 2; }
+.mk i { position: absolute; left: -2px; bottom: 100%; margin-bottom: 2px; padding: 1px 7px; border-radius: 4px; background: #ef4444; color: #fff; font: 700 11px/1.5 inherit; font-style: normal; white-space: nowrap; }
+.mk.sm { border-width: 1.5px; box-shadow: 0 0 0 1px rgba(255,255,255,.7); }
+.mk-off .mk { display: none; }
+.photo:has(.mk):hover img { transform: none; }
+.mk-btn .mk-dot { display: inline-block; width: 10px; height: 10px; border: 2px solid #ef4444; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+.mk-btn.off { opacity: .6; }
 /* UI 개선 패치 — 차트 보조선 · 목록 · 빈 상태 · 단계 안내 */
 .rv-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .rv-item .small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -448,7 +456,57 @@ circle.arc { transition: opacity .15s, stroke-width .15s; } circle.arc:hover { s
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /** 데모에 사용하는 PCB 샘플 촬영 이미지 경로 */
-const SAMPLE_IMG = './docs/assets/pcb_sample.png';
+/* 샘플 이미지: VisA PCB1(CC BY 4.0, Zou et al. ECCV 2022) · DeepPCB(연구용, Tang et al. 2019). 불량 상자는 각 데이터셋의 정답(마스크·주석)에서 가져온 값(x,y,너비,높이 %, 유형) */
+const SAMPLE_DIR = './docs/assets/samples/';
+const SAMPLES = {
+  'visa_pcb1_normal_01.jpg': ['N', 'V', []],
+  'visa_pcb1_normal_02.jpg': ['N', 'V', []],
+  'visa_pcb1_normal_03.jpg': ['N', 'V', []],
+  'visa_pcb1_normal_04.jpg': ['N', 'V', []],
+  'visa_pcb1_normal_05.jpg': ['N', 'V', []],
+  'visa_pcb1_normal_06.jpg': ['N', 'V', []],
+  'visa_pcb1_normal_07.jpg': ['N', 'V', []],
+  'visa_pcb1_normal_08.jpg': ['N', 'V', []],
+  'visa_pcb1_normal_09.jpg': ['N', 'V', []],
+  'visa_pcb1_normal_10.jpg': ['N', 'V', []],
+  'visa_pcb1_normal_11.jpg': ['N', 'V', []],
+  'visa_pcb1_normal_12.jpg': ['N', 'V', []],
+  'visa_pcb1_normal_13.jpg': ['N', 'V', []],
+  'visa_pcb1_normal_14.jpg': ['N', 'V', []],
+  'visa_pcb1_anomaly_01_melt.jpg': ['A', 'V', [[45.4,54.3,9.2,4.3,'melt']]],
+  'visa_pcb1_anomaly_02_melt.jpg': ['A', 'V', [[46.7,55.1,6.5,5.7,'melt']]],
+  'visa_pcb1_anomaly_03_melt.jpg': ['A', 'V', [[44.3,52.5,11.6,6,'melt']]],
+  'visa_pcb1_anomaly_04_melt.jpg': ['A', 'V', [[45.6,43.7,8.9,12.7,'melt']]],
+  'visa_pcb1_anomaly_05_melt.jpg': ['A', 'V', [[40.2,18.8,19.8,62.3,'melt']]],
+  'visa_pcb1_anomaly_06_missing.jpg': ['A', 'V', [[10.9,29,78.4,42,'missing']]],
+  'visa_pcb1_anomaly_07_missing.jpg': ['A', 'V', [[12.8,33,74.4,34.1,'missing']]],
+  'visa_pcb1_anomaly_08_missing.jpg': ['A', 'V', [[41.9,60.4,16.1,16.5,'missing']]],
+  'visa_pcb1_anomaly_09_missing.jpg': ['A', 'V', [[22.3,33.6,24.6,33,'missing']]],
+  'visa_pcb1_anomaly_10_bent.jpg': ['A', 'V', [[47.8,62,3.4,12.3,'bent']]],
+  'visa_pcb1_anomaly_11_bent.jpg': ['A', 'V', [[42.3,62.8,7.8,9.2,'bent']]],
+  'visa_pcb1_anomaly_12_bent.jpg': ['A', 'V', [[43.5,60.6,13.2,15.8,'bent']]],
+  'visa_pcb1_anomaly_13_scratch.jpg': ['A', 'V', [[41.6,46.9,16.9,6.4,'scratch']]],
+  'visa_pcb1_anomaly_14_scratch.jpg': ['A', 'V', [[36.5,43.8,23.2,13.9,'scratch']]],
+  'visa_pcb1_anomaly_15_scratch.jpg': ['A', 'V', [[39.3,41.1,21.5,19.8,'scratch']]],
+  'deeppcb_01_12300063.jpg': ['A', 'D', [[8.6,71.2,18.8,8.1,'open'],[32,94.1,6.1,5.9,'mousebite'],[17.3,28,5.6,8.7,'pin-hole'],[41.3,33.5,5.8,7.6,'copper']]],
+  'deeppcb_02_50600004.jpg': ['A', 'D', [[29.2,53,5.3,7.6,'open'],[46.4,64.4,5.5,11.4,'short'],[11.4,88.6,4.4,6.4,'pin-hole'],[23.1,76.7,4.7,6.1,'mousebite']]],
+  'deeppcb_03_92000010.jpg': ['A', 'D', [[21.4,87.5,15.9,10.6,'open'],[56.9,82.6,14.4,7.2,'short'],[56.3,52.5,6.7,9.1,'spur'],[30.2,40.7,6.7,9.1,'mousebite']]],
+  'deeppcb_04_00041008.jpg': ['A', 'D', [[62.8,24.4,10.6,9.3,'open'],[59.7,1.7,9.5,8.9,'short'],[71.1,37.7,6.4,5.9,'mousebite'],[33.9,89.2,5,8.5,'copper'],[82.2,35.2,5.5,6.1,'pin-hole']]],
+  'deeppcb_05_12000085.jpg': ['A', 'D', [[25.2,92.4,4.1,7.2,'open'],[22.5,3.2,5.6,8.7,'short'],[34.5,22.2,4.8,7.4,'spur'],[39.1,11.7,6.7,5.9,'mousebite'],[15.3,57.4,7.7,7.8,'open']]],
+  'deeppcb_06_12100010.jpg': ['A', 'D', [[28.3,74.4,9.2,5.9,'open'],[46.7,58.5,6.4,8.5,'short'],[90.2,72.5,5.6,7.4,'short'],[30.9,93,4.8,6.8,'pin-hole'],[27.5,60,6.1,7.2,'spur']]]
+};
+const KIND_KO = { melt: '납 용융', missing: '부품 누락', bent: '핀 휨', scratch: '스크래치', open: '단선', short: '단락', mousebite: '쥐물림', spur: '돌기', copper: '잉여 구리', 'pin-hole': '핀홀' };
+const sampleSrc = n => SAMPLE_DIR + n;
+const SAMPLE_NORM = Object.keys(SAMPLES).filter(n => SAMPLES[n][0] === 'N');
+const SAMPLE_ANOM = Object.keys(SAMPLES).filter(n => SAMPLES[n][0] === 'A' && SAMPLES[n][1] === 'V');
+const SAMPLE_DP = Object.keys(SAMPLES).filter(n => SAMPLES[n][1] === 'D');
+const SAMPLE_IMG = sampleSrc(SAMPLE_NORM[0]);
+/** 샘플 파일명으로 정답 상자를 찾는다(큰 것부터). 목록에 없는 파일이면 빈 배열. @param {string} name 파일명 */
+function boxesOf(name) { const m = SAMPLES[name]; return m ? m[2].map(([x, y, w, h, k]) => ({ x, y, w, h, k })).sort((a, b) => b.w * b.h - a.w * a.h) : []; }
+/** 상자들의 대표 위치(가장 큰 상자 중심·크기)를 spot 형식으로 만든다. @param {object[]} bx boxesOf 결과 */
+function spotOf(bx) { const b = bx[0]; return { x: Math.round(b.x + b.w / 2), y: Math.round(b.y + b.h / 2), r: Math.max(6, Math.min(16, Math.round(Math.max(b.w, b.h) / 1.6))) }; }
+/** 샘플 한 장을 대기열 입력 형식으로 만든다. @param {string} name 샘플 파일명 */
+const sampleItem = name => ({ name, src: sampleSrc(name), key: name, sample: true });
 /** 사이드 메뉴 정의 (8메뉴 — 과업지시서 구현결과(예상) 화면 구성 참고) */
 const MENUS = [
   { id: 'dashboard', label: '대시보드', short: '홈', icon: 'grid' },
@@ -550,11 +608,13 @@ function createInitialState(keep = {}) {
     let memo = '';
     if (final === 'DEFECT') memo = n === 117 ? 'AI 정상이나 육안상 납땜 들뜸 확인 → 불량' : n === 52 ? '경계 점수 미탐 — 패드 오염 확인' : '배선/납땜 이상 육안 확인';
     if (rescued.includes(n)) memo = '표면 미세 스크래치, 기능 영향 없음 (가불량 구제)';
+    const ms = 380 + Math.round(rng() * 160), spot = { x: 18 + Math.round(rng() * 64), y: 20 + Math.round(rng() * 60), r: 9 + Math.round(rng() * 7) };
+    // 이상 의심·불량 건은 VisA PCB1 불량 샘플(실제 불량 위치 상자 포함), 정상 건은 정상 샘플을 사용한다
+    const nm = ai === 'ANOMALY' || final === 'DEFECT' ? SAMPLE_ANOM[n % SAMPLE_ANOM.length] : SAMPLE_NORM[n % SAMPLE_NORM.length], bx = boxesOf(nm);
     list.push({
       n, id: 'INS-' + String(n).padStart(6, '0'), pcb: 'PCB1', score, thr: 0.60, ver: 'v0.3.0', ai, final, memo,
-      at: DEMO_DAY_START + Math.round(n * 5.5 * 60000), ms: 380 + Math.round(rng() * 160),
-      spot: { x: 18 + Math.round(rng() * 64), y: 20 + Math.round(rng() * 60), r: 9 + Math.round(rng() * 7) },
-      img: SAMPLE_IMG
+      at: DEMO_DAY_START + Math.round(n * 5.5 * 60000), ms,
+      spot: bx.length ? spotOf(bx) : spot, boxes: bx, img: sampleSrc(nm)
     });
   }
   return {
@@ -650,9 +710,9 @@ function mdhm(ms) { const d = new Date(ms); return String(d.getMonth() + 1).padS
  * @returns {string} inline style 문자열
  */
 function thumbStyle(r) {
-  // 같은 원본 이미지를 건별로 다른 크롭 배율·밝기·색조로 보여 줘 여러 제품을 검사한 느낌을 낸다(시연용, 원본 파일은 불변).
-  const size = 240 + (r.n * 37) % 90, br = (0.9 + (r.n * 13 % 21) / 100).toFixed(2), hue = ((r.n * 29) % 17) - 8;
-  return `background-image:url('${r.img}');background-size:${size}%;background-position:${r.spot.x}% ${r.spot.y}%;filter:brightness(${br}) hue-rotate(${hue}deg);`;
+  // 이상 의심 건은 의심 위치를 확대해 보여 주고, 정상 건은 전체를 보여 준다.
+  const zoom = r.ai === 'ANOMALY' ? 320 : 115;
+  return `background-image:url('${r.img}');background-size:${zoom}%;background-position:${r.ai === 'ANOMALY' ? `${r.spot.x}% ${r.spot.y}%` : '50% 50%'};`;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -980,7 +1040,7 @@ function fmtBytes(b) { return b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toF
  * @param {{name: string, src: string, size?: number, seed?: number, sample?: boolean}} o 이미지 정보
  * @returns {object} 대기열 항목 (st: wait | run | done)
  */
-function newQueueItem(o) { return { uid: ++U.qSeq, name: o.name, src: o.src, size: o.size || 0, seed: o.seed || 7, sample: !!o.sample, st: 'wait', rec: null }; }
+function newQueueItem(o) { return { uid: ++U.qSeq, name: o.name, src: o.src, key: o.key || '', size: o.size || 0, seed: o.seed || 7, sample: !!o.sample, st: 'wait', rec: null }; }
 
 /** 대기열에 이미지를 추가하고 화면을 갱신한다. @param {object[]} list newQueueItem 입력 배열 */
 function queueAdd(list) { list.forEach(o => U.queue.push(newQueueItem(o))); render(); }
@@ -989,8 +1049,17 @@ function queueAdd(list) { list.forEach(o => U.queue.push(newQueueItem(o))); rend
 function capture() {
   if (U.running) return;
   if (U.queue.length >= MAX_BATCH) return toast(`한 번에 최대 ${MAX_BATCH}장까지 검사할 수 있습니다`);
-  queueAdd([{ name: '촬영 이미지 ' + new Date().toTimeString().slice(0, 8), src: SAMPLE_IMG, sample: true }]);
+  const k = U.capSeq = (U.capSeq || 0) + 1, pool = k % 2 ? SAMPLE_ANOM : SAMPLE_NORM, nm = pool[(k >> 1) % pool.length];   // 불량·정상 샘플을 번갈아 촬영한 것처럼 보여 준다(시안)
+  queueAdd([{ ...sampleItem(nm), name: '촬영 이미지 ' + new Date().toTimeString().slice(0, 8) }]);
   toast('촬영 완료 — 대기열에 추가했습니다 (시안: 샘플 이미지)');
+}
+
+/** 샘플 세트(VisA PCB1 정상 3 · 불량 4 + DeepPCB 3)를 대기열에 한 번에 추가한다. 파일명으로 정답 불량 위치가 연결된다. */
+function loadSampleSet() {
+  if (U.running) return;
+  const names = [...SAMPLE_NORM.slice(0, 3), SAMPLE_ANOM[0], SAMPLE_ANOM[5], SAMPLE_ANOM[9], SAMPLE_ANOM[12], ...SAMPLE_DP.slice(0, 3)], room = MAX_BATCH - U.queue.length;
+  if (room < names.length) return toast(`대기열 자리가 부족합니다 (${names.length}장 필요 · 최대 ${MAX_BATCH}장)`);
+  queueAdd(names.map(sampleItem)); toast(`샘플 ${names.length}장을 추가했습니다 (VisA PCB1 · DeepPCB)`);
 }
 
 /** 파일 선택 창을 연다 (여러 장 선택 가능). */
@@ -1043,6 +1112,8 @@ function queueClearDone() { if (U.running) return; U.queue = U.queue.filter(q =>
  * @returns {number} 0~1 이상 점수
  */
 function mockApiScore(q) {
+  const m = SAMPLES[q.key || q.name];
+  if (m) { const k = S.demoSeq++; return m[0] === 'A' ? [0.72, 0.88, 0.81, 0.67][k % 4] : [0.21, 0.34, 0.18, 0.27][k % 4]; }   // 샘플 이미지는 정답에 맞춰 점수를 정한다(시안)
   const cycle = [0.72, 0.21, 0.88, 0.34];
   if (q.sample) return cycle[S.demoSeq++ % cycle.length];
   return +(0.12 + ((q.seed || 7) * 37 % 83) / 100).toFixed(2);
@@ -1070,10 +1141,10 @@ async function runBatch() {
     q.st = 'run'; redraw(); await sleep(650);
     if (S !== S0 || !S.user) { aborted = true; break; }
     const thr = S.model.threshold, score = mockApiScore(q), last = Math.max(...S.inspections.map(r => r.n)), prevAt = S.inspections.find(r => r.n === last).at;
-    const n = last + 1, rng = makeRng((Date.now() + n * 97) % 100000), ai = score >= thr ? 'ANOMALY' : 'NORMAL';
+    const n = last + 1, rng = makeRng((Date.now() + n * 97) % 100000), ai = score >= thr ? 'ANOMALY' : 'NORMAL', bx = boxesOf(q.key || q.name);
     const rec = { n, id: 'INS-' + String(n).padStart(6, '0'), pcb: U.pcb, score, thr, ver: S.model.active, ai, final: ai === 'NORMAL' ? 'NORMAL' : null, memo: '',
       at: prevAt + 120000 + Math.round(rng() * 60000), ms: 380 + Math.round(rng() * 160),
-      spot: { x: 20 + Math.round(rng() * 60), y: 22 + Math.round(rng() * 56), r: 10 + Math.round(rng() * 6) }, img: q.src };
+      spot: bx.length ? spotOf(bx) : { x: 20 + Math.round(rng() * 60), y: 22 + Math.round(rng() * 56), r: 10 + Math.round(rng() * 6) }, boxes: bx, img: q.src };
     S.inspections.push(rec); q.rec = rec; q.st = 'done'; ok++; if (ai === 'ANOMALY') anom++;
     redraw();
   }
@@ -1101,8 +1172,8 @@ function viewInspect() {
       : `<span class="pill">대기</span>`;
     const act = x.st === 'done' ? `${r.ai === 'ANOMALY' ? `<button class="btn sm outline" onclick="openReview(${r.n})">판정하기</button>` : ''}`
       : `<button class="icon-btn" ${U.running ? 'disabled' : ''} onclick="queueRemove(${x.uid})" aria-label="목록에서 빼기" title="목록에서 빼기">${ic('x')}</button>`;
-    return `<div class="qrow ${x.st}" data-st="${x.st}"><div class="photo ${x.st === 'run' ? 'scanning' : ''}" onclick="${x.st === 'done' ? `openViewer(${r.n})` : `openQueueImg(${x.uid})`}" title="클릭하면 크게 볼 수 있습니다"><img src="${x.src}" alt="${esc(x.name)}"></div>
-      <div class="qinfo"><b class="qname" title="${esc(x.name)}">${esc(x.name)}</b><div class="small muted">${x.sample ? '샘플 이미지' : fmtBytes(x.size)}${x.st === 'done' ? ` · ${r.id} · ${r.ms}ms` : ''}</div></div>
+    return `<div class="qrow ${x.st}" data-st="${x.st}"><div class="photo ${x.st === 'run' ? 'scanning' : ''}" onclick="${x.st === 'done' ? `openViewer(${r.n})` : `openQueueImg(${x.uid})`}" title="클릭하면 크게 볼 수 있습니다"><img src="${x.src}" alt="${esc(x.name)}">${x.st === 'done' ? markerHtml(r, true) : ''}</div>
+      <div class="qinfo"><b class="qname" title="${esc(x.name)}">${esc(x.name)}</b><div class="small muted">${x.sample ? '샘플 이미지' : fmtBytes(x.size)}${x.st === 'done' ? ` · ${r.id} · ${r.ms}ms` : ''}</div>${x.st === 'done' && r.ai === 'ANOMALY' ? `<div class="small" style="color:#ef4444;font-weight:600">의심 영역 1곳 — 썸네일의 빨간 박스 (클릭하면 크게 확인)</div>` : ''}</div>
       <div class="qres">${state}</div><div class="qact">${act}</div></div>`;
   };
   return `${pageHead('PCB 외관 검사', 'PCB 종류 선택 → 사진 여러 장 올리기 → 한 번에 검사')}
@@ -1115,12 +1186,13 @@ function viewInspect() {
     <div class="card"><div class="card-title">검사 이미지 <span class="pill">${total}장</span><span class="sp"></span><button class="btn sm outline" ${U.running || !total ? 'disabled' : ''} onclick="queueClear()">목록 비우기</button></div>
       <div class="drop dz" role="button" tabindex="0" ${U.running ? '' : 'onclick="pickFile()" onkeydown="if(event.key===\'Enter\')pickFile()"'} ondragover="dzOver(event)" ondragleave="dzLeave(event)" ondrop="dzDrop(event,'queue')">
         ${ic('upload', 'lg')}<div class="mt6"><b>PCB 사진을 여기로 끌어다 놓으세요</b></div><div class="small dz-note">또는 클릭해서 파일 선택 — <b>여러 장 동시 선택 가능</b> · 최대 ${MAX_BATCH}장 · PNG · JPG · BMP · WebP</div></div>
-      <div class="grid2 mt10"><button class="btn" ${U.running ? 'disabled' : ''} onclick="pickFile()">${ic('upload')}파일 선택 (여러 장)</button><button class="btn" ${U.running ? 'disabled' : ''} onclick="capture()">${ic('camera')}촬영 추가</button></div></div>
+      <div class="grid2 mt10"><button class="btn" ${U.running ? 'disabled' : ''} onclick="pickFile()">${ic('upload')}파일 선택 (여러 장)</button><button class="btn" ${U.running ? 'disabled' : ''} onclick="capture()">${ic('camera')}촬영 추가</button></div>
+      <div class="row mt8"><button class="btn sm outline" ${U.running ? 'disabled' : ''} onclick="loadSampleSet()">${ic('chip')}샘플 세트 불러오기 (10장)</button><span class="small muted">VisA PCB1 · DeepPCB 공개 이미지 — 정상·불량이 섞여 있어 의심 영역 표시를 바로 볼 수 있습니다</span></div></div>
     <div class="card"><div class="card-title">검사 목록 · 결과<span class="sp"></span>${done.length && !U.running ? `<button class="btn sm outline" onclick="queueClearDone()">완료 항목 치우기</button>` : ''}</div>
       ${total ? `<div class="qsum"><div class="bar-track"><div class="bar-fill ok" style="width:${pct}%"></div></div><b>${done.length} / ${total}</b><span class="pill green">정상 ${done.length - anom.length}</span><span class="pill orange">이상 의심 ${anom.length}</span>${anom.length && !U.running ? `<button class="btn sm primary" onclick="openReview(${anom[0].rec.n})">이상 의심 건 판정하기</button>` : ''}</div>
         <div class="qlist">${q.map(row).join('')}</div>` : `<div class="empty">${ic('upload')}검사할 이미지가 없습니다.<br>위 영역에 사진을 끌어다 놓거나 파일을 선택하세요.</div>`}</div>
     <button class="btn primary block mt14" onclick="runBatch()" ${U.running || off || !waiting ? 'disabled' : ''}>${U.running ? '<span class="spin"></span>PatchCore API 호출 중…' : off ? 'API 오프라인 — 검사 불가' : waiting ? `검사 시작 (${waiting}장)` : total ? '모든 이미지를 검사했습니다' : '검사할 이미지를 추가하세요'}</button>
-    <p class="note">여러 장을 올리면 순서대로 한 장씩 PatchCore API에 보내 한 번에 검사합니다. 이상 의심 건은 검사 관리의 검토 대기로 들어가고, 정상은 자동 확정됩니다. (Heatmap은 API 확장 이후 추가)</p>
+    <p class="note">여러 장을 올리면 순서대로 한 장씩 PatchCore API에 보내 한 번에 검사합니다. 이상 의심 건은 검사 관리의 검토 대기로 들어가고, 정상은 자동 확정됩니다. 이상 의심 건은 이미지에 빨간 박스로 의심 영역이 표시됩니다 (샘플 이미지는 데이터셋 정답 위치, 그 외 파일은 시연용 위치 · 실제 영역 좌표는 API 연동 시 제공, Heatmap은 확장 단계). 샘플 이미지 출처: VisA(CC BY 4.0, Zou et al., ECCV 2022) · DeepPCB(연구용, Tang et al.).</p>
     ${isAdmin() ? `<div class="card mt14"><details><summary>외부 PatchCore API 호출 계약(안) 보기 <span class="pill role-admin">관리자 전용</span></summary>
       <div class="note" style="margin:6px 0 8px">자체 모델 구현 없이 공개 Industrial PatchCore API를 호출만 합니다. 이미지마다 한 번씩 호출합니다. 아래는 어댑터가 사용할 요청·응답 계약(안)입니다.</div>
       <div class="grid2"><div><div class="small muted">요청</div><div class="code">${esc(req)}</div></div><div><div class="small muted">응답</div><div class="code">${esc(res)}</div></div></div></details></div>` : ''}`;
@@ -1197,7 +1269,7 @@ function bankCardHtml(adm) {
 }
 
 // 시작 시 검사 대기열에 샘플 이미지 1장을 넣어 두어, 바로 '검사 시작'을 눌러 볼 수 있게 한다.
-U.queue.push(newQueueItem({ name: '샘플 촬영 이미지', src: SAMPLE_IMG, sample: true }));
+U.queue.push(newQueueItem({ ...sampleItem(SAMPLE_ANOM[0]), name: '샘플 촬영 이미지' }));
 
 /* ═══════════════════════════════════════════════════════════════════════════
    7. [메뉴 3] 검사 관리 — 검사원 최종 판정 · 판정 사유 · 피드백 + (관리자) AI 판단 근거
@@ -1207,6 +1279,33 @@ U.queue.push(newQueueItem({ name: '샘플 촬영 이미지', src: SAMPLE_IMG, sa
  * @param {number} n 검사 번호
  */
 function openReview(n) { closeModal(); U.rvSel = n; U.rvMemo = ''; U.evMode = 'orig'; U.rvFilter = 'all'; go('review'); }
+
+/**
+ * 이상 의심 영역 박스를 만든다(모든 역할 공통). 위치는 시연용 시뮬레이션이며, 실서비스에서는 PatchCore 응답의 영역 좌표를 쓴다.
+ * 이미지 박스(position:relative) 안에 넣어 쓰며, 정상 판정이면 빈 문자열이다.
+ * @param {object} r 검사 레코드
+ * @param {boolean} [small] true면 라벨 없이 얇은 박스(썸네일용)
+ * @returns {string} 박스 HTML
+ */
+function markerHtml(r, small) {
+  if (!r || r.ai !== 'ANOMALY') return '';
+  let bs = r.boxes && r.boxes.length ? r.boxes : (r.spot ? [{ x: r.spot.x - r.spot.r * 1.1, y: r.spot.y - r.spot.r * 1.45, w: r.spot.r * 2.2, h: r.spot.r * 2.9 }] : []);
+  return bs.map((q, i) => {
+    const w = Math.min(100, Math.max(q.w + 2.4, 5)), h = Math.min(100, Math.max(q.h + 2.4, 5));
+    const l = Math.max(0, Math.min(100 - w, q.x + q.w / 2 - w / 2)), t = Math.max(0, Math.min(100 - h, q.y + q.h / 2 - h / 2));
+    const lab = i || small ? '' : `<i${t < 12 ? ' style="bottom:auto;top:100%;margin:2px 0 0"' : ''}>의심 영역 · ${r.score.toFixed(2)}${bs.length > 1 ? ` 외 ${bs.length - 1}곳` : ''}</i>`;
+    return `<div class="mk ${small ? 'sm' : ''}" style="left:${l}%;top:${t}%;width:${w}%;height:${h}%">${lab}</div>`;
+  }).join('');
+}
+
+/** 의심 영역 표시 켜기/끄기 버튼(검사 관리·확대 뷰어). */
+function markBtn() { return `<button class="btn sm outline mk-btn ${U.mkOff ? 'off' : ''}" onclick="toggleMark()" aria-pressed="${!U.mkOff}" title="이미지 위 이상 의심 영역 박스를 켜고 끕니다"><span class="mk-dot"></span>의심 영역 표시 ${U.mkOff ? '꺼짐' : '켜짐'}</button>`; }
+
+/** 의심 영역 표시를 켜고 끈다(화면 전체에 적용). */
+function toggleMark() {
+  U.mkOff = !U.mkOff; document.body.classList.toggle('mk-off', !!U.mkOff);
+  document.querySelectorAll('.mk-btn').forEach(b => { b.classList.toggle('off', !!U.mkOff); b.setAttribute('aria-pressed', String(!U.mkOff)); b.lastChild.textContent = '의심 영역 표시 ' + (U.mkOff ? '꺼짐' : '켜짐'); });
+}
 
 /**
  * AI 판단 근거 오버레이(Heatmap · Mask · Overlay)를 생성한다 — 관리자 전용 시뮬레이션.
@@ -1243,13 +1342,14 @@ function viewReview() {
       <div class="card-title mt16">AI 판단 근거 <span class="pill">관리자 전용</span></div>
       <div class="row mb8">${modes.map(([k, l]) => `<button class="pill ${U.evMode === k ? 'active' : ''}" onclick="U.evMode='${k}';render()">${l}</button>`).join('')}
         <label class="small muted" style="margin-left:auto">투명도 <input type="range" min="20" max="100" value="${U.evOpacity}" oninput="U.evOpacity=+this.value;document.getElementById('evLayer').innerHTML=evidenceLayer(S.inspections.find(r=>r.n===U.rvSel),U.evMode,U.evOpacity)"></label></div>
-      <div class="photo zoomable" title="클릭하면 크게 볼 수 있습니다(선택한 판단 근거 포함)" onclick="openViewer(${cur.n})"><img src="${cur.img}" alt="AI 판단 근거 원본" style="${U.evMode === 'mask' && cur.ai === 'ANOMALY' ? 'visibility:hidden' : ''}"><div id="evLayer">${evidenceLayer(cur, U.evMode, U.evOpacity)}</div><span class="zoom-hint">${ic('zoom')}확대</span></div>
-      <div class="note">${cur.ai === 'ANOMALY' ? 'AI가 어떤 영역을 근거로 이상으로 판단했는지 보여주는 자료입니다 (시안: 위치는 시뮬레이션).' : 'AI 정상 판정 — 표시할 이상 영역이 없습니다.'} 실제 Heatmap · Mask · Overlay는 API 확장 이후 연동됩니다.</div>`
+      <div class="photo zoomable" title="클릭하면 크게 볼 수 있습니다(선택한 판단 근거 포함)" onclick="openViewer(${cur.n})"><img src="${cur.img}" alt="AI 판단 근거 원본" style="${U.evMode === 'mask' && cur.ai === 'ANOMALY' ? 'visibility:hidden' : ''}"><div id="evLayer">${evidenceLayer(cur, U.evMode, U.evOpacity)}</div>${U.evMode === 'orig' ? markerHtml(cur) : ''}<span class="zoom-hint">${ic('zoom')}확대</span></div>
+      <div class="note">${cur.ai === 'ANOMALY' ? 'AI가 어떤 영역을 근거로 이상으로 판단했는지 보여주는 자료입니다 (시안: 샘플 이미지는 데이터셋 정답 위치, 그 외는 시뮬레이션).' : 'AI 정상 판정 — 표시할 이상 영역이 없습니다.'} 실제 Heatmap · Mask · Overlay는 API 확장 이후 연동됩니다.</div>`
       : `<div class="locked mt16">${ic('lock', 'lg')}<div><b>AI 판단 근거(Heatmap · Mask · Overlay)</b><br>관리자 전용 화면에서 제공됩니다. 검사원은 점수와 원본 이미지로 판정합니다.</div></div>`;
     detail = `
       <div class="row" style="align-items:flex-start;flex-wrap:nowrap;gap:16px">
-        <div style="width:46%;min-width:0"><div class="photo zoomable" role="button" tabindex="0" title="클릭하면 크게 볼 수 있습니다" onclick="openViewer(${cur.n})" onkeydown="if(event.key==='Enter')openViewer(${cur.n})"><img src="${cur.img}" alt="${cur.id} 원본"><span class="zoom-hint">${ic('zoom')}확대</span></div>
-          <div class="row mt8"><button class="btn sm" onclick="openViewer(${cur.n})">${ic('zoom')}확대 보기</button><button class="btn sm outline" onclick="downloadImage(${cur.n})">${ic('download')}다운로드</button></div></div>
+        <div style="width:46%;min-width:0"><div class="photo zoomable" role="button" tabindex="0" title="클릭하면 크게 볼 수 있습니다" onclick="openViewer(${cur.n})" onkeydown="if(event.key==='Enter')openViewer(${cur.n})"><img src="${cur.img}" alt="${cur.id} 원본">${markerHtml(cur)}<span class="zoom-hint">${ic('zoom')}확대</span></div>
+          <div class="row mt8"><button class="btn sm" onclick="openViewer(${cur.n})">${ic('zoom')}확대 보기</button><button class="btn sm outline" onclick="downloadImage(${cur.n})">${ic('download')}다운로드</button>${cur.ai === 'ANOMALY' ? markBtn() : ''}</div>
+          ${cur.ai === 'ANOMALY' ? `<div class="small mt6" style="color:#ef4444">빨간 박스: AI가 이상으로 의심한 영역${cur.boxes && cur.boxes.length && cur.boxes[0].k ? ` · 데이터셋 정답 유형(참고): ${KIND_KO[cur.boxes[0].k] || cur.boxes[0].k}${cur.boxes.length > 1 ? ' 외' : ''}` : ' (시연용 위치)'}</div>` : ''}</div>
         <div style="flex:1;min-width:0"><div style="font-size:20px;font-weight:800">${cur.id}</div>
           <div class="muted" style="margin:2px 0 8px">PCB 종류 ${pcbTag(cur.pcb)} · Industrial PatchCore ${cur.ver}</div>
           <span class="pill ${cur.ai === 'ANOMALY' ? 'orange' : 'green'}">${cur.ai === 'ANOMALY' ? 'AI 이상 의심' : 'AI 정상'}</span>
@@ -1335,7 +1435,7 @@ function viewHistory() {
 function openDetail(n) {
   const r = S.inspections.find(x => x.n === n); if (!r) return;
   openModal(`<div class="row between"><b style="font-size:18px">${r.id}</b><button class="icon-btn" onclick="closeModal()" aria-label="닫기">${ic('x')}</button></div>
-    <div class="photo zoomable" style="margin:12px 0" title="클릭하면 크게 볼 수 있습니다" onclick="openViewer(${r.n})"><img src="${r.img}" alt="${r.id}"><span class="zoom-hint">${ic('zoom')}확대</span></div>
+    <div class="photo zoomable" style="margin:12px 0" title="클릭하면 크게 볼 수 있습니다" onclick="openViewer(${r.n})"><img src="${r.img}" alt="${r.id}">${markerHtml(r)}<span class="zoom-hint">${ic('zoom')}확대</span></div>
     <dl class="kv"><dt>PCB 종류 / 모델</dt><dd>${pcbTag(r.pcb)} · Industrial PatchCore ${r.ver}</dd><dt>검사 시각</dt><dd>${mdhm(r.at)} · 처리 ${r.ms}ms</dd>
       <dt>AI 점수</dt><dd>${r.score.toFixed(2)} (당시 임계값 ${r.thr.toFixed(2)})</dd><dt>AI 판정</dt><dd>${aiBadge(r.ai)}</dd><dt>최종 판정</dt><dd>${finalBadge(r)}</dd><dt>판정 사유</dt><dd>${esc(r.memo) || '<span class="muted">—</span>'}</dd></dl>
     <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn outline" onclick="downloadImage(${r.n})">${ic('download')}이미지 다운로드</button><button class="btn primary" onclick="openReview(${r.n})">검사 관리에서 열기</button></div>`);
@@ -1495,10 +1595,10 @@ function openViewer(n) {
   Object.assign(VZ, { s: 1, x: 0, y: 0 });
   const ev = isAdmin() && U.evMode !== 'orig' && r.ai === 'ANOMALY';
   openModal(`<div class="row between mb8"><b style="font-size:18px">${r.id} · ${pcbTag(r.pcb)}</b><button class="icon-btn" onclick="closeModal()" aria-label="닫기">${ic('x')}</button></div>
-    <div class="vz" id="vz"><div class="vz-in" id="vzIn"><img src="${r.img}" alt="${r.id} 원본" draggable="false" style="${ev && U.evMode === 'mask' ? 'visibility:hidden' : ''}">${ev ? evidenceLayer(r, U.evMode, U.evOpacity) : ''}</div></div>
+    <div class="vz" id="vz"><div class="vz-in" id="vzIn"><img src="${r.img}" alt="${r.id} 원본" draggable="false" style="${ev && U.evMode === 'mask' ? 'visibility:hidden' : ''}">${ev ? evidenceLayer(r, U.evMode, U.evOpacity) : ''}${ev && U.evMode === 'mask' ? '' : markerHtml(r)}</div></div>
     <div class="row between mt10"><div class="row"><button class="btn sm" onclick="vzZoom(1/1.25)" aria-label="축소">−</button><span id="vzPct" class="small muted" style="min-width:48px;text-align:center">100%</span><button class="btn sm" onclick="vzZoom(1.25)" aria-label="확대">+</button><button class="btn sm outline" onclick="vzReset()">맞춤</button></div>
-      <button class="btn sm primary" onclick="downloadImage(${r.n})">${ic('download')}이미지 다운로드</button></div>
-    <div class="note">마우스 휠 · +/− 로 확대·축소, 끌어서 이동, 더블클릭으로 확대/복귀. 다운로드는 원본 이미지입니다${ev ? '(판단 근거 표시는 화면용)' : ''}.</div>`);
+      <div class="row">${r.ai === 'ANOMALY' ? markBtn() : ''}<button class="btn sm primary" onclick="downloadImage(${r.n})">${ic('download')}이미지 다운로드</button></div></div>
+    <div class="note">마우스 휠 · +/− 로 확대·축소, 끌어서 이동, 더블클릭으로 확대/복귀. 다운로드는 표시 없는 원본 이미지입니다(빨간 박스${ev ? ' · 판단 근거 표시' : ''}는 화면용).</div>`);
   document.querySelector('.modal-card').classList.add('wide');
   const box = document.getElementById('vz'); let p = null;
   const pos = e => { const b = box.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
@@ -1806,7 +1906,7 @@ function render() {
 function resetDemo() {
   Object.values(S.banks).forEach(a => a.forEach(f => f.src && URL.revokeObjectURL(f.src)));   // 데이터뱅크 미리보기 Blob URL 해제
   S = createInitialState({ theme: S.theme, user: S.user, api: S.api }); U.rvSel = null; U.hf = { period: 'all', pcb: 'all', result: 'all', q: '' }; U.hpage = 1; U.anim = true;
-  U.queue = [newQueueItem({ name: '샘플 촬영 이미지', src: SAMPLE_IMG, sample: true })]; U.bankPcb = 'PCB1'; render(); toast('데모 데이터를 초기화했습니다');
+  U.queue = [newQueueItem({ ...sampleItem(SAMPLE_ANOM[0]), name: '샘플 촬영 이미지' })]; U.capSeq = 0; U.bankPcb = 'PCB1'; render(); toast('데모 데이터를 초기화했습니다');
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
