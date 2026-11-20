@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CircuitEye (써킷아이) — PCB 외관검사 MVP</title>
+<link rel="icon" type="image/png" href="./docs/assets/favicon.png">
+<link rel="apple-touch-icon" href="./docs/assets/circuiteye_icon_256.png">
+<style>
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   1. 디자인 토큰 — 라이트 / 다크 (담당자 레퍼런스: 흰 카드 · 차분한 그린 · 필(pill) 배지)
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root, html[data-theme="light"] {
+  --font: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+  --bg-app: #f6f7f6; --bg-card: #ffffff; --bg-muted: #f1f2f1; --bg-hover: #ecefec; --bg-input: #ffffff;
+  --border: #e4e7e4; --border-strong: #cfd4cf;
+  --text-1: #141816; --text-2: #3b423d; --text-3: #6b736d; --text-4: #9aa19b;
+  --primary: #46745f; --primary-hover: #3b6350; --primary-fg: #ffffff;
+  --danger: #a8504a; --danger-hover: #92423d;
+  --good: #2f6b3a; --warn: #8a4a1c; --bad: #c0463e;
+  --b-green-bg: #e3f1e3; --b-green-fg: #2f6b3a;
+  --b-orange-bg: #fbe6dc; --b-orange-fg: #a2501e;
+  --b-red-bg: #fbe1de; --b-red-fg: #b23a32;
+  --b-gray-bg: #f1f2f1; --b-gray-fg: #4b534d;
+  --shadow: 0 1px 2px rgba(20, 24, 22, .05);
+  --shadow-float: 0 18px 48px -8px rgba(20, 24, 22, .22);
+  --bar-normal: #6fa384; --bar-defect: #c0463e; --bar-pending: #d49a5c;
+}
+html[data-theme="dark"] {
+  --bg-app: #0e1210; --bg-card: #161c19; --bg-muted: #1d2521; --bg-hover: #232d28; --bg-input: #121714;
+  --border: #26302b; --border-strong: #3a4740;
+  --text-1: #f1f4f2; --text-2: #cdd5d0; --text-3: #92a098; --text-4: #6a776f;
+  --primary: #5b9378; --primary-hover: #6aa388; --primary-fg: #0b100d;
+  --danger: #c46a63; --danger-hover: #d27b74;
+  --good: #7fcf94; --warn: #e5a76c; --bad: #f08a82;
+  --b-green-bg: rgba(111, 200, 140, .15); --b-green-fg: #86d69b;
+  --b-orange-bg: rgba(229, 150, 90, .16); --b-orange-fg: #eba66d;
+  --b-red-bg: rgba(240, 120, 110, .16); --b-red-fg: #f29a92;
+  --b-gray-bg: #232d28; --b-gray-fg: #b6c1ba;
+  --shadow: 0 1px 3px rgba(0, 0, 0, .4);
+  --shadow-float: 0 22px 54px rgba(0, 0, 0, .6);
+  --bar-normal: #5b9378; --bar-defect: #e0766d; --bar-pending: #d49a5c;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%; font-family: var(--font); font-variant-numeric: tabular-nums; font-size: 14px; line-height: 1.5;
+  background: var(--bg-app); color: var(--text-1); -webkit-font-smoothing: antialiased;
+}
+button, input, select, textarea { font-family: inherit; font-size: inherit; color: inherit; font-variant-numeric: tabular-nums; }
+button { cursor: pointer; border: 0; background: none; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 8px; }
+.ic { width: 16px; height: 16px; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; fill: none; flex: none; }
+.ic.lg { width: 20px; height: 20px; }
+.hidden { display: none !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   2. 공통 컴포넌트 — 카드 · 배지 · 버튼 · 폼 · 표
+   ═══════════════════════════════════════════════════════════════════════════ */
+.card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow); padding: 18px 20px; }
+.card + .card { margin-top: 14px; }
+.card-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.card-title .sp { flex: 1; }
+.page-title { font-size: 22px; font-weight: 800; letter-spacing: -.02em; margin-bottom: 4px; }
+.page-sub { color: var(--text-3); margin-bottom: 16px; }
+.pill { display: inline-flex; align-items: center; gap: 5px; padding: 2px 11px; border-radius: 999px; font-size: 12.5px; font-weight: 600; white-space: nowrap; background: var(--b-gray-bg); color: var(--b-gray-fg); }
+.pill.green { background: var(--b-green-bg); color: var(--b-green-fg); }
+.pill.orange { background: var(--b-orange-bg); color: var(--b-orange-fg); }
+.pill.red { background: var(--b-red-bg); color: var(--b-red-fg); }
+.pill.lg { font-size: 13.5px; padding: 4px 14px; }
+button.pill { cursor: pointer; border: 1px solid transparent; }
+button.pill.active { background: var(--text-1); color: var(--bg-card); }
+button.pill:hover:not(.active) { border-color: var(--border-strong); }
+/* 버튼류 텍스트·아이콘 가운데 정렬 보정 (한 줄·여러 줄 모두) */
+.btn, .pill, .icon-btn, .vw-seg button, .pager .btn { text-align: center; line-height: 1.35; text-decoration: none; }
+.pill, .icon-btn { justify-content: center; }
+.btn { white-space: nowrap; }
+.btn.block { display: flex; }
+.nav-item { text-align: left; }
+.vw-seg button { display: inline-flex; align-items: center; justify-content: center; }
+@media (max-width: 900px) { .nav-item { text-align: center; justify-content: center; } }
+.dragging, .dragging * { cursor: grabbing !important; user-select: none !important; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 9px 16px; border-radius: 10px; font-weight: 600; background: var(--bg-muted); color: var(--text-1); border: 1px solid transparent; transition: background .15s; }
+.btn:hover:not(:disabled) { background: var(--bg-hover); }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn.primary { background: var(--primary); color: var(--primary-fg); }
+.btn.primary:hover:not(:disabled) { background: var(--primary-hover); }
+.btn.danger { background: var(--danger); color: #fff; }
+.btn.danger:hover:not(:disabled) { background: var(--danger-hover); }
+.btn.outline { background: var(--bg-card); border-color: var(--border-strong); }
+.btn.block { width: 100%; padding: 14px; font-size: 16px; border-radius: 12px; }
+.btn.sm { padding: 5px 11px; font-size: 13px; border-radius: 8px; }
+.field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+.field > label { font-size: 12.5px; font-weight: 600; color: var(--text-3); }
+.inp, select.inp, textarea.inp { width: 100%; padding: 9px 12px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--bg-input); outline: none; }
+.inp:focus { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent); }
+textarea.inp { min-height: 84px; resize: vertical; line-height: 1.5; }
+.row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.row.between { justify-content: space-between; }
+.muted { color: var(--text-3); }
+.small { font-size: 12.5px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.tbl { width: 100%; border-collapse: collapse; }
+.tbl th { text-align: left; font-size: 12.5px; font-weight: 600; color: var(--text-3); padding: 9px 10px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.tbl td { padding: 11px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.tbl tr.click { cursor: pointer; }
+.tbl tr.click:hover td { background: var(--bg-muted); }
+.tbl-wrap { overflow-x: auto; }
+.bar-track { height: 10px; border-radius: 6px; background: var(--bg-muted); position: relative; overflow: visible; }
+.bar-fill { height: 100%; border-radius: 6px; background: #c9994f; }
+.bar-fill.ok { background: var(--bar-normal); }
+.bar-thr { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--text-1); border-radius: 1px; }
+.divider { height: 1px; background: var(--border); margin: 14px 0; }
+.note { color: var(--text-3); font-size: 13px; margin-top: 10px; }
+.empty { text-align: center; color: var(--text-3); padding: 28px 10px; }
+.kv { display: grid; grid-template-columns: 110px 1fr; gap: 6px 12px; font-size: 13.5px; }
+.kv dt { color: var(--text-3); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   3. 스플래시 · 로그인
+   ═══════════════════════════════════════════════════════════════════════════ */
+#splash { position: fixed; inset: 0; z-index: 90; background: var(--bg-app); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; transition: opacity .35s; }
+#splash.out { opacity: 0; pointer-events: none; }
+#splash img { width: 64px; height: 64px; border-radius: 16px; }
+#splash b { font-size: 20px; letter-spacing: -.02em; }
+.splash-bar { width: 140px; height: 3px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.splash-bar i { display: block; height: 100%; width: 0; background: var(--primary); animation: sbar .9s ease forwards; }
+@keyframes sbar { to { width: 100%; } }
+.login-wrap { min-height: 100%; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.login-card { width: 100%; max-width: 396px; }
+.login-brand { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.login-brand img { width: 40px; height: 40px; border-radius: 10px; }
+.login-brand b { font-size: 20px; letter-spacing: -.02em; display: block; line-height: 1.2; }
+.login-brand span { font-size: 12.5px; color: var(--text-3); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   4. 콘솔 셸 — 상단 헤더 + 좌측 6메뉴 (좁은 화면에서는 하단 탭바)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.shell { display: flex; flex-direction: column; height: 100%; }
+.topbar { display: flex; align-items: center; gap: 12px; padding: 0 22px; height: 60px; background: var(--bg-card); border-bottom: 1px solid var(--border); flex: none; }
+.brand { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 800; letter-spacing: -.02em; }
+.brand img { width: 28px; height: 28px; border-radius: 7px; }
+.brand small { font-weight: 500; color: var(--text-3); font-size: 12.5px; margin-left: 2px; }
+.top-sp { flex: 1; }
+.icon-btn { width: 34px; height: 34px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; color: var(--text-2); }
+.icon-btn:hover { background: var(--bg-muted); }
+.body-wrap { display: flex; flex: 1; min-height: 0; }
+.side { width: 220px; flex: none; padding: 18px 14px; display: flex; flex-direction: column; gap: 8px; background: var(--bg-card); border-right: 1px solid var(--border); overflow-y: auto; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; background: var(--bg-muted); color: var(--text-2); font-weight: 500; text-align: left; position: relative; }
+.nav-item:hover { background: var(--bg-hover); }
+.nav-item.active { color: var(--text-1); font-weight: 800; background: var(--bg-hover); box-shadow: inset 3px 0 0 var(--primary); }
+.nav-item .cnt { margin-left: auto; font-size: 11.5px; font-weight: 700; padding: 0 7px; border-radius: 999px; background: var(--b-orange-bg); color: var(--b-orange-fg); }
+.side-foot { margin-top: auto; padding-top: 14px; font-size: 12.5px; color: var(--text-3); }
+.main { flex: 1; overflow-y: auto; padding: 24px 28px 40px; }
+.main-inner { max-width: 1040px; margin: 0 auto; }
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 14px; }
+.kpi { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; text-align: left; box-shadow: var(--shadow); transition: border-color .15s, transform .15s; }
+.kpi:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+.kpi .l { color: var(--text-3); font-size: 14px; }
+.kpi .v { font-size: 32px; font-weight: 800; letter-spacing: -.02em; margin-top: 4px; }
+.kpi .v.good { color: var(--good); } .kpi .v.bad { color: var(--bad); } .kpi .v.warn { color: var(--warn); }
+.split { display: grid; grid-template-columns: 1.15fr 1fr; gap: 14px; align-items: start; }
+.photo { position: relative; width: 100%; aspect-ratio: 475 / 350; border-radius: 12px; overflow: hidden; background: #0f1512; border: 1px solid var(--border); }
+.photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo .ov { position: absolute; inset: 0; pointer-events: none; }
+.photo .ph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #8a958e; font-size: 13px; text-align: center; padding: 16px; }
+.photo.flash::after { content: ''; position: absolute; inset: 0; background: #fff; animation: flash .45s ease-out forwards; }
+@keyframes flash { from { opacity: .9; } to { opacity: 0; } }
+.score-big { font-size: 38px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
+.thumb { width: 64px; height: 48px; border-radius: 8px; border: 1px solid var(--border); background-repeat: no-repeat; flex: none; }
+.split.rv { grid-template-columns: minmax(260px, .62fr) 1.6fr; }
+.rv-list { display: flex; flex-direction: column; gap: 8px; max-height: 640px; overflow-y: auto; padding-right: 2px; }
+.rv-item { display: flex; gap: 12px; align-items: center; padding: 10px; border: 1px solid var(--border); border-radius: 12px; text-align: left; width: 100%; background: var(--bg-card); }
+.rv-item:hover { background: var(--bg-muted); }
+.rv-item.sel { border-color: var(--primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 22%, transparent); }
+.rv-item .t { font-weight: 700; }
+.locked { border: 1px dashed var(--border-strong); border-radius: 12px; padding: 14px; color: var(--text-3); font-size: 13px; display: flex; gap: 10px; align-items: flex-start; }
+.code { background: #0f1512; color: #cfe8d8; border-radius: 10px; padding: 12px 14px; font-family: 'Pretendard', 'Malgun Gothic', monospace; font-size: 12px; line-height: 1.6; overflow-x: auto; white-space: pre; }
+details > summary { cursor: pointer; font-weight: 600; color: var(--text-2); padding: 6px 0; }
+.ver-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.ver-row:last-child { border-bottom: 0; }
+.usage { height: 8px; background: var(--bg-muted); border-radius: 6px; overflow: hidden; }
+.usage i { display: block; height: 100%; background: var(--primary); }
+.road { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+.road div { display: flex; align-items: center; gap: 8px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 10px; font-size: 13.5px; }
+.pager { display: flex; gap: 6px; justify-content: center; align-items: center; margin-top: 12px; }
+.pager .btn { min-width: 34px; }
+
+/* 모달 · 토스트 */
+#modal { position: fixed; inset: 0; z-index: 70; background: rgba(10, 14, 12, .5); display: flex; align-items: center; justify-content: center; padding: 20px; }
+.modal-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow-float); width: 100%; max-width: 640px; max-height: 92vh; overflow-y: auto; padding: 22px 24px; }
+#toasts { position: fixed; right: 20px; bottom: 20px; z-index: 80; display: flex; flex-direction: column; gap: 8px; }
+.toast { background: var(--text-1); color: var(--bg-card); padding: 11px 16px; border-radius: 10px; font-size: 13.5px; box-shadow: var(--shadow-float); animation: tin .25s ease; max-width: 340px; }
+@keyframes tin { from { transform: translateY(8px); opacity: 0; } }
+
+/* 반응형 — 현장 모바일/태블릿: 사이드 메뉴 → 하단 탭바 */
+@media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 900px) {
+  .split, .split.rv, .grid2 { grid-template-columns: 1fr; }
+  .body-wrap { flex-direction: column-reverse; }
+  .side { width: 100%; flex-direction: row; padding: 6px 8px; gap: 4px; border-right: 0; border-top: 1px solid var(--border); overflow-x: auto; justify-content: space-around; }
+  .nav-item { flex-direction: column; gap: 2px; padding: 6px 8px; font-size: 11px; background: none; flex: 1; align-items: center; min-width: 54px; box-shadow: none !important; }
+  .nav-item.active { background: var(--bg-hover); }
+  .nav-item .cnt { position: absolute; top: 0; right: 6px; margin: 0; }
+  .side-foot { display: none; }
+  .main { padding: 16px 14px 24px; }
+  .topbar { padding: 0 14px; }
+  .brand small, .role-label { display: none; }
+  .road { grid-template-columns: 1fr; }
+}
+/* 환경별 UI 데모 뷰어 (기본 진입 화면) */
+#app { height: 100%; }
+.vw { display: flex; flex-direction: column; height: 100%; background: var(--bg-muted); }
+.vw-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 18px; background: var(--bg-card); border-bottom: 1px solid var(--border); }
+.vw-seg { display: inline-flex; background: var(--bg-muted); border-radius: 10px; padding: 3px; gap: 2px; }
+.vw-seg button { padding: 6px 13px; border-radius: 8px; font-weight: 600; color: var(--text-3); }
+.vw-seg button.on { background: var(--bg-card); color: var(--text-1); box-shadow: var(--shadow); }
+.vw-stage { flex: 1; min-height: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative; }
+.vw-row { display: flex; gap: 28px; align-items: center; transform-origin: center center; }
+.vw-dev { flex: none; background: #1b1f1d; padding: 10px; border-radius: 18px; box-shadow: var(--shadow-float); }
+.vw-dev.phone { padding: 12px 8px; border-radius: 40px; }
+.vw-dev iframe { display: block; border: 0; background: var(--bg-app); border-radius: 10px; }
+.vw-dev.phone iframe { border-radius: 28px; }
+.vw-cap { color: var(--text-3); font-size: 12.5px; text-align: center; margin-top: 8px; }
+@media (max-width: 520px) { .api-txt { display: none; } .topbar { gap: 6px; } .main { padding: 14px 12px 20px; } .rv-list { max-height: 360px; } }
+</style>
+</head>
+<body>
+
+<div id="splash"><img src="./docs/assets/circuiteye_icon_256.png" alt="CircuitEye"><b>CircuitEye</b><div class="splash-bar"><i></i></div></div>
+<div id="app"></div>
+<div id="modal" class="hidden"></div>
+<div id="toasts"></div>
+<input type="file" id="fileInput" accept="image/*" class="hidden">
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════════════
+   CircuitEye — PCB 외관검사 MVP 시안 (v2.0)
+   담당자 피드백(2026-11-20) 반영: 6메뉴 구조 · PatchCore는 외부 API '호출만' · 자체 구현은 후속 확장
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/** 데모에 사용하는 PCB 샘플 촬영 이미지 경로 */
+const SAMPLE_IMG = './docs/assets/pcb_sample.png';
+/** 사이드 메뉴 정의 (6메뉴 — 담당자 MVP 화면 구성안) */
+const MENUS = [
+  { id: 'dashboard', label: '대시보드', icon: 'grid' },
+  { id: 'inspect',   label: 'PCB 검사', icon: 'scan' },
+  { id: 'review',    label: '검토 관리', icon: 'check' },
+  { id: 'history',   label: '검사 이력', icon: 'history' },
+  { id: 'models',    label: '모델 관리', icon: 'db' },
+  { id: 'settings',  label: '시스템 설정', icon: 'gear' }
+];
+/** 로그인 시연 프리셋 (역할: inspector=검사원 / admin=관리자) */
+const PRESETS = {
+  abov:   { company: '어보브반도체', name: '김하늘', title: '품질 담당(검사원)', role: 'inspector', target: 'dashboard' },
+  dl:     { company: '디엘정보기술', name: '박현장', title: '현장 검사원',       role: 'inspector', target: 'inspect' },
+  neurocle:{ company: '뉴로클',      name: '이비전', title: '비전 AI 엔지니어(관리자)', role: 'admin', target: 'models' },
+  khaki:  { company: '카키스케치',   name: '송관리', title: '시스템 관리자',     role: 'admin',     target: 'dashboard' }
+};
+/** 아이콘 SVG 경로 사전 (이모지 대신 사용) */
+const ICONS = {
+  grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  scan: '<path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M4 12h16"/>',
+  check: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 13l2 2 4-4"/>',
+  history: '<path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/>',
+  db: '<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/>',
+  gear: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  camera: '<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/>',
+  upload: '<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>',
+  download: '<path d="M12 4v12M7 11l5 5 5-5M4 20h16"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon: '<path d="M21 13A9 9 0 1 1 11 3a7 7 0 0 0 10 10z"/>',
+  out: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
+  lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  x: '<path d="M6 6l12 12M18 6L6 18"/>'
+};
+
+/**
+ * SVG 선형 아이콘 마크업을 반환한다.
+ * @param {string} name ICONS 사전의 키
+ * @param {string} [cls] 추가 CSS 클래스 ('lg' 등)
+ * @returns {string} SVG 마크업
+ */
+function ic(name, cls = '') {
+  return `<svg class="ic ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name] || ''}</svg>`;
+}
+
+/**
+ * HTML 특수문자를 이스케이프한다 (사용자 입력 메모 · 파일명 출력용).
+ * @param {string} s 원본 문자열
+ * @returns {string} 이스케이프된 문자열
+ */
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   1. 데이터 모델 · 시드 데이터 (전체 120 = 정상 108 + 불량 7 + 검토 대기 5)
+   ═══════════════════════════════════════════════════════════════════════════ */
+/** 데모 가상 시계 기준 시각 (오늘 08:30 첫 검사 시작) */
+const DEMO_DAY_START = new Date('2026-11-20T08:30:00+09:00').getTime();
+
+/**
+ * 시드 기반 의사난수 생성기(mulberry32) — 새로고침해도 동일한 데모 데이터를 보장한다.
+ * @param {number} seed 시드값
+ * @returns {function(): number} 0~1 난수 함수
+ */
+function makeRng(seed) {
+  let a = seed >>> 0;
+  return () => { a = (a + 0x6D2B79F5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+}
+
+/**
+ * 초기 상태(검사 120건, 모델, PCB, 사용자, 설정)를 생성한다.
+ * @param {object} [keep] 유지할 값 { theme, user } (데모 초기화 시 테마·로그인 유지)
+ * @returns {object} 앱 상태 객체
+ */
+function createInitialState(keep = {}) {
+  const rng = makeRng(20261120);
+  const pending = [120, 116, 111, 107, 102];            // 검토 대기 5건
+  const defect = [118, 117, 98, 85, 71, 52, 33];        // 불량 확정 7건
+  const rescued = [110, 96, 88, 64, 47, 29, 15];        // AI 이상 → 검사원 정상 확정(가불량 구제)
+  const fixed = { 120: 0.72, 119: 0.21, 118: 0.93, 117: 0.52 };  // 담당자 레퍼런스 화면의 실제 값
+  const list = [];
+  for (let n = 1; n <= 120; n++) {
+    let score, final;
+    if (pending.includes(n)) { score = fixed[n] ?? +(0.63 + rng() * 0.21).toFixed(2); final = null; }
+    else if (defect.includes(n)) { score = fixed[n] ?? (n === 52 ? 0.55 : +(0.66 + rng() * 0.26).toFixed(2)); final = 'DEFECT'; }
+    else if (rescued.includes(n)) { score = +(0.61 + rng() * 0.13).toFixed(2); final = 'NORMAL'; }
+    else { score = fixed[n] ?? +(0.08 + rng() * 0.38).toFixed(2); final = 'NORMAL'; }
+    const ai = score >= 0.60 ? 'ANOMALY' : 'NORMAL';
+    let memo = '';
+    if (final === 'DEFECT') memo = n === 117 ? 'AI 정상이나 육안상 납땜 들뜸 확인 → 불량' : n === 52 ? '경계 점수 미탐 — 패드 오염 확인' : '배선/납땜 이상 육안 확인';
+    if (rescued.includes(n)) memo = '표면 미세 스크래치, 기능 영향 없음 (가불량 구제)';
+    list.push({
+      n, id: 'INS-' + String(n).padStart(6, '0'), pcb: 'PCB1', score, thr: 0.60, ver: 'v0.3.0', ai, final, memo,
+      at: DEMO_DAY_START + Math.round(n * 5.5 * 60000), ms: 380 + Math.round(rng() * 160),
+      spot: { x: 18 + Math.round(rng() * 64), y: 20 + Math.round(rng() * 60), r: 9 + Math.round(rng() * 7) },
+      img: SAMPLE_IMG
+    });
+  }
+  return {
+    theme: keep.theme || 'light',
+    user: keep.user || null,
+    inspections: list,
+    pcbs: [{ id: 'PCB1', model: 'Industrial PatchCore', status: '검사 가능' }],
+    model: { active: 'v0.3.0', threshold: 0.60, versions: [
+      { v: 'v0.3.0', note: '공개 Memory Bank · 현재 운영', date: '2026-11-18' },
+      { v: 'v0.2.1', note: '공개 Memory Bank · 이전 버전', date: '2026-11-10' }
+    ] },
+    users: [
+      { name: '송관리', role: '관리자', company: '카키스케치', status: '활성' },
+      { name: '이비전', role: '관리자', company: '뉴로클', status: '활성' },
+      { name: '김하늘', role: '검사원', company: '어보브반도체', status: '활성' },
+      { name: '박현장', role: '검사원', company: '디엘정보기술', status: '활성' }
+    ],
+    settings: { camera: '기본 카메라 (USB 현미경)', resolution: '1920 × 1080', retention: '90일' },
+    result: null,       // PCB 검사 화면의 최근 API 응답
+    demoSeq: 0          // 시연용 점수 순환 인덱스
+  };
+}
+
+let S = createInitialState();
+/** 화면별 임시 UI 상태 (필터 · 선택 · 페이지 등 — 데모 초기화 대상 아님) */
+const U = {
+  route: 'dashboard', pcb: 'PCB1', img: SAMPLE_IMG, imgName: '샘플 촬영 이미지', running: false,
+  rvFilter: 'all', rvSel: null, rvMemo: '', evMode: 'orig', evOpacity: 70,
+  hf: { period: 'all', pcb: 'all', result: 'all', q: '' }, hpage: 1
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   2. 판정 · 집계 헬퍼
+   ═══════════════════════════════════════════════════════════════════════════ */
+/**
+ * 검사 레코드의 최종 상태를 표시용 키로 반환한다.
+ * @param {object} r 검사 레코드
+ * @returns {'PENDING'|'NORMAL'|'DEFECT'} 검토 대기 / 정상 확정 / 불량 확정
+ */
+function finalState(r) { return r.final === null ? 'PENDING' : r.final; }
+
+/**
+ * 대시보드 KPI 4종과 AI-검사원 일치율을 집계한다.
+ * @returns {{total:number, normal:number, defect:number, pending:number, match:number}} 집계값 (match: 일치율 %)
+ */
+function getStats() {
+  const l = S.inspections;
+  const normal = l.filter(r => r.final === 'NORMAL').length;
+  const defect = l.filter(r => r.final === 'DEFECT').length;
+  const pending = l.filter(r => r.final === null).length;
+  const confirmed = l.filter(r => r.final !== null);
+  const same = confirmed.filter(r => (r.ai === 'ANOMALY') === (r.final === 'DEFECT')).length;
+  return { total: l.length, normal, defect, pending, match: confirmed.length ? +(same / confirmed.length * 100).toFixed(1) : 0 };
+}
+
+/**
+ * AI 판정 배지(정상/이상)를 반환한다.
+ * @param {string} ai 'NORMAL' | 'ANOMALY'
+ * @returns {string} 배지 HTML
+ */
+function aiBadge(ai) { return ai === 'ANOMALY' ? '<span class="pill orange">이상</span>' : '<span class="pill green">정상</span>'; }
+
+/**
+ * 최종 판정 배지(정상/불량/대기)를 반환한다.
+ * @param {object} r 검사 레코드
+ * @returns {string} 배지 HTML
+ */
+function finalBadge(r) {
+  const f = finalState(r);
+  return f === 'NORMAL' ? '<span class="pill green">정상</span>' : f === 'DEFECT' ? '<span class="pill red">불량</span>' : '<span class="pill orange">검토 대기</span>';
+}
+
+/**
+ * 시각(ms)을 'HH:MM' 문자열로 변환한다.
+ * @param {number} ms 에폭 밀리초
+ * @returns {string} 시:분
+ */
+function hhmm(ms) { const d = new Date(ms); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
+
+/**
+ * 시각(ms)을 'MM-DD HH:MM' 문자열로 변환한다.
+ * @param {number} ms 에폭 밀리초
+ * @returns {string} 월-일 시:분
+ */
+function mdhm(ms) { const d = new Date(ms); return String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0') + ' ' + hhmm(ms); }
+
+/**
+ * 이상 영역 좌표를 이용해 확대 썸네일 스타일을 만든다 (목록용).
+ * @param {object} r 검사 레코드
+ * @returns {string} inline style 문자열
+ */
+function thumbStyle(r) { return `background-image:url('${r.img}');background-size:280%;background-position:${r.spot.x}% ${r.spot.y}%;`; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   3. 공통 UI — 토스트 · 모달 · 테마 · 라우팅
+   ═══════════════════════════════════════════════════════════════════════════ */
+/**
+ * 토스트 알림을 3초간 표시한다.
+ * @param {string} msg 표시할 메시지
+ */
+function toast(msg) {
+  const el = document.createElement('div'); el.className = 'toast'; el.textContent = msg;
+  document.getElementById('toasts').appendChild(el); setTimeout(() => el.remove(), 3000);
+}
+
+/**
+ * 모달을 연다.
+ * @param {string} html 모달 카드 내부 HTML
+ */
+function openModal(html) {
+  const m = document.getElementById('modal'); m.innerHTML = `<div class="modal-card" role="dialog" aria-modal="true">${html}</div>`; m.classList.remove('hidden');
+  m.onclick = e => { if (e.target === m) closeModal(); };
+}
+
+/** 모달을 닫는다. */
+function closeModal() { const m = document.getElementById('modal'); m.classList.add('hidden'); m.innerHTML = ''; }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/**
+ * 라이트/다크 테마를 적용한다.
+ * @param {'light'|'dark'} t 테마명
+ */
+function applyTheme(t) { S.theme = t; document.documentElement.setAttribute('data-theme', t); }
+
+/** 테마를 토글하고 화면을 다시 그린다. */
+function toggleTheme() { applyTheme(S.theme === 'light' ? 'dark' : 'light'); render(); }
+
+/**
+ * 화면(메뉴)을 전환한다. URL 해시도 함께 갱신한다.
+ * @param {string} id MENUS의 id
+ */
+function go(id) {
+  U.route = id; U.hpage = 1;
+  history.replaceState(null, '', '#' + id + (S.theme === 'dark' ? '-dark' : ''));
+  render(); const m = document.querySelector('.main'); if (m) m.scrollTop = 0;
+}
+
+/**
+ * 검사원 / 관리자 권한 여부를 반환한다.
+ * @returns {boolean} 관리자이면 true
+ */
+function isAdmin() { return S.user && S.user.role === 'admin'; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   4. 로그인 · 셸 레이아웃
+   ═══════════════════════════════════════════════════════════════════════════ */
+/**
+ * 프리셋 계정으로 로그인하고 지정 화면으로 진입한다.
+ * @param {string} key PRESETS의 키
+ */
+function login(key) {
+  const p = PRESETS[key] || PRESETS.khaki; S.user = { ...p, key };
+  U.route = p.target; history.replaceState(null, '', '#' + U.route + (S.theme === 'dark' ? '-dark' : '')); render();
+}
+
+/** 로그아웃하고 로그인 화면으로 돌아간다. */
+function logout() { S.user = null; history.replaceState(null, '', '#login' + (S.theme === 'dark' ? '-dark' : '')); render(); }
+
+/**
+ * 로그인 화면 마크업을 생성한다 (396px 단일 카드 · 수요기업 프리셋 4종).
+ * @returns {string} HTML
+ */
+function viewLogin() {
+  return `<div class="login-wrap"><div class="card login-card">
+    <div class="login-brand"><img src="./docs/assets/circuiteye_icon_256.png" alt=""><div><b>CircuitEye</b><span>PCB 외관검사 · 써킷아이</span></div></div>
+    <div class="field"><label>워크스페이스 / 계정</label>
+      <select class="inp" id="preset">${Object.entries(PRESETS).map(([k, p]) => `<option value="${k}">${p.company} · ${p.title}</option>`).join('')}</select></div>
+    <div class="field"><label>이메일 / 사번</label><input class="inp" value="demo@circuiteye.kr" readonly></div>
+    <div class="field"><label>비밀번호</label><input class="inp" type="password" value="••••••••" readonly></div>
+    <button class="btn primary block" onclick="login(document.getElementById('preset').value)">로그인</button>
+    <p class="note">시연용 계정입니다. 관리자 계정은 AI 판단 근거(Heatmap) · 모델 · 사용자 관리 기능이 열립니다.</p>
+    <div class="row between" style="margin-top:10px"><span class="small muted">KhakiSketch · 2026</span><button class="icon-btn" onclick="toggleTheme()" aria-label="테마 전환">${ic(S.theme === 'dark' ? 'sun' : 'moon')}</button></div>
+  </div></div>`;
+}
+
+/**
+ * 로그인 후 공통 셸(상단 헤더 + 6메뉴 + 본문)을 생성한다.
+ * @param {string} content 본문 HTML
+ * @returns {string} HTML
+ */
+function shell(content) {
+  const st = getStats();
+  return `<div class="shell">
+    <header class="topbar">
+      <div class="brand"><img src="./docs/assets/circuiteye_icon_256.png" alt="">CircuitEye<small>PCB Inspection</small></div>
+      <span class="pill green" title="외부 PatchCore 추론 API 연결 상태"><span class="dot"></span>PatchCore<span class="api-txt">API 정상</span></span>
+      <div class="top-sp"></div>
+      <span class="small muted role-label">${esc(S.user.company)} · ${esc(S.user.name)}</span>
+      <span class="pill">${isAdmin() ? '관리자' : '검사원'}</span>
+      <button class="icon-btn" onclick="toggleTheme()" aria-label="테마 전환" title="테마 전환">${ic(S.theme === 'dark' ? 'sun' : 'moon')}</button>
+      <button class="icon-btn" onclick="logout()" aria-label="로그아웃" title="로그아웃">${ic('out')}</button>
+    </header>
+    <div class="body-wrap">
+      <nav class="side" aria-label="주 메뉴">
+        ${MENUS.map(m => `<button class="nav-item ${U.route === m.id ? 'active' : ''}" onclick="go('${m.id}')">${ic(m.icon, 'lg')}<span>${m.label}</span>${m.id === 'review' && st.pending ? `<span class="cnt">${st.pending}</span>` : ''}</button>`).join('')}
+        <div class="side-foot">모델 ${S.model.active} · 임계값 ${S.model.threshold.toFixed(2)}<br><button class="btn sm outline" style="margin-top:8px" onclick="resetDemo()">데모 초기화</button></div>
+      </nav>
+      <main class="main"><div class="main-inner">${content}</div></main>
+    </div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   5. [메뉴 1] 대시보드 — 검사 현황 · 정상/불량 통계 · 검토 대기 현황
+   ═══════════════════════════════════════════════════════════════════════════ */
+/**
+ * 시간대별 검사 건수 누적 막대 차트(SVG)를 생성한다.
+ * @returns {string} SVG 마크업
+ */
+function hourlyChart() {
+  const hours = Array.from({ length: 12 }, (_, i) => 8 + i);
+  const data = hours.map(h => { const rs = S.inspections.filter(r => new Date(r.at).getHours() === h); return { h, n: rs.filter(r => r.final === 'NORMAL').length, d: rs.filter(r => r.final === 'DEFECT').length, p: rs.filter(r => r.final === null).length }; });
+  const max = Math.max(1, ...data.map(x => x.n + x.d + x.p)), W = 480, H = 170, bw = 26, gap = (W - 20 - bw * 12) / 11;
+  const bars = data.map((x, i) => {
+    const X = 10 + i * (bw + gap); let y = H - 22; let out = '';
+    [['n', 'var(--bar-normal)'], ['d', 'var(--bar-defect)'], ['p', 'var(--bar-pending)']].forEach(([k, c]) => {
+      const h = x[k] / max * (H - 40); if (h > 0) { y -= h; out += `<rect x="${X}" y="${y}" width="${bw}" height="${h}" rx="2" fill="${c}"/>`; }
+    });
+    return out + `<text x="${X + bw / 2}" y="${H - 6}" text-anchor="middle" font-size="10" fill="var(--text-3)">${x.h}</text><text x="${X + bw / 2}" y="${y - 4}" text-anchor="middle" font-size="10" fill="var(--text-2)">${x.n + x.d + x.p}</text>`;
+  }).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="시간대별 검사 건수">${bars}</svg>
+    <div class="row small muted" style="gap:14px"><span><span class="dot" style="color:var(--bar-normal);display:inline-block"></span> 정상</span><span><span class="dot" style="color:var(--bar-defect);display:inline-block"></span> 불량</span><span><span class="dot" style="color:var(--bar-pending);display:inline-block"></span> 검토 대기</span></div>`;
+}
+
+/**
+ * 대시보드 화면을 생성한다.
+ * @returns {string} 본문 HTML
+ */
+function viewDashboard() {
+  const st = getStats();
+  const recent = [...S.inspections].sort((a, b) => b.n - a.n).slice(0, 5);
+  const pend = S.inspections.filter(r => r.final === null).sort((a, b) => b.n - a.n).slice(0, 5);
+  const kpi = (label, v, cls, flt) => `<button class="kpi" onclick="gotoHistory('${flt}')"><div class="l">${label}</div><div class="v ${cls}">${v}</div></button>`;
+  return `<h1 class="page-title">오늘의 검사 현황</h1><p class="page-sub">2026-11-20 · 카드를 누르면 해당 조건의 검사 이력으로 이동합니다.</p>
+    <div class="kpi-grid">${kpi('전체 검사', st.total, '', 'all')}${kpi('정상 확정', st.normal, 'good', 'NORMAL')}${kpi('불량 확정', st.defect, 'bad', 'DEFECT')}${kpi('검토 대기', st.pending, 'warn', 'PENDING')}</div>
+    <div class="split">
+      <div class="card"><div class="card-title">시간대별 검사 건수</div>${hourlyChart()}</div>
+      <div class="card"><div class="card-title">검토 대기 <span class="pill orange">${st.pending}건</span><span class="sp"></span><button class="btn sm" onclick="go('review')">검토하기</button></div>
+        ${pend.length ? pend.map(r => `<div class="ver-row"><div class="thumb" style="${thumbStyle(r)}"></div><div style="flex:1"><b>${r.id}</b><div class="small muted">${r.pcb} · 점수 ${r.score.toFixed(2)} · ${hhmm(r.at)}</div></div><button class="btn sm outline" onclick="openReview(${r.n})">판정</button></div>`).join('') : '<div class="empty">검토 대기 건이 없습니다.</div>'}
+        <div class="divider"></div><div class="row between"><span class="muted">AI-검사원 판정 일치율</span><b style="font-size:20px">${st.match}%</b></div>
+        <div class="note" style="margin-top:4px">검사원 확정 건 중 AI 최초 판정과 같은 비율 (AI 원본 판정은 보존)</div></div>
+    </div>
+    <div class="card" style="margin-top:14px"><div class="card-title">최근 검사<span class="sp"></span><button class="btn sm" onclick="go('history')">전체 이력</button></div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>번호</th><th>PCB</th><th>AI 점수</th><th>AI 판정</th><th>최종 판정</th><th>시각</th></tr></thead><tbody>
+      ${recent.map(r => `<tr class="click" onclick="openDetail(${r.n})"><td>${r.n}</td><td>${r.pcb}</td><td>${r.score.toFixed(2)}</td><td>${aiBadge(r.ai)}</td><td>${finalBadge(r)}</td><td>${hhmm(r.at)}</td></tr>`).join('')}</tbody></table></div></div>`;
+}
+
+/**
+ * 대시보드 KPI 카드에서 검사 이력 화면으로 필터를 적용해 이동한다.
+ * @param {string} flt 'all' | 'NORMAL' | 'DEFECT' | 'PENDING'
+ */
+function gotoHistory(flt) { U.hf = { period: 'all', pcb: 'all', result: flt, q: '' }; go('history'); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   6. [메뉴 2] PCB 검사 — PCB 선택 · 촬영/업로드 · PatchCore API 호출
+   ═══════════════════════════════════════════════════════════════════════════ */
+/** 촬영 버튼: 샘플 촬영(셔터 효과)으로 이미지를 교체한다 (시안 — 실제 카메라 연동은 시스템 설정의 카메라 항목에서 제공 예정). */
+function capture() {
+  U.img = SAMPLE_IMG; U.imgName = '촬영 이미지 ' + new Date().toTimeString().slice(0, 8); S.result = null; render();
+  const p = document.querySelector('.photo'); if (p) { p.classList.add('flash'); }
+  toast('촬영 완료 (시안: 샘플 이미지)');
+}
+
+/** 업로드 버튼: 파일 선택 창을 연다. */
+function pickFile() { document.getElementById('fileInput').click(); }
+document.getElementById('fileInput').addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0]; if (!f) return;
+  const fr = new FileReader();
+  fr.onload = () => { U.img = fr.result; U.imgName = f.name; U.imgSeed = f.size + f.name.length; S.result = null; e.target.value = ''; render(); toast('이미지를 업로드했습니다'); };
+  fr.readAsDataURL(f);
+});
+
+/**
+ * 외부 PatchCore API 응답을 모사해 이상 점수를 산출한다 (시연용 순환 + 업로드 파일은 파일 정보 기반).
+ * @returns {number} 0~1 이상 점수
+ */
+function mockApiScore() {
+  const cycle = [0.72, 0.21, 0.88, 0.34];
+  if (U.imgName.startsWith('샘플') || U.imgName.startsWith('촬영')) return cycle[S.demoSeq++ % cycle.length];
+  return +(0.12 + ((U.imgSeed || 7) * 37 % 83) / 100).toFixed(2);
+}
+
+/**
+ * 검사 시작: PatchCore API를 호출(시뮬레이션)하고 결과를 검사 이력에 저장한다.
+ * AI 이상 → '검토 대기' 큐 편입 / AI 정상 → 정상 자동 확정.
+ */
+function runInspection() {
+  if (U.running) return; U.running = true; render();
+  setTimeout(() => {
+    const score = mockApiScore(), thr = S.model.threshold, rng = makeRng(Date.now() % 100000);
+    const last = Math.max(...S.inspections.map(r => r.n)), prevAt = S.inspections.find(r => r.n === last).at;
+    const ai = score >= thr ? 'ANOMALY' : 'NORMAL', ms = 380 + Math.round(rng() * 160), n = last + 1;
+    const rec = { n, id: 'INS-' + String(n).padStart(6, '0'), pcb: U.pcb, score, thr, ver: S.model.active, ai, final: ai === 'NORMAL' ? 'NORMAL' : null,
+      memo: ai === 'NORMAL' ? '' : '', at: prevAt + 120000 + Math.round(rng() * 60000), ms,
+      spot: { x: 20 + Math.round(rng() * 60), y: 22 + Math.round(rng() * 56), r: 10 + Math.round(rng() * 6) }, img: U.img };
+    S.inspections.push(rec); S.result = rec; U.running = false; render();
+    toast(ai === 'ANOMALY' ? `${rec.id} 이상 의심 — 검토 대기로 등록` : `${rec.id} 정상 판정`);
+  }, 900);
+}
+
+/**
+ * PCB 검사 화면을 생성한다.
+ * @returns {string} 본문 HTML
+ */
+function viewInspect() {
+  const r = S.result, thr = S.model.threshold;
+  const req = JSON.stringify({ image: '<base64 PCB 이미지>', pcb_id: U.pcb, model: 'industrial-patchcore', version: S.model.active }, null, 2);
+  const res = r ? JSON.stringify({ anomaly_score: r.score, threshold: r.thr, is_anomaly: r.ai === 'ANOMALY', elapsed_ms: r.ms }, null, 2) : '(검사 시작 후 표시)';
+  const result = r ? `
+      <span class="pill ${r.ai === 'ANOMALY' ? 'orange' : 'green'} lg">${r.ai === 'ANOMALY' ? '이상 의심' : '정상'}</span>
+      <div class="muted" style="margin-top:12px">이상 점수</div><div class="score-big">${r.score.toFixed(2)}</div>
+      <div class="muted" style="margin:6px 0">기본 임계값: ${r.thr.toFixed(2)}</div>
+      <div class="bar-track"><div class="bar-fill ${r.ai === 'NORMAL' ? 'ok' : ''}" style="width:${Math.round(r.score * 100)}%"></div><div class="bar-thr" style="left:${Math.round(r.thr * 100)}%" title="임계값"></div></div>
+      <div class="divider"></div>
+      <div class="muted">추론 모델</div><div style="font-weight:600;margin-bottom:6px">Industrial PatchCore <span class="muted small">${r.ver}</span></div>
+      <div class="muted">처리 시간: ${r.ms}ms</div>
+      ${r.ai === 'ANOMALY' ? `<button class="btn outline sm" style="margin-top:12px" onclick="openReview(${r.n})">검토 관리에서 판정하기</button>` : `<div class="note">정상 판정은 자동 확정됩니다. 이상 의심 건만 검사원 검토가 필요합니다.</div>`}`
+    : `<span class="pill lg">검사 대기</span><div class="empty" style="padding:30px 0">이미지를 준비하고 <b>검사 시작</b>을 누르면<br>PatchCore API 결과가 여기에 표시됩니다.</div>`;
+  return `<h1 class="page-title">PCB 외관 검사</h1>
+    <div class="row" style="margin-bottom:14px">
+      <select class="inp" style="width:auto" onchange="U.pcb=this.value;render()">${S.pcbs.filter(p => p.status === '검사 가능').map(p => `<option ${p.id === U.pcb ? 'selected' : ''}>${esc(p.id)}</option>`).join('')}</select>
+      <span class="pill">일반 검사</span><span class="pill green">모델 준비 완료</span>
+    </div>
+    <div class="split">
+      <div class="card"><div class="card-title">촬영 이미지</div>
+        <div class="photo">${U.img ? `<img src="${U.img}" alt="PCB 촬영 이미지">` : ''}</div>
+        <div class="note" style="margin:6px 0 10px">${esc(U.imgName)}</div>
+        <div class="grid2"><button class="btn" onclick="capture()">${ic('camera')}촬영</button><button class="btn" onclick="pickFile()">${ic('upload')}업로드</button></div></div>
+      <div class="card"><div class="card-title">AI 검사 결과</div>${result}</div>
+    </div>
+    <button class="btn primary block" style="margin-top:14px" onclick="runInspection()" ${U.running ? 'disabled' : ''}>${U.running ? 'PatchCore API 호출 중…' : '검사 시작'}</button>
+    <p class="note">검사 화면 목업 · Heatmap은 API 확장 이후 추가 (현재는 관리자의 검토 화면에서 AI 판단 근거 시뮬레이션 제공)</p>
+    <div class="card" style="margin-top:14px"><details><summary>외부 PatchCore API 호출 계약(안) 보기</summary>
+      <div class="note" style="margin:6px 0 8px">자체 모델 구현 없이 공개 Industrial PatchCore API를 호출만 합니다. 아래는 어댑터가 사용할 요청·응답 계약(안)입니다.</div>
+      <div class="grid2"><div><div class="small muted">요청</div><div class="code">${esc(req)}</div></div><div><div class="small muted">응답</div><div class="code">${esc(res)}</div></div></div></details></div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   7. [메뉴 3] 검토 관리 — 검사원 최종 판정 · 판정 사유 · 피드백 + (관리자) AI 판단 근거
+   ═══════════════════════════════════════════════════════════════════════════ */
+/**
+ * 검토 관리 화면으로 이동해 특정 검사를 선택한다.
+ * @param {number} n 검사 번호
+ */
+function openReview(n) { closeModal(); U.rvSel = n; U.rvMemo = ''; U.evMode = 'orig'; U.rvFilter = 'all'; go('review'); }
+
+/**
+ * AI 판단 근거 오버레이(Heatmap · Mask · Overlay)를 생성한다 — 관리자 전용 시뮬레이션.
+ * @param {object} r 검사 레코드
+ * @param {string} mode 'orig' | 'heat' | 'mask' | 'overlay'
+ * @param {number} op 불투명도(0~100)
+ * @returns {string} 오버레이 HTML (이미지 박스 내부에 삽입)
+ */
+function evidenceLayer(r, mode, op) {
+  if (r.ai !== 'ANOMALY' || mode === 'orig') return '';
+  const { x, y, r: rad } = r.spot, a = (op / 100).toFixed(2);
+  if (mode === 'heat') return `<div class="ov" style="opacity:${a};background:radial-gradient(circle at ${x}% ${y}%, rgba(239,68,68,.95) 0, rgba(249,115,22,.75) ${rad * .45}%, rgba(234,179,8,.4) ${rad * .8}%, rgba(34,197,94,0) ${rad * 1.3}%)"></div>`;
+  if (mode === 'mask') return `<div class="ov" style="background:#000"></div><div class="ov" style="background:radial-gradient(ellipse ${rad}% ${rad * 1.3}% at ${x}% ${y}%, #fff 0, #fff 92%, #000 100%)"></div>`;
+  return `<div class="ov" style="opacity:${a};background:radial-gradient(ellipse ${rad}% ${rad * 1.3}% at ${x}% ${y}%, rgba(239,68,68,.5) 0, rgba(239,68,68,.5) 90%, rgba(239,68,68,0) 100%)"></div>
+    <div class="ov" style="opacity:${a}"><div style="position:absolute;left:${x - rad * 1.1}%;top:${y - rad * 1.45}%;width:${rad * 2.2}%;height:${rad * 2.9}%;border:2px solid #ef4444;border-radius:4px"></div></div>`;
+}
+
+/**
+ * 검토 관리 화면을 생성한다.
+ * @returns {string} 본문 HTML
+ */
+function viewReview() {
+  const st = getStats();
+  const flt = { all: () => true, pending: r => r.final === null, done: r => r.final !== null }[U.rvFilter];
+  const list = S.inspections.filter(flt).sort((a, b) => (a.final === null ? 0 : 1) - (b.final === null ? 0 : 1) || b.n - a.n).slice(0, 60);
+  if (!list.find(r => r.n === U.rvSel)) U.rvSel = list.length ? list[0].n : null;
+  const cur = S.inspections.find(r => r.n === U.rvSel);
+  const chip = (id, label) => `<button class="pill ${U.rvFilter === id ? 'active' : (id === 'pending' ? 'orange' : id === 'done' ? 'green' : '')}" onclick="U.rvFilter='${id}';render()">${label}</button>`;
+  let detail = '<div class="empty">검토할 항목이 없습니다.</div>';
+  if (cur) {
+    const f = finalState(cur);
+    const modes = [['orig', '원본'], ['heat', 'Heatmap'], ['mask', 'Mask'], ['overlay', 'Overlay']];
+    const evidence = isAdmin() ? `
+      <div class="card-title" style="margin-top:16px">AI 판단 근거 <span class="pill">관리자 전용</span></div>
+      <div class="row" style="margin-bottom:8px">${modes.map(([k, l]) => `<button class="pill ${U.evMode === k ? 'active' : ''}" onclick="U.evMode='${k}';render()">${l}</button>`).join('')}
+        <label class="small muted" style="margin-left:auto">투명도 <input type="range" min="20" max="100" value="${U.evOpacity}" oninput="U.evOpacity=+this.value;document.getElementById('evLayer').innerHTML=evidenceLayer(S.inspections.find(r=>r.n===U.rvSel),U.evMode,U.evOpacity)"></label></div>
+      <div class="photo"><img src="${cur.img}" alt="AI 판단 근거 원본" style="${U.evMode === 'mask' && cur.ai === 'ANOMALY' ? 'visibility:hidden' : ''}"><div id="evLayer">${evidenceLayer(cur, U.evMode, U.evOpacity)}</div></div>
+      <div class="note">${cur.ai === 'ANOMALY' ? 'AI가 어떤 영역을 근거로 이상으로 판단했는지 보여주는 자료입니다 (시안: 위치는 시뮬레이션).' : 'AI 정상 판정 — 표시할 이상 영역이 없습니다.'} 실제 Heatmap · Mask · Overlay는 API 확장 이후 연동됩니다.</div>`
+      : `<div class="locked" style="margin-top:16px">${ic('lock', 'lg')}<div><b>AI 판단 근거(Heatmap · Mask · Overlay)</b><br>관리자 전용 화면에서 제공됩니다. 검사원은 점수와 원본 이미지로 판정합니다.</div></div>`;
+    detail = `
+      <div class="row" style="align-items:flex-start;flex-wrap:nowrap;gap:16px">
+        <div style="width:46%;min-width:0"><div class="photo"><img src="${cur.img}" alt="${cur.id} 원본"></div></div>
+        <div style="flex:1;min-width:0"><div style="font-size:20px;font-weight:800">${cur.id}</div>
+          <div class="muted" style="margin:2px 0 8px">${cur.pcb} · Industrial PatchCore ${cur.ver}</div>
+          <span class="pill ${cur.ai === 'ANOMALY' ? 'orange' : 'green'}">${cur.ai === 'ANOMALY' ? 'AI 이상 의심' : 'AI 정상'}</span>
+          <div style="margin-top:10px">이상 점수: <b>${cur.score.toFixed(2)}</b></div><div>임계값: <b>${cur.thr.toFixed(2)}</b> <span class="muted small">(검사 당시)</span></div>
+          <div class="note">현재 상태: ${finalBadge(cur)}</div></div></div>
+      <div class="divider"></div>
+      <div style="font-weight:700;margin-bottom:8px">검사원 최종 판정</div>
+      <div class="grid2"><button class="btn primary block" style="font-size:15px;padding:12px" onclick="submitReview(${cur.n},'NORMAL')">정상</button><button class="btn danger block" style="font-size:15px;padding:12px" onclick="submitReview(${cur.n},'DEFECT')">불량</button></div>
+      <div class="field" style="margin-top:12px"><label>판정 사유 및 검사원 메모</label>
+        <textarea class="inp" id="rvMemo" placeholder="판정 사유를 입력하는 영역 (정상 확정 시 가불량 사유, 불량 확정 시 불량 내용)" oninput="U.rvMemo=this.value">${esc(U.rvMemo || cur.memo)}</textarea></div>
+      <div class="note">${f === 'PENDING' ? '' : '이미 확정된 건입니다. 다시 누르면 최종 판정을 변경하며, AI 최초 판정은 그대로 보존됩니다. '}확정 판정과 사유는 피드백 데이터로 누적되어 추후 자체 모델(Custom PatchCore) 학습에 활용됩니다.</div>
+      ${evidence}`;
+  }
+  return `<div class="row between"><h1 class="page-title">검토 관리</h1><span class="pill orange lg">${st.pending}건 대기</span></div>
+    <div class="row" style="margin:6px 0 14px">${chip('all', '전체')}${chip('pending', '검토 대기')}${chip('done', '검토 완료')}</div>
+    <div class="split rv">
+      <div class="rv-list">${list.map(r => `<button class="rv-item ${r.n === U.rvSel ? 'sel' : ''}" onclick="U.rvSel=${r.n};U.rvMemo='';U.evMode='orig';render()"><div class="thumb" style="${thumbStyle(r)}"></div><div style="flex:1;min-width:0"><div class="t">${r.id}</div><div class="small muted">${r.pcb} · ${r.score.toFixed(2)} · ${hhmm(r.at)}</div></div>${finalBadge(r)}</button>`).join('') || '<div class="empty">항목이 없습니다.</div>'}</div>
+      <div class="card">${detail}</div></div>`;
+}
+
+/**
+ * 검사원 최종 판정을 저장한다. AI 최초 판정(ai·score)은 변경하지 않고 final·memo만 기록한다.
+ * @param {number} n 검사 번호
+ * @param {'NORMAL'|'DEFECT'} decision 최종 판정
+ */
+function submitReview(n, decision) {
+  const r = S.inspections.find(x => x.n === n); if (!r) return;
+  const memo = (document.getElementById('rvMemo') || { value: '' }).value.trim();
+  const wasPending = r.final === null; r.final = decision; r.memo = memo; U.rvMemo = '';
+  const rescue = r.ai === 'ANOMALY' && decision === 'NORMAL';
+  toast(`${r.id} ${decision === 'NORMAL' ? '정상' : '불량'} 확정${rescue ? ' (가불량 구제)' : ''}${decision === 'DEFECT' && !memo ? ' · 사유 미입력' : ''}`);
+  if (wasPending) { const next = S.inspections.filter(x => x.final === null).sort((a, b) => b.n - a.n)[0]; U.rvSel = next ? next.n : r.n; }
+  render();
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   8. [메뉴 4] 검사 이력 — 결과 조회 · 검색 · 이미지 및 CSV 다운로드
+   ═══════════════════════════════════════════════════════════════════════════ */
+/**
+ * 현재 필터(기간·PCB·결과·검색어)에 맞는 검사 목록을 반환한다.
+ * @returns {object[]} 번호 내림차순 검사 레코드
+ */
+function filteredHistory() {
+  const f = U.hf;
+  return S.inspections.filter(r => {
+    const h = new Date(r.at).getHours();
+    if (f.period === 'am' && h >= 12) return false;
+    if (f.period === 'pm' && (h < 12 || h >= 18)) return false;
+    if (f.period === 'eve' && h < 18) return false;
+    if (f.pcb !== 'all' && r.pcb !== f.pcb) return false;
+    if (f.result !== 'all' && finalState(r) !== f.result) return false;
+    if (f.q && !(r.id.toLowerCase().includes(f.q.toLowerCase()) || String(r.n) === f.q.trim())) return false;
+    return true;
+  }).sort((a, b) => b.n - a.n);
+}
+
+/**
+ * 검사 이력 화면을 생성한다 (10건 단위 페이징).
+ * @returns {string} 본문 HTML
+ */
+function viewHistory() {
+  const all = filteredHistory(), per = 10, pages = Math.max(1, Math.ceil(all.length / per));
+  U.hpage = Math.min(U.hpage, pages); const rows = all.slice((U.hpage - 1) * per, U.hpage * per);
+  const sel = (key, opts) => `<select class="inp" style="width:auto" onchange="U.hf.${key}=this.value;U.hpage=1;render()">${opts.map(([v, l]) => `<option value="${v}" ${U.hf[key] === v ? 'selected' : ''}>${l}</option>`).join('')}</select>`;
+  return `<h1 class="page-title">검사 이력</h1><p class="page-sub">결과 조회 · 검색 · 이미지 및 CSV 다운로드</p>
+    <div class="card"><div class="row" style="margin-bottom:12px">
+      ${sel('period', [['all', '기간: 전체'], ['am', '기간: 오전'], ['pm', '기간: 오후'], ['eve', '기간: 저녁']])}
+      ${sel('pcb', [['all', 'PCB: 전체'], ...S.pcbs.map(p => [p.id, 'PCB: ' + p.id])])}
+      ${sel('result', [['all', '결과: 전체'], ['NORMAL', '결과: 정상'], ['DEFECT', '결과: 불량'], ['PENDING', '결과: 검토 대기']])}
+      <input class="inp" style="width:170px" placeholder="검사 ID · 번호 검색" value="${esc(U.hf.q)}" onchange="U.hf.q=this.value;U.hpage=1;render()">
+      <span class="muted small">${all.length}건</span></div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>번호</th><th>PCB</th><th>AI 점수</th><th>AI 판정</th><th>최종 판정</th><th>검사 시각</th></tr></thead><tbody>
+      ${rows.map(r => `<tr class="click" onclick="openDetail(${r.n})"><td>${r.n}</td><td>${r.pcb}</td><td>${r.score.toFixed(2)}</td><td>${aiBadge(r.ai)}</td><td>${finalBadge(r)}</td><td>${mdhm(r.at)}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">조건에 맞는 검사가 없습니다.</td></tr>'}</tbody></table></div>
+      <div class="pager"><button class="btn sm" ${U.hpage <= 1 ? 'disabled' : ''} onclick="U.hpage--;render()">이전</button><span class="small muted">${U.hpage} / ${pages}</span><button class="btn sm" ${U.hpage >= pages ? 'disabled' : ''} onclick="U.hpage++;render()">다음</button></div>
+      <div class="row" style="justify-content:flex-end;margin-top:8px"><button class="btn outline" onclick="exportCsv()">${ic('download')}CSV 다운로드</button></div></div>`;
+}
+
+/**
+ * 검사 상세 모달을 연다 (검사 당시 임계값·모델 버전 스냅샷 포함).
+ * @param {number} n 검사 번호
+ */
+function openDetail(n) {
+  const r = S.inspections.find(x => x.n === n); if (!r) return;
+  openModal(`<div class="row between"><b style="font-size:18px">${r.id}</b><button class="icon-btn" onclick="closeModal()" aria-label="닫기">${ic('x')}</button></div>
+    <div class="photo" style="margin:12px 0"><img src="${r.img}" alt="${r.id}"></div>
+    <dl class="kv"><dt>PCB / 모델</dt><dd>${r.pcb} · Industrial PatchCore ${r.ver}</dd><dt>검사 시각</dt><dd>${mdhm(r.at)} · 처리 ${r.ms}ms</dd>
+      <dt>AI 점수</dt><dd>${r.score.toFixed(2)} (당시 임계값 ${r.thr.toFixed(2)})</dd><dt>AI 판정</dt><dd>${aiBadge(r.ai)}</dd><dt>최종 판정</dt><dd>${finalBadge(r)}</dd><dt>판정 사유</dt><dd>${esc(r.memo) || '<span class="muted">—</span>'}</dd></dl>
+    <div class="row" style="margin-top:16px;justify-content:flex-end"><a class="btn outline" href="${r.img}" download="${r.id}.png">${ic('download')}이미지 다운로드</a><button class="btn primary" onclick="openReview(${r.n})">검토 관리에서 열기</button></div>`);
+}
+
+/**
+ * CSV 셀 값을 RFC 4180 규칙으로 이스케이프한다.
+ * @param {*} v 셀 값
+ * @returns {string} 이스케이프된 문자열
+ */
+function csvCell(v) { const s = String(v ?? ''); return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+
+/** 현재 필터 결과를 CSV(UTF-8 BOM)로 내려받는다. */
+function exportCsv() {
+  const head = ['번호', '검사ID', 'PCB', '검사시각', 'AI점수', 'AI판정', '최종판정', '당시임계값', '모델버전', '판정사유'];
+  const rows = filteredHistory().map(r => [r.n, r.id, r.pcb, mdhm(r.at), r.score.toFixed(2), r.ai === 'ANOMALY' ? '이상' : '정상', { PENDING: '검토 대기', NORMAL: '정상', DEFECT: '불량' }[finalState(r)], r.thr.toFixed(2), r.ver, r.memo]);
+  const csv = '﻿' + [head, ...rows].map(r => r.map(csvCell).join(',')).join('\r\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+  a.download = 'CircuitEye_검사이력_20261120.csv'; document.body.appendChild(a); a.click(); a.remove(); toast(`CSV ${rows.length}건 다운로드`);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   9. [메뉴 5] PCB·모델 관리 — PCB 등록 · 모델 연결 · 모델 버전 관리 (+ 후속 확장 로드맵)
+   ═══════════════════════════════════════════════════════════════════════════ */
+/** PCB 등록 모달을 연다 (관리자). */
+function openPcbForm() {
+  openModal(`<div class="row between"><b style="font-size:18px">PCB 등록</b><button class="icon-btn" onclick="closeModal()" aria-label="닫기">${ic('x')}</button></div>
+    <div class="field" style="margin-top:12px"><label>PCB 이름</label><input class="inp" id="pcbName" placeholder="예: PCB2"></div>
+    <div class="field"><label>연결 모델</label><select class="inp" id="pcbModel"><option>Industrial PatchCore</option></select></div>
+    <div class="note">Custom PatchCore는 추후 지원 예정입니다.</div>
+    <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn" onclick="closeModal()">취소</button><button class="btn primary" onclick="addPcb()">등록</button></div>`);
+}
+
+/** 입력값으로 PCB를 등록한다 (중복·빈 이름 방지). */
+function addPcb() {
+  const name = document.getElementById('pcbName').value.trim();
+  if (!name) return toast('PCB 이름을 입력하세요');
+  if (S.pcbs.some(p => p.id.toLowerCase() === name.toLowerCase())) return toast('이미 등록된 PCB입니다');
+  S.pcbs.push({ id: name, model: document.getElementById('pcbModel').value, status: '검사 가능' }); closeModal(); render(); toast(`${name} 등록 완료`);
+}
+
+/**
+ * 활성 모델 버전을 전환한다. 과거 검사 이력은 당시 버전·임계값을 유지한다(스냅샷).
+ * @param {string} v 전환할 버전
+ */
+function activateVersion(v) { S.model.active = v; render(); toast(`모델 ${v} 활성화 · 이후 검사부터 적용 (과거 이력은 유지)`); }
+
+/** 임계값 입력값을 검증 후 적용한다 (0.30~0.90). 이후 검사부터 적용. */
+function applyThreshold() {
+  const v = parseFloat(document.getElementById('thrInput').value);
+  if (!(v >= 0.3 && v <= 0.9)) return toast('임계값은 0.30 ~ 0.90 범위입니다');
+  S.model.threshold = +v.toFixed(2); render(); toast(`기본 임계값 ${S.model.threshold.toFixed(2)} 적용 · 과거 이력은 당시 값 유지`);
+}
+
+/**
+ * PCB·모델 관리 화면을 생성한다.
+ * @returns {string} 본문 HTML
+ */
+function viewModels() {
+  const adm = isAdmin();
+  return `<h1 class="page-title">PCB 및 모델 관리</h1><p class="page-sub">PCB 등록 · 모델 연결 · 모델 버전 관리</p>
+    <div class="card"><div class="card-title">등록된 PCB<span class="sp"></span>${adm ? `<button class="btn sm primary" onclick="openPcbForm()">${ic('plus')}PCB 등록</button>` : ''}</div>
+      ${S.pcbs.map(p => `<div class="ver-row"><div class="photo" style="width:84px;aspect-ratio:475/350;border-radius:8px"><img src="${SAMPLE_IMG}" alt=""></div><div style="flex:1"><b style="font-size:16px">${esc(p.id)}</b><div class="muted">연결 모델: ${p.model}</div></div><span class="pill green">${p.status}</span></div>`).join('')}</div>
+    <div class="card"><div class="card-title">등록된 추론 모델</div>
+      <div class="card" style="box-shadow:none"><div class="card-title" style="margin-bottom:6px">${ic('db', 'lg')}Industrial PatchCore<span class="sp"></span><span class="pill green">활성화</span></div>
+        <div class="muted">${S.model.active} · 공개 Memory Bank</div><div class="muted">특징 추출기: ResNet18 | 입력: 256 × 256</div>
+        <div class="divider"></div>
+        <div class="row between"><div><b>기본 임계값</b><div class="small muted">이상 점수가 이 값 이상이면 AI 이상 의심 (이후 검사부터 적용)</div></div>
+          <div class="row"><input class="inp" id="thrInput" type="number" min="0.3" max="0.9" step="0.05" value="${S.model.threshold.toFixed(2)}" style="width:90px" ${adm ? '' : 'disabled'}>${adm ? '<button class="btn sm primary" onclick="applyThreshold()">적용</button>' : ''}</div></div></div>
+      <div class="card" style="box-shadow:none;opacity:.8"><div class="card-title" style="margin-bottom:6px">${ic('db', 'lg')}Custom PatchCore<span class="sp"></span><span class="pill">추후 지원</span></div><div class="muted">자체 PCB 데이터 기반 모델</div></div></div>
+    <div class="card"><div class="card-title">모델 버전 관리</div>
+      ${S.model.versions.map(x => `<div class="ver-row"><div style="flex:1"><b>${x.v}</b> <span class="muted small">${x.date}</span><div class="small muted">${x.note}</div></div>${x.v === S.model.active ? '<span class="pill green">활성화</span>' : (adm ? `<button class="btn sm outline" onclick="activateVersion('${x.v}')">이 버전으로 전환</button>` : '<span class="pill">대기</span>')}</div>`).join('')}
+      ${adm ? '' : '<div class="note">버전 전환 · 임계값 변경 · PCB 등록은 관리자 권한이 필요합니다.</div>'}</div>
+    <div class="card"><div class="card-title">후속 확장 예정 (MVP 이후)</div>
+      <div class="road">${['촬영 품질 자동 검사 및 이미지 보정', 'Best Frame 선정', 'Heatmap, Mask, Overlay 제공 (API 연동)', '픽셀 직접 비교 기반 정밀 검사', '자체 Memory Bank 생성 및 관리', 'PCB 종류 자동 인식', '전기적 결함 검사'].map(t => `<div><span class="pill">예정</span>${t}</div>`).join('')}</div></div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   10. [메뉴 6] 시스템 설정 — 카메라 · 저장소 · 사용자 관리 (추론 서버 항목은 MVP 제외)
+   ═══════════════════════════════════════════════════════════════════════════ */
+/**
+ * 시스템 설정 값을 저장한다.
+ * @param {string} key S.settings의 키
+ * @param {string} v 선택값
+ */
+function setSetting(key, v) { S.settings[key] = v; toast('설정을 저장했습니다'); }
+
+/** 사용자 추가 모달을 연다 (관리자). */
+function openUserForm() {
+  openModal(`<div class="row between"><b style="font-size:18px">사용자 추가</b><button class="icon-btn" onclick="closeModal()" aria-label="닫기">${ic('x')}</button></div>
+    <div class="field" style="margin-top:12px"><label>이름</label><input class="inp" id="uName"></div>
+    <div class="field"><label>소속</label><input class="inp" id="uCo"></div>
+    <div class="field"><label>역할</label><select class="inp" id="uRole"><option>검사원</option><option>관리자</option></select></div>
+    <div class="row" style="justify-content:flex-end;margin-top:14px"><button class="btn" onclick="closeModal()">취소</button><button class="btn primary" onclick="addUser()">추가</button></div>`);
+}
+
+/** 입력값으로 사용자를 추가한다. */
+function addUser() {
+  const name = document.getElementById('uName').value.trim(); if (!name) return toast('이름을 입력하세요');
+  S.users.push({ name, company: document.getElementById('uCo').value.trim() || '-', role: document.getElementById('uRole').value, status: '활성' }); closeModal(); render(); toast(`${name} 추가 완료`);
+}
+
+/**
+ * 사용자 활성/비활성 상태를 전환한다 (본인 계정 제외).
+ * @param {number} i 사용자 인덱스
+ */
+function toggleUser(i) {
+  const u = S.users[i]; if (u.name === S.user.name) return toast('본인 계정은 비활성화할 수 없습니다');
+  u.status = u.status === '활성' ? '비활성' : '활성'; render();
+}
+
+/**
+ * 시스템 설정 화면을 생성한다.
+ * @returns {string} 본문 HTML
+ */
+function viewSettings() {
+  const adm = isAdmin(), opt = (arr, cur) => arr.map(x => `<option ${x === cur ? 'selected' : ''}>${x}</option>`).join('');
+  const bytes = S.inspections.length * 0.153;
+  return `<h1 class="page-title">시스템 설정</h1><p class="page-sub">카메라 · 저장소 · 사용자 관리</p>
+    <div class="grid2"><div class="card"><div class="card-title">${ic('camera', 'lg')}카메라</div>
+        <div class="field"><label>촬영 장치</label><select class="inp" onchange="setSetting('camera',this.value)">${opt(['기본 카메라 (USB 현미경)', '노트북 내장 카메라', '이미지 업로드만 사용'], S.settings.camera)}</select></div>
+        <div class="field"><label>촬영 해상도</label><select class="inp" onchange="setSetting('resolution',this.value)">${opt(['1280 × 720', '1920 × 1080', '3840 × 2160'], S.settings.resolution)}</select></div>
+        <div class="note">촬영 품질 자동 검사 · Best Frame 선정은 후속 확장 항목입니다.</div></div>
+      <div class="card"><div class="card-title">${ic('db', 'lg')}저장소</div>
+        <div class="row between small"><span class="muted">검사 이미지 · 결과</span><b>${bytes.toFixed(1)} GB / 100 GB</b></div><div class="usage" style="margin:6px 0 12px"><i style="width:${bytes}%"></i></div>
+        <div class="field"><label>이미지 보관 기간</label><select class="inp" onchange="setSetting('retention',this.value)">${opt(['30일', '90일', '180일', '1년'], S.settings.retention)}</select></div>
+        <div class="muted small">저장 위치: <code>/storage/inspections</code></div></div></div>
+    <div class="card"><div class="card-title">${ic('lock', 'lg')}사용자 관리<span class="sp"></span>${adm ? `<button class="btn sm primary" onclick="openUserForm()">${ic('plus')}사용자 추가</button>` : '<span class="pill">조회 전용</span>'}</div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>이름</th><th>소속</th><th>역할</th><th>상태</th>${adm ? '<th></th>' : ''}</tr></thead><tbody>
+      ${S.users.map((u, i) => `<tr><td><b>${esc(u.name)}</b></td><td>${esc(u.company)}</td><td>${u.role}</td><td><span class="pill ${u.status === '활성' ? 'green' : ''}">${u.status}</span></td>${adm ? `<td><button class="btn sm outline" onclick="toggleUser(${i})">${u.status === '활성' ? '비활성화' : '활성화'}</button></td>` : ''}</tr>`).join('')}</tbody></table></div></div>
+    <div class="card"><div class="card-title">참고</div><div class="muted">담당자 피드백에 따라 <b>추론 서버 설정</b>은 MVP 범위에서 제외했습니다. PatchCore API 엔드포인트와 인증키는 서버 환경변수로 고정 관리합니다.</div></div>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   11. 렌더링 · 데모 초기화 · 부트스트랩
+   ═══════════════════════════════════════════════════════════════════════════ */
+/** 현재 상태(로그인 여부 · 라우트)에 맞게 #app 전체를 다시 그린다. 스크롤 위치는 유지한다. */
+function render() {
+  const app = document.getElementById('app'), prev = document.querySelector('.main'), top = prev ? prev.scrollTop : 0;
+  if (!S.user) { app.innerHTML = viewLogin(); return; }
+  const views = { dashboard: viewDashboard, inspect: viewInspect, review: viewReview, history: viewHistory, models: viewModels, settings: viewSettings };
+  app.innerHTML = shell((views[U.route] || viewDashboard)());
+  const m = document.querySelector('.main'); if (m) m.scrollTop = top;
+}
+
+/** 데모 데이터를 초기 상태(120건)로 되돌린다. 테마와 로그인은 유지한다. */
+function resetDemo() {
+  S = createInitialState({ theme: S.theme, user: S.user }); U.rvSel = null; U.hf = { period: 'all', pcb: 'all', result: 'all', q: '' }; U.hpage = 1;
+  U.img = SAMPLE_IMG; U.imgName = '샘플 촬영 이미지'; render(); toast('데모 데이터를 초기화했습니다');
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   12. 환경별 UI 데모 뷰어 — 데스크톱 · 태블릿 · 스마트폰 · 나란히 보기
+   (실제 웹은 별도 구현 예정, 이 파일은 환경별 UI 구조 시연용)
+   ═══════════════════════════════════════════════════════════════════════════ */
+/** 데모 뷰어 환경 정의 (해상도는 앱 내부 CSS 분기점 900px / 520px 과 대응) */
+const ENVS = { desktop: { w: 1280, h: 800, label: '데스크톱 콘솔', cap: '1280 × 800 · 좌측 6메뉴' },
+               tablet:  { w: 820, h: 1100, label: '태블릿', cap: '820 × 1100 · 하단 탭바' },
+               phone:   { w: 390, h: 800, label: '스마트폰', cap: '390 × 800 · 하단 탭바' } };
+/** 뷰어 선택 상태 (환경 · 권한 · 테마 · 시작 화면) */
+const V = { env: 'desktop', role: 'admin', theme: 'light', route: 'dashboard' };
+
+/**
+ * 임베드 앱의 URL을 만든다 (embed=1 은 뷰어 재진입 방지).
+ * @param {boolean} [embed] false 이면 새 창용 URL
+ * @returns {string} URL
+ */
+function viewerSrc(embed = true) {
+  return location.href.split(/[?#]/)[0] + `?${embed ? 'embed=1&' : ''}role=${V.role}&theme=${V.theme}#${V.route}`;
+}
+
+/** 뷰어 상단바 · 기기 프레임을 그린다. 옵션 변경 시 iframe을 새로 불러온다. */
+function renderViewer() {
+  const seg = (key, items) => `<div class="vw-seg">${items.map(([v, l]) => `<button class="${V[key] === v ? 'on' : ''}" onclick="V.${key}='${v}';renderViewer()">${l}</button>`).join('')}</div>`;
+  const dev = k => `<div><div class="vw-dev ${k === 'phone' ? 'phone' : ''}"><iframe title="${ENVS[k].label}" width="${ENVS[k].w}" height="${ENVS[k].h}" src="${viewerSrc()}"></iframe></div><div class="vw-cap">${ENVS[k].label} · ${ENVS[k].cap}</div></div>`;
+  const keys = V.env === 'all' ? ['desktop', 'tablet', 'phone'] : [V.env];
+  document.getElementById('app').innerHTML = `<div class="vw">
+    <div class="vw-bar"><div class="brand"><img src="./docs/assets/circuiteye_icon_256.png" alt="">CircuitEye<small>환경별 UI 데모</small></div>
+      ${seg('env', [['desktop', '데스크톱'], ['tablet', '태블릿'], ['phone', '스마트폰'], ['all', '나란히 보기']])}
+      ${seg('role', [['admin', '관리자'], ['inspector', '검사원']])}
+      <select class="inp" style="width:auto" onchange="V.route=this.value;renderViewer()">${[['login', '로그인'], ...MENUS.map(m => [m.id, m.label])].map(([v, l]) => `<option value="${v}" ${V.route === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+      ${seg('theme', [['light', '라이트'], ['dark', '다크']])}
+      <span style="flex:1"></span><a class="btn sm outline" href="${viewerSrc(false)}" target="_blank" rel="noopener">새 창으로 열기</a></div>
+    <div class="vw-stage" id="vwStage"><div class="vw-row" id="vwRow">${keys.map(dev).join('')}</div></div></div>`;
+  fitViewer();
+}
+
+/** 기기 프레임 묶음을 스테이지 크기에 맞게 축소한다 (확대는 하지 않음). */
+function fitViewer() {
+  const st = document.getElementById('vwStage'), row = document.getElementById('vwRow'); if (!st || !row) return;
+  row.style.transform = 'none'; const w = row.offsetWidth + 40, h = row.offsetHeight + 40;
+  const s = Math.min(1, st.clientWidth / w, st.clientHeight / h); row.style.transform = `scale(${s})`;
+}
+
+/**
+ * 진입 해시·쿼리를 해석해 초기 화면을 결정한다.
+ * 해시: #login · #dashboard · #inspect · #review · #history · #models · #settings (+ '-dark')
+ * 쿼리: ?theme=dark · ?nosplash=1 · ?role=inspector
+ */
+function initBoot() {
+  const q = new URLSearchParams(location.search);
+  let h = location.hash.replace('#', '');
+  // 파라미터 없이 열면 환경별 UI 데모 뷰어를 보여준다 (앱 직접 진입: ?app=1 · 해시 · ?embed=1)
+  if (!h && !q.get('app') && !q.get('embed') && !q.get('nosplash') && !q.get('theme') && !q.get('role')) { document.getElementById('splash').remove(); renderViewer(); window.addEventListener('resize', fitViewer); return; }
+  if (h.endsWith('-dark') || q.get('theme') === 'dark') { applyTheme('dark'); h = h.replace('-dark', ''); }
+  const legacy = { console: 'dashboard', workspace: 'review', mobile: 'inspect' };   // v1.1 해시 호환
+  h = legacy[h] || h;
+  const splash = document.getElementById('splash');
+  if (MENUS.some(m => m.id === h)) { S.user = { ...(q.get('role') === 'inspector' ? PRESETS.abov : PRESETS.khaki) }; U.route = h; }
+  render();
+  if (h || q.get('nosplash')) { splash.remove(); }
+  else setTimeout(() => { splash.classList.add('out'); setTimeout(() => splash.remove(), 400); }, 1000);
+}
+initBoot();
+
+/**
+ * 마우스로 꾹 누른 채 끌어서 스크롤하는 기능(드래그 스크롤).
+ * - 포인터 위치에서 위로 올라가며 실제로 스크롤 가능한 첫 컨테이너를 찾아 그 컨테이너를 움직인다.
+ * - 5px 이상 움직여야 드래그로 인정하며, 드래그 직후의 클릭은 막아 버튼 오작동을 방지한다.
+ * - 입력창·선택창·슬라이더·이미지 드래그는 제외한다. 터치는 브라우저 기본 스크롤을 그대로 사용한다.
+ */
+(function enableDragScroll() {
+  let d = null, moved = false;
+  const canScroll = (el, axis) => {
+    const cs = getComputedStyle(el), o = axis === 'x' ? cs.overflowX : cs.overflowY;
+    return /(auto|scroll)/.test(o) && (axis === 'x' ? el.scrollWidth > el.clientWidth : el.scrollHeight > el.clientHeight);
+  };
+  const findScroller = t => { for (let el = t; el && el !== document.documentElement; el = el.parentElement) if (canScroll(el, 'x') || canScroll(el, 'y')) return el; return null; };
+  document.addEventListener('pointerdown', e => {
+    if (e.pointerType !== 'mouse' || e.button !== 0 || e.target.closest('input,select,textarea,label,[contenteditable]')) return;
+    const el = findScroller(e.target); if (!el) return;
+    d = { el, x: e.clientX, y: e.clientY, sx: el.scrollLeft, sy: el.scrollTop }; moved = false;
+  });
+  document.addEventListener('pointermove', e => {
+    if (!d) return;
+    const dx = e.clientX - d.x, dy = e.clientY - d.y;
+    if (!moved && Math.hypot(dx, dy) < 5) return;
+    if (!moved) { moved = true; document.body.classList.add('dragging'); }
+    d.el.scrollLeft = d.sx - dx; d.el.scrollTop = d.sy - dy;
+  });
+  const end = () => { if (d && moved) { document.body.classList.remove('dragging'); const stop = ev => { ev.stopPropagation(); ev.preventDefault(); }; document.addEventListener('click', stop, { capture: true, once: true }); setTimeout(() => document.removeEventListener('click', stop, true), 0); } d = null; };
+  document.addEventListener('pointerup', end); document.addEventListener('pointercancel', end);
+  document.addEventListener('dragstart', e => { if (e.target.tagName === 'IMG') e.preventDefault(); });
+})();
+</script>
+</body>
+</html>
