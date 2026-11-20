@@ -80,7 +80,36 @@ button.pill:hover:not(.active) { border-color: var(--border-strong); }
 .btn.block { display: flex; }
 .nav-item { text-align: left; }
 .vw-seg button { display: inline-flex; align-items: center; justify-content: center; }
-@media (max-width: 900px) { .nav-item { text-align: center; justify-content: center; } }
+/* 역할 구분 — 관리자: 진한 그린 배지 · 검사원: 블루 배지 + 헤더 하단 포인트 라인 */
+:root { --role-insp: #3b7bbf; }
+html[data-theme="dark"] { --role-insp: #86b4e8; }
+.pill.role-admin { background: var(--primary); color: var(--primary-fg); font-weight: 700; }
+.pill.role-insp { background: color-mix(in srgb, var(--role-insp) 16%, transparent); color: var(--role-insp); font-weight: 700; }
+.pill .ic { width: 13px; height: 13px; }
+.shell[data-role="admin"] .topbar { box-shadow: inset 0 -3px 0 var(--primary); }
+.shell[data-role="inspector"] .topbar { box-shadow: inset 0 -3px 0 var(--role-insp); }
+.role-strip { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 12px 16px; border-radius: 14px; margin-bottom: 14px; border: 1px solid var(--border); border-left-width: 5px; background: var(--bg-card); }
+.role-strip.admin { border-left-color: var(--primary); }
+.role-strip.insp { border-left-color: var(--role-insp); }
+.role-strip .rs-t { font-weight: 800; display: flex; align-items: center; gap: 7px; }
+.role-strip .rs-i { display: flex; flex-direction: column; line-height: 1.3; }
+.role-strip .rs-i small { color: var(--text-3); font-size: 12px; }
+.role-strip .rs-i b { font-size: 15px; }
+.role-strip .rs-act { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+.perm { margin-top: 12px; padding: 10px 12px; border-radius: 12px; background: var(--bg-muted); font-size: 12.5px; line-height: 1.7; }
+.perm b { display: block; margin-bottom: 2px; color: var(--text-1); }
+.perm .ok { color: var(--good); } .perm .no { color: var(--text-3); }
+.grid2 + .card, .split + .card { margin-top: 14px; }
+.nav-item .lk { margin-left: auto; color: var(--text-3); display: inline-flex; }
+.nav-item .lk .ic { width: 14px; height: 14px; }
+.lbl-s { display: none; }
+/* 서버(PatchCore API) 온라인/오프라인 표시 */
+button.pill.api { gap: 6px; }
+button.pill.api.red .dot { animation: blink 1.2s infinite; }
+@keyframes blink { 50% { opacity: .25; } }
+.banner-off { display: flex; gap: 10px; align-items: center; padding: 12px 14px; border-radius: 12px; margin-bottom: 14px; background: var(--b-red-bg); color: var(--b-red-fg); font-weight: 600; }
+.mode-note { display: flex; gap: 8px; align-items: center; padding: 10px 14px; border-radius: 12px; margin-bottom: 14px; background: color-mix(in srgb, var(--role-insp) 12%, transparent); color: var(--text-2); font-size: 13.5px; }
+.mode-note .ic { color: var(--role-insp); }
 .dragging, .dragging * { cursor: grabbing !important; user-select: none !important; }
 .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 9px 16px; border-radius: 10px; font-weight: 600; background: var(--bg-muted); color: var(--text-1); border: 1px solid transparent; transition: background .15s; }
@@ -145,7 +174,7 @@ textarea.inp { min-height: 84px; resize: vertical; line-height: 1.5; }
 .brand img { width: 28px; height: 28px; border-radius: 7px; }
 .brand small { font-weight: 500; color: var(--text-3); font-size: 12.5px; margin-left: 2px; }
 .top-sp { flex: 1; }
-.icon-btn { width: 34px; height: 34px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; color: var(--text-2); }
+.icon-btn { flex: none; width: 34px; height: 34px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; color: var(--text-2); }
 .icon-btn:hover { background: var(--bg-muted); }
 .body-wrap { display: flex; flex: 1; min-height: 0; }
 .side { width: 220px; flex: none; padding: 18px 14px; display: flex; flex-direction: column; gap: 8px; background: var(--bg-card); border-right: 1px solid var(--border); overflow-y: auto; }
@@ -202,9 +231,14 @@ details > summary { cursor: pointer; font-weight: 600; color: var(--text-2); pad
   .split, .split.rv, .grid2 { grid-template-columns: 1fr; }
   .body-wrap { flex-direction: column-reverse; }
   .side { width: 100%; flex-direction: row; padding: 6px 8px; gap: 4px; border-right: 0; border-top: 1px solid var(--border); overflow-x: auto; justify-content: space-around; }
-  .nav-item { flex-direction: column; gap: 2px; padding: 6px 8px; font-size: 11px; background: none; flex: 1; align-items: center; min-width: 54px; box-shadow: none !important; }
+  .nav-item { flex-direction: column; gap: 3px; padding: 7px 2px; font-size: 11.5px; background: none; flex: 1 1 0; align-items: center; justify-content: center; text-align: center; min-width: 0; min-height: 52px; box-shadow: none !important; }
+  .nav-item span { text-align: center; white-space: nowrap; line-height: 1.2; }
   .nav-item.active { background: var(--bg-hover); }
-  .nav-item .cnt { position: absolute; top: 0; right: 6px; margin: 0; }
+  .nav-item .cnt { position: absolute; top: 0; right: 4px; margin: 0; }
+  .nav-item .lk { position: absolute; top: 3px; right: 6px; margin: 0; }
+  /* 터치 영역 최소 36px 이상 확보 */
+  .btn { min-height: 42px; } .btn.sm { min-height: 38px; padding: 6px 14px; } button.pill { min-height: 36px; padding: 6px 14px; } .icon-btn { width: 40px; height: 40px; }
+  .role-strip .rs-act { margin-left: 0; width: 100%; } .role-strip .rs-act .btn { flex: 1; }
   .side-foot { display: none; }
   .main { padding: 16px 14px 24px; }
   .topbar { padding: 0 14px; }
@@ -225,7 +259,8 @@ details > summary { cursor: pointer; font-weight: 600; color: var(--text-2); pad
 .vw-dev iframe { display: block; border: 0; background: var(--bg-app); border-radius: 10px; }
 .vw-dev.phone iframe { border-radius: 28px; }
 .vw-cap { color: var(--text-3); font-size: 12.5px; text-align: center; margin-top: 8px; }
-@media (max-width: 520px) { .api-txt { display: none; } .topbar { gap: 6px; } .main { padding: 14px 12px 20px; } .rv-list { max-height: 360px; } }
+@media (max-width: 440px) { .brand-t { display: none; } .topbar { padding: 0 10px; } .icon-btn { width: 38px !important; } }
+@media (max-width: 520px) { .api-name { display: none; } .lbl-s { display: inline; } .lbl-f { display: none; } .topbar { gap: 6px; } .main { padding: 14px 12px 20px; } .rv-list { max-height: 360px; } }
 </style>
 </head>
 <body>
@@ -246,12 +281,12 @@ details > summary { cursor: pointer; font-weight: 600; color: var(--text-2); pad
 const SAMPLE_IMG = './docs/assets/pcb_sample.png';
 /** 사이드 메뉴 정의 (6메뉴 — 담당자 MVP 화면 구성안) */
 const MENUS = [
-  { id: 'dashboard', label: '대시보드', icon: 'grid' },
-  { id: 'inspect',   label: 'PCB 검사', icon: 'scan' },
-  { id: 'review',    label: '검토 관리', icon: 'check' },
-  { id: 'history',   label: '검사 이력', icon: 'history' },
-  { id: 'models',    label: '모델 관리', icon: 'db' },
-  { id: 'settings',  label: '시스템 설정', icon: 'gear' }
+  { id: 'dashboard', label: '대시보드', short: '대시보드', icon: 'grid' },
+  { id: 'inspect',   label: 'PCB 검사', short: '검사', icon: 'scan' },
+  { id: 'review',    label: '검토 관리', short: '검토', icon: 'check' },
+  { id: 'history',   label: '검사 이력', short: '이력', icon: 'history' },
+  { id: 'models',    label: '모델 관리', short: '모델', icon: 'db', adminEdit: true },
+  { id: 'settings',  label: '시스템 설정', short: '설정', icon: 'gear', adminEdit: true }
 ];
 /** 로그인 시연 프리셋 (역할: inspector=검사원 / admin=관리자) */
 const PRESETS = {
@@ -262,6 +297,8 @@ const PRESETS = {
 };
 /** 아이콘 SVG 경로 사전 (이모지 대신 사용) */
 const ICONS = {
+  shield: '<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/>',
   grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
   scan: '<path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M4 12h16"/>',
   check: '<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M9 13l2 2 4-4"/>',
@@ -358,6 +395,7 @@ function createInitialState(keep = {}) {
       { name: '김하늘', role: '검사원', company: '어보브반도체', status: '활성' },
       { name: '박현장', role: '검사원', company: '디엘정보기술', status: '활성' }
     ],
+    api: keep.api || { online: true, ms: 142, checkedAt: Date.now() },   // 외부 PatchCore API 연결 상태 (시연용)
     settings: { camera: '기본 카메라 (USB 현미경)', resolution: '1920 × 1080', retention: '90일' },
     result: null,       // PCB 검사 화면의 최근 API 응답
     demoSeq: 0          // 시연용 점수 순환 인덱스
@@ -500,6 +538,42 @@ function login(key) {
 function logout() { S.user = null; history.replaceState(null, '', '#login' + (S.theme === 'dark' ? '-dark' : '')); render(); }
 
 /**
+ * 외부 PatchCore API 서버 상태 배지(온라인/오프라인)를 생성한다. 누르면 상태 상세 모달이 열린다.
+ * @returns {string} HTML
+ */
+function apiPill() {
+  const on = S.api.online;
+  return `<button class="pill api ${on ? 'green' : 'red'}" onclick="openApiStatus()" title="외부 PatchCore 추론 API 연결 상태 — 눌러서 상세 보기" aria-label="PatchCore API ${on ? '온라인' : '오프라인'}"><span class="dot"></span><span class="api-name">PatchCore</span>${on ? '온라인' : '오프라인'}</button>`;
+}
+
+/** API 서버 상태 상세 모달을 연다 (관리자는 온/오프라인 전환 시연 가능). */
+function openApiStatus() {
+  const a = S.api, on = a.online, adm = isAdmin();
+  openModal(`<div class="row between"><b style="font-size:18px">PatchCore API 서버 상태</b><button class="icon-btn" onclick="closeModal()" aria-label="닫기">${ic('x')}</button></div>
+    <div style="margin:14px 0"><span class="pill ${on ? 'green' : 'red'} lg"><span class="dot"></span>${on ? '온라인 — 검사 가능' : '오프라인 — 검사 불가'}</span></div>
+    <dl class="kv"><dt>엔드포인트</dt><dd><code>POST /v1/inspect</code> (서버 환경변수로 고정)</dd><dt>응답 시간</dt><dd>${on ? a.ms + ' ms' : '—'}</dd>
+      <dt>마지막 확인</dt><dd>${hhmm(a.checkedAt)}</dd><dt>활성 모델</dt><dd>Industrial PatchCore ${S.model.active}</dd></dl>
+    ${on ? '' : '<div class="note">서버가 응답하지 않으면 검사를 시작할 수 없으며, 이미 저장된 이력 조회·검토 판정은 계속 사용할 수 있습니다.</div>'}
+    <div class="row" style="justify-content:flex-end;margin-top:16px">${adm
+      ? `<button class="btn outline" onclick="checkApi()">연결 확인</button><button class="btn ${on ? 'danger' : 'primary'}" onclick="toggleApi()">${on ? '오프라인으로 전환 (시연)' : '온라인으로 복구 (시연)'}</button>`
+      : `<button class="btn outline" onclick="checkApi()">연결 확인</button>`}</div>
+    ${adm ? '' : '<div class="note" style="margin-top:8px">서버 상태 전환은 관리자만 시연할 수 있습니다.</div>'}`);
+}
+
+/** 연결 확인: 응답 시간과 확인 시각을 갱신한다 (시연용 난수). */
+function checkApi() {
+  S.api.checkedAt = Date.now(); S.api.ms = S.api.online ? 110 + Math.round(Math.random() * 90) : 0; render();
+  openApiStatus(); toast(S.api.online ? `연결 정상 (${S.api.ms}ms)` : '서버에 연결할 수 없습니다');
+}
+
+/** 관리자 시연용: 서버 온라인/오프라인 상태를 전환한다. */
+function toggleApi() {
+  if (!isAdmin()) return toast('관리자만 전환할 수 있습니다');
+  S.api.online = !S.api.online; S.api.checkedAt = Date.now(); S.api.ms = S.api.online ? 142 : 0; render(); openApiStatus();
+  toast(S.api.online ? 'PatchCore API 온라인으로 복구' : 'PatchCore API 오프라인 — 검사가 차단됩니다');
+}
+
+/**
  * 로그인 화면 마크업을 생성한다 (396px 단일 카드 · 수요기업 프리셋 4종).
  * @returns {string} HTML
  */
@@ -522,21 +596,24 @@ function viewLogin() {
  * @returns {string} HTML
  */
 function shell(content) {
-  const st = getStats();
-  return `<div class="shell">
+  const st = getStats(), adm = isAdmin();
+  const perm = adm
+    ? `<div class="perm"><b>관리자 권한</b><span class="ok">✓ AI 판단 근거(Heatmap)</span><br><span class="ok">✓ 모델·임계값 변경</span><br><span class="ok">✓ PCB 등록 · 사용자 관리</span></div>`
+    : `<div class="perm"><b>검사원 권한</b><span class="ok">✓ 검사 실행 · 이상 건 판정</span><br><span class="no">✕ AI 판단 근거 열람</span><br><span class="no">✕ 모델·설정 변경</span></div>`;
+  return `<div class="shell" data-role="${adm ? 'admin' : 'inspector'}">
     <header class="topbar">
-      <div class="brand"><img src="./docs/assets/circuiteye_icon_256.png" alt="">CircuitEye<small>PCB Inspection</small></div>
-      <span class="pill green" title="외부 PatchCore 추론 API 연결 상태"><span class="dot"></span>PatchCore<span class="api-txt">API 정상</span></span>
+      <div class="brand"><img src="./docs/assets/circuiteye_icon_256.png" alt=""><span class="brand-t">CircuitEye</span><small>PCB Inspection</small></div>
+      ${apiPill()}
       <div class="top-sp"></div>
       <span class="small muted role-label">${esc(S.user.company)} · ${esc(S.user.name)}</span>
-      <span class="pill">${isAdmin() ? '관리자' : '검사원'}</span>
+      <span class="pill ${adm ? 'role-admin' : 'role-insp'}">${ic(adm ? 'shield' : 'user')}${adm ? '관리자' : '검사원'}</span>
       <button class="icon-btn" onclick="toggleTheme()" aria-label="테마 전환" title="테마 전환">${ic(S.theme === 'dark' ? 'sun' : 'moon')}</button>
       <button class="icon-btn" onclick="logout()" aria-label="로그아웃" title="로그아웃">${ic('out')}</button>
     </header>
     <div class="body-wrap">
       <nav class="side" aria-label="주 메뉴">
-        ${MENUS.map(m => `<button class="nav-item ${U.route === m.id ? 'active' : ''}" onclick="go('${m.id}')">${ic(m.icon, 'lg')}<span>${m.label}</span>${m.id === 'review' && st.pending ? `<span class="cnt">${st.pending}</span>` : ''}</button>`).join('')}
-        <div class="side-foot">모델 ${S.model.active} · 임계값 ${S.model.threshold.toFixed(2)}<br><button class="btn sm outline" style="margin-top:8px" onclick="resetDemo()">데모 초기화</button></div>
+        ${MENUS.map(m => `<button class="nav-item ${U.route === m.id ? 'active' : ''}" onclick="go('${m.id}')">${ic(m.icon, 'lg')}<span><span class="lbl-f">${m.label}</span><span class="lbl-s">${m.short}</span></span>${m.id === 'review' && st.pending ? `<span class="cnt">${st.pending}</span>` : ''}${m.adminEdit && !adm ? `<span class="lk" title="조회 전용">${ic('lock')}</span>` : ''}</button>`).join('')}
+        <div class="side-foot">${perm}<div style="margin-top:10px">모델 ${S.model.active} · 임계값 ${S.model.threshold.toFixed(2)}<br><button class="btn sm outline" style="margin-top:8px" onclick="resetDemo()">데모 초기화</button></div></div>
       </nav>
       <main class="main"><div class="main-inner">${content}</div></main>
     </div>
@@ -574,7 +651,18 @@ function viewDashboard() {
   const recent = [...S.inspections].sort((a, b) => b.n - a.n).slice(0, 5);
   const pend = S.inspections.filter(r => r.final === null).sort((a, b) => b.n - a.n).slice(0, 5);
   const kpi = (label, v, cls, flt) => `<button class="kpi" onclick="gotoHistory('${flt}')"><div class="l">${label}</div><div class="v ${cls}">${v}</div></button>`;
+  const first = S.inspections.filter(r => r.final === null).sort((a, b) => b.n - a.n)[0];
+  const roleStrip = isAdmin()
+    ? `<div class="role-strip admin"><span class="rs-t">${ic('shield', 'lg')}관리자 현황</span>
+        <span class="rs-i"><small>PatchCore API</small><b style="color:var(--${S.api.online ? 'good' : 'bad'})">${S.api.online ? '온라인' : '오프라인'}</b></span>
+        <span class="rs-i"><small>활성 모델</small><b>${S.model.active}</b></span><span class="rs-i"><small>임계값</small><b>${S.model.threshold.toFixed(2)}</b></span>
+        <span class="rs-i"><small>활성 사용자</small><b>${S.users.filter(u => u.status === '활성').length}명</b></span>
+        <span class="rs-act"><button class="btn sm outline" onclick="go('models')">모델·임계값 관리</button><button class="btn sm outline" onclick="go('settings')">사용자 관리</button></span></div>`
+    : `<div class="role-strip insp"><span class="rs-t">${ic('user', 'lg')}내 작업</span>
+        <span class="rs-i"><small>검토 대기</small><b style="color:var(--warn)">${st.pending}건</b></span><span class="rs-i"><small>오늘 검사</small><b>${st.total}건</b></span>
+        <span class="rs-act">${first ? `<button class="btn sm primary" onclick="openReview(${first.n})">바로 판정하기</button>` : ''}<button class="btn sm outline" onclick="go('inspect')">새 검사 시작</button></span></div>`;
   return `<h1 class="page-title">오늘의 검사 현황</h1><p class="page-sub">2026-11-20 · 카드를 누르면 해당 조건의 검사 이력으로 이동합니다.</p>
+    ${roleStrip}
     <div class="kpi-grid">${kpi('전체 검사', st.total, '', 'all')}${kpi('정상 확정', st.normal, 'good', 'NORMAL')}${kpi('불량 확정', st.defect, 'bad', 'DEFECT')}${kpi('검토 대기', st.pending, 'warn', 'PENDING')}</div>
     <div class="split">
       <div class="card"><div class="card-title">시간대별 검사 건수</div>${hourlyChart()}</div>
@@ -628,7 +716,9 @@ function mockApiScore() {
  * AI 이상 → '검토 대기' 큐 편입 / AI 정상 → 정상 자동 확정.
  */
 function runInspection() {
-  if (U.running) return; U.running = true; render();
+  if (U.running) return;
+  if (!S.api.online) return toast('PatchCore API 서버가 오프라인입니다. 연결 복구 후 다시 시도하세요');
+  U.running = true; render();
   setTimeout(() => {
     const score = mockApiScore(), thr = S.model.threshold, rng = makeRng(Date.now() % 100000);
     const last = Math.max(...S.inspections.map(r => r.n)), prevAt = S.inspections.find(r => r.n === last).at;
@@ -659,7 +749,9 @@ function viewInspect() {
       <div class="muted">처리 시간: ${r.ms}ms</div>
       ${r.ai === 'ANOMALY' ? `<button class="btn outline sm" style="margin-top:12px" onclick="openReview(${r.n})">검토 관리에서 판정하기</button>` : `<div class="note">정상 판정은 자동 확정됩니다. 이상 의심 건만 검사원 검토가 필요합니다.</div>`}`
     : `<span class="pill lg">검사 대기</span><div class="empty" style="padding:30px 0">이미지를 준비하고 <b>검사 시작</b>을 누르면<br>PatchCore API 결과가 여기에 표시됩니다.</div>`;
+  const off = !S.api.online;
   return `<h1 class="page-title">PCB 외관 검사</h1>
+    ${off ? `<div class="banner-off">${ic('lock', 'lg')}<span>PatchCore API 서버 오프라인 — 검사를 시작할 수 없습니다. 상단의 상태 배지를 눌러 연결을 확인하세요.</span></div>` : ''}
     <div class="row" style="margin-bottom:14px">
       <select class="inp" style="width:auto" onchange="U.pcb=this.value;render()">${S.pcbs.filter(p => p.status === '검사 가능').map(p => `<option ${p.id === U.pcb ? 'selected' : ''}>${esc(p.id)}</option>`).join('')}</select>
       <span class="pill">일반 검사</span><span class="pill green">모델 준비 완료</span>
@@ -671,11 +763,11 @@ function viewInspect() {
         <div class="grid2"><button class="btn" onclick="capture()">${ic('camera')}촬영</button><button class="btn" onclick="pickFile()">${ic('upload')}업로드</button></div></div>
       <div class="card"><div class="card-title">AI 검사 결과</div>${result}</div>
     </div>
-    <button class="btn primary block" style="margin-top:14px" onclick="runInspection()" ${U.running ? 'disabled' : ''}>${U.running ? 'PatchCore API 호출 중…' : '검사 시작'}</button>
+    <button class="btn primary block" style="margin-top:14px" onclick="runInspection()" ${U.running || off ? 'disabled' : ''}>${U.running ? 'PatchCore API 호출 중…' : off ? 'API 오프라인 — 검사 불가' : '검사 시작'}</button>
     <p class="note">검사 화면 목업 · Heatmap은 API 확장 이후 추가 (현재는 관리자의 검토 화면에서 AI 판단 근거 시뮬레이션 제공)</p>
-    <div class="card" style="margin-top:14px"><details><summary>외부 PatchCore API 호출 계약(안) 보기</summary>
+    ${isAdmin() ? `<div class="card" style="margin-top:14px"><details><summary>외부 PatchCore API 호출 계약(안) 보기 <span class="pill role-admin">관리자 전용</span></summary>
       <div class="note" style="margin:6px 0 8px">자체 모델 구현 없이 공개 Industrial PatchCore API를 호출만 합니다. 아래는 어댑터가 사용할 요청·응답 계약(안)입니다.</div>
-      <div class="grid2"><div><div class="small muted">요청</div><div class="code">${esc(req)}</div></div><div><div class="small muted">응답</div><div class="code">${esc(res)}</div></div></div></details></div>`;
+      <div class="grid2"><div><div class="small muted">요청</div><div class="code">${esc(req)}</div></div><div><div class="small muted">응답</div><div class="code">${esc(res)}</div></div></div></details></div>` : ''}`;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -799,8 +891,8 @@ function viewHistory() {
       ${sel('result', [['all', '결과: 전체'], ['NORMAL', '결과: 정상'], ['DEFECT', '결과: 불량'], ['PENDING', '결과: 검토 대기']])}
       <input class="inp" style="width:170px" placeholder="검사 ID · 번호 검색" value="${esc(U.hf.q)}" onchange="U.hf.q=this.value;U.hpage=1;render()">
       <span class="muted small">${all.length}건</span></div>
-      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>번호</th><th>PCB</th><th>AI 점수</th><th>AI 판정</th><th>최종 판정</th><th>검사 시각</th></tr></thead><tbody>
-      ${rows.map(r => `<tr class="click" onclick="openDetail(${r.n})"><td>${r.n}</td><td>${r.pcb}</td><td>${r.score.toFixed(2)}</td><td>${aiBadge(r.ai)}</td><td>${finalBadge(r)}</td><td>${mdhm(r.at)}</td></tr>`).join('') || '<tr><td colspan="6" class="empty">조건에 맞는 검사가 없습니다.</td></tr>'}</tbody></table></div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>번호</th><th>PCB</th><th>AI 점수</th><th>AI 판정</th><th>최종 판정</th><th>검사 시각</th>${isAdmin() ? '<th>당시 임계값</th><th>모델</th>' : ''}</tr></thead><tbody>
+      ${rows.map(r => `<tr class="click" onclick="openDetail(${r.n})"><td>${r.n}</td><td>${r.pcb}</td><td>${r.score.toFixed(2)}</td><td>${aiBadge(r.ai)}</td><td>${finalBadge(r)}</td><td>${mdhm(r.at)}</td>${isAdmin() ? `<td>${r.thr.toFixed(2)}</td><td>${r.ver}</td>` : ''}</tr>`).join('') || `<tr><td colspan="${isAdmin() ? 8 : 6}" class="empty">조건에 맞는 검사가 없습니다.</td></tr>`}</tbody></table></div>
       <div class="pager"><button class="btn sm" ${U.hpage <= 1 ? 'disabled' : ''} onclick="U.hpage--;render()">이전</button><span class="small muted">${U.hpage} / ${pages}</span><button class="btn sm" ${U.hpage >= pages ? 'disabled' : ''} onclick="U.hpage++;render()">다음</button></div>
       <div class="row" style="justify-content:flex-end;margin-top:8px"><button class="btn outline" onclick="exportCsv()">${ic('download')}CSV 다운로드</button></div></div>`;
 }
@@ -874,6 +966,7 @@ function applyThreshold() {
 function viewModels() {
   const adm = isAdmin();
   return `<h1 class="page-title">PCB 및 모델 관리</h1><p class="page-sub">PCB 등록 · 모델 연결 · 모델 버전 관리</p>
+    ${adm ? '' : `<div class="mode-note">${ic('lock', 'lg')}<span><b>조회 전용</b> — 검사원 계정은 현재 설정을 확인만 할 수 있습니다. 변경은 관리자에게 요청하세요.</span></div>`}
     <div class="card"><div class="card-title">등록된 PCB<span class="sp"></span>${adm ? `<button class="btn sm primary" onclick="openPcbForm()">${ic('plus')}PCB 등록</button>` : ''}</div>
       ${S.pcbs.map(p => `<div class="ver-row"><div class="photo" style="width:84px;aspect-ratio:475/350;border-radius:8px"><img src="${SAMPLE_IMG}" alt=""></div><div style="flex:1"><b style="font-size:16px">${esc(p.id)}</b><div class="muted">연결 모델: ${p.model}</div></div><span class="pill green">${p.status}</span></div>`).join('')}</div>
     <div class="card"><div class="card-title">등록된 추론 모델</div>
@@ -932,13 +1025,14 @@ function viewSettings() {
   const adm = isAdmin(), opt = (arr, cur) => arr.map(x => `<option ${x === cur ? 'selected' : ''}>${x}</option>`).join('');
   const bytes = S.inspections.length * 0.153;
   return `<h1 class="page-title">시스템 설정</h1><p class="page-sub">카메라 · 저장소 · 사용자 관리</p>
+    ${adm ? '' : `<div class="mode-note">${ic('lock', 'lg')}<span><b>부분 조회</b> — 카메라 설정만 변경할 수 있고, 보관 기간·사용자 관리는 관리자만 수정할 수 있습니다.</span></div>`}
     <div class="grid2"><div class="card"><div class="card-title">${ic('camera', 'lg')}카메라</div>
         <div class="field"><label>촬영 장치</label><select class="inp" onchange="setSetting('camera',this.value)">${opt(['기본 카메라 (USB 현미경)', '노트북 내장 카메라', '이미지 업로드만 사용'], S.settings.camera)}</select></div>
         <div class="field"><label>촬영 해상도</label><select class="inp" onchange="setSetting('resolution',this.value)">${opt(['1280 × 720', '1920 × 1080', '3840 × 2160'], S.settings.resolution)}</select></div>
         <div class="note">촬영 품질 자동 검사 · Best Frame 선정은 후속 확장 항목입니다.</div></div>
       <div class="card"><div class="card-title">${ic('db', 'lg')}저장소</div>
         <div class="row between small"><span class="muted">검사 이미지 · 결과</span><b>${bytes.toFixed(1)} GB / 100 GB</b></div><div class="usage" style="margin:6px 0 12px"><i style="width:${bytes}%"></i></div>
-        <div class="field"><label>이미지 보관 기간</label><select class="inp" onchange="setSetting('retention',this.value)">${opt(['30일', '90일', '180일', '1년'], S.settings.retention)}</select></div>
+        <div class="field"><label>이미지 보관 기간</label><select class="inp" ${adm ? '' : 'disabled'} onchange="setSetting('retention',this.value)">${opt(['30일', '90일', '180일', '1년'], S.settings.retention)}</select></div>
         <div class="muted small">저장 위치: <code>/storage/inspections</code></div></div></div>
     <div class="card"><div class="card-title">${ic('lock', 'lg')}사용자 관리<span class="sp"></span>${adm ? `<button class="btn sm primary" onclick="openUserForm()">${ic('plus')}사용자 추가</button>` : '<span class="pill">조회 전용</span>'}</div>
       <div class="tbl-wrap"><table class="tbl"><thead><tr><th>이름</th><th>소속</th><th>역할</th><th>상태</th>${adm ? '<th></th>' : ''}</tr></thead><tbody>
@@ -960,7 +1054,7 @@ function render() {
 
 /** 데모 데이터를 초기 상태(120건)로 되돌린다. 테마와 로그인은 유지한다. */
 function resetDemo() {
-  S = createInitialState({ theme: S.theme, user: S.user }); U.rvSel = null; U.hf = { period: 'all', pcb: 'all', result: 'all', q: '' }; U.hpage = 1;
+  S = createInitialState({ theme: S.theme, user: S.user, api: S.api }); U.rvSel = null; U.hf = { period: 'all', pcb: 'all', result: 'all', q: '' }; U.hpage = 1;
   U.img = SAMPLE_IMG; U.imgName = '샘플 촬영 이미지'; render(); toast('데모 데이터를 초기화했습니다');
 }
 
