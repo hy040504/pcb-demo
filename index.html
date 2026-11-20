@@ -337,6 +337,40 @@ circle.arc { transition: opacity .15s, stroke-width .15s; } circle.arc:hover { s
 .more-item { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 16px 8px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-card); font-weight: 600; position: relative; }
 .more-item.on { border-color: var(--primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 22%, transparent); }
 .more-item .lk2 { position: absolute; top: 8px; right: 10px; color: var(--text-3); } .more-item .lk2 .ic { width: 14px; height: 14px; }
+/* PCB 종류 표시 · 다중 이미지 검사 · 데이터뱅크 */
+.ptype { display: inline-flex; align-items: center; gap: 4px; padding: 0 8px; border-radius: 6px; background: var(--bg-muted); border: 1px solid var(--border); font-weight: 600; font-size: .92em; color: var(--text-2); white-space: nowrap; line-height: 1.6; }
+.ptype .ic { width: 13px; height: 13px; flex: none; }
+.ptype-lbl { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: var(--text-2); }
+.ptype-lbl .ic { width: 16px; height: 16px; }
+.dz { cursor: pointer; transition: border-color .15s, background .15s; }
+.dz.over { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, var(--bg-muted)); }
+.dz .ic { width: 26px; height: 26px; }
+.dz-note { display: block; }
+.qsum { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 10px; }
+.qsum .bar-track { flex: 1 1 160px; min-width: 120px; }
+.qlist { display: flex; flex-direction: column; gap: 8px; max-height: 560px; overflow-y: auto; padding-right: 2px; }
+.qrow { display: flex; align-items: center; gap: 12px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-card); }
+.qrow.run { border-color: var(--primary); }
+.qrow .photo { width: 84px; flex: none; border-radius: 8px; cursor: zoom-in; }
+.qinfo { flex: 1; min-width: 0; } .qname { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qres { display: flex; align-items: center; gap: 8px; flex: none; flex-wrap: wrap; justify-content: flex-end; }
+.qact { display: flex; gap: 6px; flex: none; min-width: 96px; justify-content: flex-end; }
+.bk-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.bk-row:last-child { border-bottom: 0; }
+.bk-ico { width: 44px; height: 34px; border-radius: 6px; background: var(--bg-muted); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex: none; overflow: hidden; color: var(--text-3); }
+.bk-ico img { width: 100%; height: 100%; object-fit: cover; }
+.bk-list { max-height: 320px; overflow-y: auto; }
+.tbl tr.sel td { background: var(--bg-muted); }
+/* 이미지 확대 뷰어 */
+.zoomable { cursor: zoom-in; }
+.zoom-hint { position: absolute; right: 8px; bottom: 8px; display: inline-flex; gap: 4px; align-items: center; padding: 3px 10px; border-radius: 999px; background: rgba(15, 21, 18, .74); color: #fff; font-size: 12px; font-weight: 600; pointer-events: none; }
+.zoom-hint .ic { width: 13px; height: 13px; }
+.modal-card.wide { max-width: 900px; }
+.vz { position: relative; overflow: hidden; border-radius: 12px; background: #0f1512; border: 1px solid var(--border); aspect-ratio: 475 / 350; max-width: calc(68vh * 475 / 350); margin: 0 auto; touch-action: none; cursor: zoom-in; user-select: none; }
+.vz.zoomed { cursor: grab; } .vz.pan { cursor: grabbing; }
+.vz-in { position: absolute; inset: 0; transform-origin: 0 0; will-change: transform; }
+.vz-in img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+.vz-in .ov { position: absolute; inset: 0; pointer-events: none; }
 /* UI 개선 패치 — 차트 보조선 · 목록 · 빈 상태 · 단계 안내 */
 .rv-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .rv-item .small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -394,7 +428,7 @@ circle.arc { transition: opacity .15s, stroke-width .15s; } circle.arc:hover { s
 .vw-dev.phone iframe { border-radius: 28px; }
 .vw-cap { color: var(--text-3); font-size: 12.5px; text-align: center; margin-top: 8px; }
 @media (max-width: 440px) { .brand-t { display: none; } .topbar { padding: 0 10px; } .icon-btn { width: 38px !important; } }
-@media (max-width: 700px) { .lbl-s { display: inline; } .lbl-f { display: none; } .sub-hint { display: none; } svg .ct { font-size: 14px; } .nav-item.sec { display: none; } .nav-more { display: flex; } }
+@media (max-width: 700px) { .qrow { display: grid; grid-template-columns: 84px 1fr auto; grid-template-areas: "t i a" "t r r"; align-items: center; row-gap: 4px; } .qrow .photo { grid-area: t; } .qrow .qinfo { grid-area: i; } .qrow .qact { grid-area: a; } .qrow .qres { grid-area: r; justify-content: flex-start; } .lbl-s { display: inline; } .lbl-f { display: none; } .sub-hint { display: none; } svg .ct { font-size: 14px; } .nav-item.sec { display: none; } .nav-more { display: flex; } }
 @media (max-width: 520px) { .api-name { display: none; } .rank-row { grid-template-columns: 18px 72px 1fr 58px; } .topbar { gap: 6px; } .main { padding: 14px 12px 20px; } .rv-list { max-height: 360px; } }
 </style>
 </head>
@@ -404,7 +438,8 @@ circle.arc { transition: opacity .15s, stroke-width .15s; } circle.arc:hover { s
 <div id="app"></div>
 <div id="modal" class="hidden"></div>
 <div id="toasts"></div>
-<input type="file" id="fileInput" accept="image/*" class="hidden">
+<input type="file" id="fileInput" accept="image/*" multiple class="hidden">
+<input type="file" id="bankInput" accept="image/*,.zip,.npy,.pt,.pth,.ckpt,.faiss,.pkl,.bin,.json" multiple class="hidden">
 
 <script>
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -451,6 +486,8 @@ const ICONS = {
   lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
   chart: '<path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/>',
   folder: '<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>',
+  zoom: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M8 11h6M11 8v6"/>',
+  chip: '<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>',
   dots: '<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
   x: '<path d="M6 6l12 12M18 6L6 18"/>'
@@ -525,6 +562,7 @@ function createInitialState(keep = {}) {
     user: keep.user || null,
     inspections: list,
     pcbs: [{ id: 'PCB1', model: 'Industrial PatchCore', status: '검사 가능' }],
+    banks: {},          // PCB 종류별 데이터뱅크 파일 { 'PCB1': [{ id, name, size, kind, at, src }] } — 시연용(브라우저 메모리)
     model: { active: 'v0.3.0', threshold: 0.60, versions: [
       { v: 'v0.3.0', note: '공개 Memory Bank · 현재 운영', date: '2026-11-18' },
       { v: 'v0.2.1', note: '공개 Memory Bank · 이전 버전', date: '2026-11-10' }
@@ -546,7 +584,7 @@ let S = createInitialState();
 /** 화면별 임시 UI 상태 (필터 · 선택 · 페이지 등 — 데모 초기화 대상 아님) */
 const U = {
   anim: true, fresh: false,   // 진입 모션 / 검사 결과 갱신 모션 1회성 플래그 (playEnter가 소비)
-  route: 'dashboard', pcb: 'PCB1', img: SAMPLE_IMG, imgName: '샘플 촬영 이미지', running: false,
+  route: 'dashboard', pcb: 'PCB1', running: false, queue: [], qSeq: 0, bankPcb: 'PCB1',
   rvFilter: 'all', rvSel: null, rvMemo: '', evMode: 'orig', evOpacity: 70,
   hf: { period: 'all', pcb: 'all', result: 'all', q: '' }, hpage: 1
 };
@@ -898,13 +936,13 @@ function viewDashboard() {
     <div class="split eq">
       <div class="card"><div class="card-title">시간대별 검사 건수</div>${hourlyChart()}<div class="divider"></div><div class="card-title">불량 유형별 분포 <span class="pill">최근 7일</span><span class="sp"></span><button class="btn sm" onclick="go('stats')">통계 분석</button></div>${defectDist(statsData(7).byType)}</div>
       <div class="card"><div class="card-title">검토 대기 <span class="pill orange">${st.pending}건</span><span class="sp"></span><button class="btn sm" onclick="go('review')">검토하기</button></div>
-        ${pend.length ? pend.map(r => `<div class="ver-row"><div class="thumb" style="${thumbStyle(r)}"></div><div style="flex:1"><b>${r.id}</b><div class="small muted">${r.pcb} · 점수 ${r.score.toFixed(2)} · ${hhmm(r.at)}</div></div><button class="btn sm outline" onclick="openReview(${r.n})">판정</button></div>`).join('') : `<div class="empty">검토 대기 건이 없습니다.<br><button class="btn sm outline mt10" onclick="go('inspect')">새 검사 시작</button></div>`}
+        ${pend.length ? pend.map(r => `<div class="ver-row"><div class="thumb" style="${thumbStyle(r)}"></div><div style="flex:1"><b>${r.id}</b><div class="small muted">${pcbTag(r.pcb)} · 점수 ${r.score.toFixed(2)} · ${hhmm(r.at)}</div></div><button class="btn sm outline" onclick="openReview(${r.n})">판정</button></div>`).join('') : `<div class="empty">검토 대기 건이 없습니다.<br><button class="btn sm outline mt10" onclick="go('inspect')">새 검사 시작</button></div>`}
         <div class="divider"></div><div class="row between"><span class="muted">AI-검사원 판정 일치율</span><b style="font-size:20px">${st.match}%</b></div>
         <div class="note mt4">검사원 확정 건 중 AI 최초 판정과 같은 비율 (AI 원본 판정은 보존)</div></div>
     </div>
     <div class="card mt14"><div class="card-title">최근 검사<span class="sp"></span><button class="btn sm" onclick="go('history')">전체 이력</button></div>
-      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>번호</th><th>PCB</th><th>AI 점수</th><th>AI 판정</th><th>최종 판정</th><th>시각</th></tr></thead><tbody>
-      ${recent.map(r => `<tr class="click" onclick="openDetail(${r.n})"><td>${r.n}</td><td>${r.pcb}</td><td>${r.score.toFixed(2)}</td><td>${aiBadge(r.ai)}</td><td>${finalBadge(r)}</td><td>${hhmm(r.at)}</td></tr>`).join('')}</tbody></table></div></div>`;
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>번호</th><th>PCB 종류</th><th>AI 점수</th><th>AI 판정</th><th>최종 판정</th><th>시각</th></tr></thead><tbody>
+      ${recent.map(r => `<tr class="click" onclick="openDetail(${r.n})"><td>${r.n}</td><td>${pcbTag(r.pcb)}</td><td>${r.score.toFixed(2)}</td><td>${aiBadge(r.ai)}</td><td>${finalBadge(r)}</td><td>${hhmm(r.at)}</td></tr>`).join('')}</tbody></table></div></div>`;
 }
 
 /**
@@ -916,50 +954,130 @@ function gotoHistory(flt) { U.hf = { period: 'all', pcb: 'all', result: flt, q: 
 /* ═══════════════════════════════════════════════════════════════════════════
    6. [메뉴 2] PCB 검사 — PCB 선택 · 촬영/업로드 · PatchCore API 호출
    ═══════════════════════════════════════════════════════════════════════════ */
-/** 촬영 버튼: 샘플 촬영(셔터 효과)으로 이미지를 교체한다 (시안 — 실제 카메라 연동은 시스템 설정의 카메라 항목에서 제공 예정). */
-function capture() {
-  U.img = SAMPLE_IMG; U.imgName = '촬영 이미지 ' + new Date().toTimeString().slice(0, 8); S.result = null; render();
-  const p = document.querySelector('.photo'); if (p) { p.classList.add('flash'); }
-  toast('촬영 완료 (시안: 샘플 이미지)');
-}
-
-/** 업로드 버튼: 파일 선택 창을 연다. */
-function pickFile() { document.getElementById('fileInput').click(); }
-document.getElementById('fileInput').addEventListener('change', e => {
-  const f = e.target.files && e.target.files[0]; if (!f) return;
-  const fr = new FileReader();
-  fr.onload = () => { U.img = fr.result; U.imgName = f.name; U.imgSeed = f.size + f.name.length; S.result = null; e.target.value = ''; render(); toast('이미지를 업로드했습니다'); };
-  fr.readAsDataURL(f);
-});
+/* ═══════════════════════════════════════════════════════════════════════════
+   6. [메뉴 2] PCB 검사 — PCB 종류 선택 · 여러 장 업로드(드래그 앤 드롭) · 일괄 검사
+   ═══════════════════════════════════════════════════════════════════════════ */
+/** 한 번에 올릴 수 있는 최대 이미지 수 (시연 기준 — 브라우저 메모리 보호) */
+const MAX_BATCH = 50;
 
 /**
- * 외부 PatchCore API 응답을 모사해 이상 점수를 산출한다 (시연용 순환 + 업로드 파일은 파일 정보 기반).
+ * PCB 종류 이름을 알아보기 쉬운 칩(칩 아이콘 + 이름)으로 표시한다.
+ * PCB 종류는 '검사 대상 제품(기판)의 등록 이름'이며 정상 기준 사진이 아니다.
+ * @param {string} name PCB 종류 이름(예: PCB1)
+ * @returns {string} HTML
+ */
+function pcbTag(name) { return `<span class="ptype" title="PCB 종류 — 검사 대상 제품(기판)의 등록 이름">${ic('chip')}${esc(name)}</span>`; }
+
+/**
+ * 바이트 수를 읽기 쉬운 문자열로 바꾼다.
+ * @param {number} b 바이트
+ * @returns {string} 예: 1.2 MB
+ */
+function fmtBytes(b) { return b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(0) + ' KB' : (b / 1048576).toFixed(1) + ' MB'; }
+
+/**
+ * 검사 대기열 항목을 만든다.
+ * @param {{name: string, src: string, size?: number, seed?: number, sample?: boolean}} o 이미지 정보
+ * @returns {object} 대기열 항목 (st: wait | run | done)
+ */
+function newQueueItem(o) { return { uid: ++U.qSeq, name: o.name, src: o.src, size: o.size || 0, seed: o.seed || 7, sample: !!o.sample, st: 'wait', rec: null }; }
+
+/** 대기열에 이미지를 추가하고 화면을 갱신한다. @param {object[]} list newQueueItem 입력 배열 */
+function queueAdd(list) { list.forEach(o => U.queue.push(newQueueItem(o))); render(); }
+
+/** 촬영 버튼: 샘플 촬영 이미지를 대기열에 추가한다 (시안 — 실제 카메라 연동은 시스템 설정의 카메라 항목에서 제공 예정). */
+function capture() {
+  if (U.running) return;
+  if (U.queue.length >= MAX_BATCH) return toast(`한 번에 최대 ${MAX_BATCH}장까지 검사할 수 있습니다`);
+  queueAdd([{ name: '촬영 이미지 ' + new Date().toTimeString().slice(0, 8), src: SAMPLE_IMG, sample: true }]);
+  toast('촬영 완료 — 대기열에 추가했습니다 (시안: 샘플 이미지)');
+}
+
+/** 파일 선택 창을 연다 (여러 장 선택 가능). */
+function pickFile() { if (!U.running) document.getElementById('fileInput').click(); }
+
+/**
+ * 이미지 파일 여러 개를 읽어 검사 대기열에 추가한다 (이미지가 아닌 파일 · 최대 장수 초과분은 제외하고 안내).
+ * @param {FileList|File[]} files 선택하거나 끌어다 놓은 파일들
+ */
+function addFiles(files) {
+  if (U.running) return toast('검사 중에는 이미지를 추가할 수 없습니다');
+  const all = [...files], imgs = all.filter(f => /^image\//.test(f.type) || /\.(png|jpe?g|bmp|webp)$/i.test(f.name));
+  const skipType = all.length - imgs.length, room = Math.max(0, MAX_BATCH - U.queue.length), take = imgs.slice(0, room), skipMax = imgs.length - take.length;
+  if (!take.length) return toast(skipType ? '이미지 파일(PNG · JPG · BMP · WebP)만 추가할 수 있습니다' : `한 번에 최대 ${MAX_BATCH}장까지 검사할 수 있습니다`);
+  Promise.all(take.map(f => new Promise(res => { const fr = new FileReader(); fr.onload = () => res({ name: f.name, src: fr.result, size: f.size, seed: f.size + f.name.length }); fr.onerror = () => res(null); fr.readAsDataURL(f); })))
+    .then(list => {
+      list = list.filter(Boolean); queueAdd(list);
+      toast(`${list.length}장을 추가했습니다` + (skipType ? ` · 이미지가 아닌 ${skipType}개 제외` : '') + (skipMax ? ` · 최대 ${MAX_BATCH}장 초과 ${skipMax}장 제외` : ''));
+    });
+}
+document.getElementById('fileInput').addEventListener('change', e => { const arr = [...e.target.files]; e.target.value = ''; if (arr.length) addFiles(arr); });
+
+/** 드롭 영역 위에 파일을 끌고 왔을 때 강조한다. */
+function dzOver(e) { e.preventDefault(); e.currentTarget.classList.add('over'); }
+/** 드롭 영역에서 벗어나면 강조를 끈다. */
+function dzLeave(e) { e.currentTarget.classList.remove('over'); }
+/**
+ * 드롭 영역에 파일을 놓았을 때 대상에 맞게 처리한다.
+ * @param {DragEvent} e 드롭 이벤트
+ * @param {'queue'|'bank'} target queue=검사 대기열, bank=PCB 종류별 데이터뱅크
+ */
+function dzDrop(e, target) {
+  e.preventDefault(); e.stopPropagation(); e.currentTarget.classList.remove('over');
+  if (target === 'bank') addBankFiles(e.dataTransfer.files); else addFiles(e.dataTransfer.files);
+}
+// 드롭 영역 밖에 놓아도 브라우저가 파일을 열어 버리지 않게 막고, PCB 검사 화면에서는 어디에 놓아도 대기열에 추가한다.
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop', e => { e.preventDefault(); if (S.user && U.route === 'inspect' && e.dataTransfer && e.dataTransfer.files.length) addFiles(e.dataTransfer.files); });
+
+/** 대기열에서 이미지 한 장을 뺀다. @param {number} uid 항목 번호 */
+function queueRemove(uid) { if (U.running) return; U.queue = U.queue.filter(q => q.uid !== uid); render(); }
+/** 대기열을 모두 비운다(검사 결과 기록은 이력에 남는다). */
+function queueClear() { if (U.running) return; U.queue = []; render(); }
+/** 검사가 끝난 항목만 목록에서 치운다. */
+function queueClearDone() { if (U.running) return; U.queue = U.queue.filter(q => q.st !== 'done'); render(); }
+
+/**
+ * 외부 PatchCore API 응답을 모사해 이상 점수를 산출한다 (시연용: 샘플은 순환 값, 업로드 파일은 파일 정보 기반).
+ * @param {object} q 대기열 항목
  * @returns {number} 0~1 이상 점수
  */
-function mockApiScore() {
+function mockApiScore(q) {
   const cycle = [0.72, 0.21, 0.88, 0.34];
-  if (U.imgName.startsWith('샘플') || U.imgName.startsWith('촬영')) return cycle[S.demoSeq++ % cycle.length];
-  return +(0.12 + ((U.imgSeed || 7) * 37 % 83) / 100).toFixed(2);
+  if (q.sample) return cycle[S.demoSeq++ % cycle.length];
+  return +(0.12 + ((q.seed || 7) * 37 % 83) / 100).toFixed(2);
 }
 
+/** 지정 시간(ms)만큼 기다린다(모션 감소 설정이면 짧게). */
+const sleep = ms => new Promise(r => setTimeout(r, REDUCED ? Math.min(ms, 120) : ms));
+
 /**
- * 검사 시작: PatchCore API를 호출(시뮬레이션)하고 결과를 검사 이력에 저장한다.
- * AI 이상 → '검토 대기' 큐 편입 / AI 정상 → 정상 자동 확정.
+ * 일괄 검사: 대기 중인 이미지를 순서대로 PatchCore API에 보내고(시뮬레이션) 결과를 검사 이력에 저장한다.
+ * AI 이상 → '검토 대기' 큐 편입 / AI 정상 → 정상 자동 확정. 실서비스에서는 같은 POST /api/inspections 를 이미지마다 호출한다.
+ * 서버 연결이 끊기면 남은 이미지는 대기 상태로 두고 중단한다.
  */
-function runInspection() {
+async function runBatch() {
   if (U.running) return;
   if (!S.api.online) return toast('PatchCore API 서버가 오프라인입니다. 연결 복구 후 다시 시도하세요');
+  const todo = U.queue.filter(q => q.st !== 'done');
+  if (!todo.length) return toast('검사할 이미지를 추가하세요');
   U.running = true; render();
-  setTimeout(() => {
-    const score = mockApiScore(), thr = S.model.threshold, rng = makeRng(Date.now() % 100000);
-    const last = Math.max(...S.inspections.map(r => r.n)), prevAt = S.inspections.find(r => r.n === last).at;
-    const ai = score >= thr ? 'ANOMALY' : 'NORMAL', ms = 380 + Math.round(rng() * 160), n = last + 1;
-    const rec = { n, id: 'INS-' + String(n).padStart(6, '0'), pcb: U.pcb, score, thr, ver: S.model.active, ai, final: ai === 'NORMAL' ? 'NORMAL' : null,
-      memo: ai === 'NORMAL' ? '' : '', at: prevAt + 120000 + Math.round(rng() * 60000), ms,
-      spot: { x: 20 + Math.round(rng() * 60), y: 22 + Math.round(rng() * 56), r: 10 + Math.round(rng() * 6) }, img: U.img };
-    S.inspections.push(rec); S.result = rec; U.running = false; U.fresh = true; render();
-    toast(ai === 'ANOMALY' ? `${rec.id} 이상 의심 — 검토 대기로 등록` : `${rec.id} 정상 판정`);
-  }, 900);
+  const redraw = () => { if (U.route === 'inspect') render(); };
+  let ok = 0, anom = 0, stopped = false;
+  for (const q of todo) {
+    if (!S.api.online) { stopped = true; break; }
+    q.st = 'run'; redraw(); await sleep(650);
+    const thr = S.model.threshold, score = mockApiScore(q), last = Math.max(...S.inspections.map(r => r.n)), prevAt = S.inspections.find(r => r.n === last).at;
+    const n = last + 1, rng = makeRng((Date.now() + n * 97) % 100000), ai = score >= thr ? 'ANOMALY' : 'NORMAL';
+    const rec = { n, id: 'INS-' + String(n).padStart(6, '0'), pcb: U.pcb, score, thr, ver: S.model.active, ai, final: ai === 'NORMAL' ? 'NORMAL' : null, memo: '',
+      at: prevAt + 120000 + Math.round(rng() * 60000), ms: 380 + Math.round(rng() * 160),
+      spot: { x: 20 + Math.round(rng() * 60), y: 22 + Math.round(rng() * 56), r: 10 + Math.round(rng() * 6) }, img: q.src };
+    S.inspections.push(rec); q.rec = rec; q.st = 'done'; ok++; if (ai === 'ANOMALY') anom++;
+    redraw();
+  }
+  for (const q of U.queue) if (q.st === 'run') q.st = 'wait';
+  U.running = false; U.fresh = true; render();
+  toast(stopped ? `서버 연결이 끊겨 ${ok}장까지 검사하고 중단했습니다` : `${ok}장 검사 완료 · 정상 ${ok - anom} · 이상 의심 ${anom}${anom ? ' — 검토 대기로 등록' : ''}`);
 }
 
 /**
@@ -967,39 +1085,115 @@ function runInspection() {
  * @returns {string} 본문 HTML
  */
 function viewInspect() {
-  const r = S.result, thr = S.model.threshold;
+  const q = U.queue, off = !S.api.online, total = q.length, done = q.filter(x => x.st === 'done'), waiting = total - done.length;
+  const anom = done.filter(x => x.rec.ai === 'ANOMALY'), pct = total ? Math.round(done.length / total * 100) : 0;
+  const lastRec = done.length ? done[done.length - 1].rec : null;
   const req = JSON.stringify({ image: '<base64 PCB 이미지>', pcb_id: U.pcb, model: 'industrial-patchcore', version: S.model.active }, null, 2);
-  const res = r ? JSON.stringify({ anomaly_score: r.score, threshold: r.thr, is_anomaly: r.ai === 'ANOMALY', elapsed_ms: r.ms }, null, 2) : '(검사 시작 후 표시)';
-  const result = U.running ? `<span class="pill lg"><span class="spin"></span>PatchCore 분석 중…</span><div class="skel w60"></div><div class="skel"></div><div class="skel w80"></div><div class="skel w60"></div>` : r ? `<div class="fresh">
-      <span class="pill ${r.ai === 'ANOMALY' ? 'orange' : 'green'} lg">${r.ai === 'ANOMALY' ? '이상 의심' : '정상'}</span>
-      <div class="muted mt12">이상 점수</div><div class="score-big">${r.score.toFixed(2)}</div>
-      <div class="muted" style="margin:6px 0">기본 임계값: ${r.thr.toFixed(2)}</div>
-      <div class="bar-track"><div class="bar-fill ${r.ai === 'NORMAL' ? 'ok' : ''}" style="width:${Math.round(r.score * 100)}%"></div><div class="bar-thr" style="left:${Math.round(r.thr * 100)}%" title="임계값"></div></div>
-      <div class="divider"></div>
-      <div class="muted">추론 모델</div><div style="font-weight:600;margin-bottom:6px">Industrial PatchCore <span class="muted small">${r.ver}</span></div>
-      <div class="muted">처리 시간: ${r.ms}ms</div>
-      ${r.ai === 'ANOMALY' ? `<button class="btn outline sm mt12" onclick="openReview(${r.n})">검사 관리에서 판정하기</button>` : `<div class="note">정상 판정은 자동 확정됩니다. 이상 의심 건만 검사원 검토가 필요합니다.</div>`}</div>`
-    : `<span class="pill lg">검사 대기</span><ul class="steps"><li class="${U.pcb ? 'ok' : ''}"><span class="n">1</span>PCB 선택 <span class="muted small">${esc(U.pcb || '')}</span></li><li class="${U.img ? 'ok' : ''}"><span class="n">2</span>이미지 준비 (촬영 또는 업로드)</li><li><span class="n">3</span>검사 시작 → PatchCore API 결과가 여기에 표시됩니다</li></ul>`;
-  const off = !S.api.online;
-  return `${pageHead('PCB 외관 검사', 'PCB 선택 → 이미지 준비 → 검사 시작')}
+  const res = lastRec ? JSON.stringify({ anomaly_score: lastRec.score, threshold: lastRec.thr, is_anomaly: lastRec.ai === 'ANOMALY', elapsed_ms: lastRec.ms }, null, 2) : '(검사 시작 후 표시)';
+  const row = x => {
+    const r = x.rec;
+    const state = x.st === 'run' ? `<span class="pill lg"><span class="spin"></span>분석 중</span>`
+      : x.st === 'done' ? `<span class="sc">${r.score.toFixed(2)}<i class="${r.score >= r.thr ? 'hi' : ''}"><b style="width:${Math.round(r.score * 100)}%"></b></i></span><span class="pill ${r.ai === 'ANOMALY' ? 'orange' : 'green'}">${r.ai === 'ANOMALY' ? '이상 의심' : '정상'}</span>`
+      : `<span class="pill">대기</span>`;
+    const act = x.st === 'done' ? `${r.ai === 'ANOMALY' ? `<button class="btn sm outline" onclick="openReview(${r.n})">판정하기</button>` : ''}`
+      : `<button class="icon-btn" ${U.running ? 'disabled' : ''} onclick="queueRemove(${x.uid})" aria-label="목록에서 빼기" title="목록에서 빼기">${ic('x')}</button>`;
+    return `<div class="qrow ${x.st}" data-st="${x.st}"><div class="photo ${x.st === 'run' ? 'scanning' : ''}" onclick="${x.st === 'done' ? `openViewer(${r.n})` : `openQueueImg(${x.uid})`}" title="클릭하면 크게 볼 수 있습니다"><img src="${x.src}" alt="${esc(x.name)}"></div>
+      <div class="qinfo"><b class="qname" title="${esc(x.name)}">${esc(x.name)}</b><div class="small muted">${x.sample ? '샘플 이미지' : fmtBytes(x.size)}${x.st === 'done' ? ` · ${r.id} · ${r.ms}ms` : ''}</div></div>
+      <div class="qres">${state}</div><div class="qact">${act}</div></div>`;
+  };
+  return `${pageHead('PCB 외관 검사', 'PCB 종류 선택 → 사진 여러 장 올리기 → 한 번에 검사')}
     ${off ? `<div class="banner-off">${ic('lock', 'lg')}<span>PatchCore API 서버 오프라인 — 검사를 시작할 수 없습니다. 상단의 상태 배지를 눌러 연결을 확인하세요.</span></div>` : ''}
     <div class="row mb14">
-      <select class="inp" style="width:auto" onchange="U.pcb=this.value;render()">${S.pcbs.filter(p => p.status === '검사 가능').map(p => `<option ${p.id === U.pcb ? 'selected' : ''}>${esc(p.id)}</option>`).join('')}</select>
-      <span class="pill">일반 검사</span><span class="pill green">모델 준비 완료</span>
+      <span class="ptype-lbl" title="검사할 제품(기판)의 이름입니다">${ic('chip')}PCB 종류</span>
+      <select class="inp" style="width:auto" aria-label="PCB 종류" ${U.running ? 'disabled' : ''} onchange="U.pcb=this.value;render()">${S.pcbs.filter(p => p.status === '검사 가능').map(p => `<option ${p.id === U.pcb ? 'selected' : ''}>${esc(p.id)}</option>`).join('')}</select>
+      <span class="pill">일반 검사</span><span class="pill green">모델 준비 완료</span><span class="small muted">선택한 종류로 아래 모든 이미지를 검사합니다</span>
     </div>
-    <div class="split">
-      <div class="card"><div class="card-title">촬영 이미지</div>
-        <div class="photo ${U.running ? 'scanning' : ''}">${U.img ? `<img src="${U.img}" alt="PCB 촬영 이미지">` : ''}</div>
-        <div class="note" style="margin:6px 0 10px">${esc(U.imgName)}</div>
-        <div class="grid2"><button class="btn" onclick="capture()">${ic('camera')}촬영</button><button class="btn" onclick="pickFile()">${ic('upload')}업로드</button></div></div>
-      <div class="card"><div class="card-title">AI 검사 결과</div>${result}</div>
-    </div>
-    <button class="btn primary block mt14" onclick="runInspection()" ${U.running || off ? 'disabled' : ''}>${U.running ? '<span class="spin"></span>PatchCore API 호출 중…' : off ? 'API 오프라인 — 검사 불가' : '검사 시작'}</button>
-    <p class="note">검사 화면 목업 · Heatmap은 API 확장 이후 추가 (현재는 관리자의 검토 화면에서 AI 판단 근거 시뮬레이션 제공)</p>
+    <div class="card"><div class="card-title">검사 이미지 <span class="pill">${total}장</span><span class="sp"></span><button class="btn sm outline" ${U.running || !total ? 'disabled' : ''} onclick="queueClear()">목록 비우기</button></div>
+      <div class="drop dz" role="button" tabindex="0" ${U.running ? '' : 'onclick="pickFile()" onkeydown="if(event.key===\'Enter\')pickFile()"'} ondragover="dzOver(event)" ondragleave="dzLeave(event)" ondrop="dzDrop(event,'queue')">
+        ${ic('upload', 'lg')}<div class="mt6"><b>PCB 사진을 여기로 끌어다 놓으세요</b></div><div class="small dz-note">또는 클릭해서 파일 선택 — <b>여러 장 동시 선택 가능</b> · 최대 ${MAX_BATCH}장 · PNG · JPG · BMP · WebP</div></div>
+      <div class="grid2 mt10"><button class="btn" ${U.running ? 'disabled' : ''} onclick="pickFile()">${ic('upload')}파일 선택 (여러 장)</button><button class="btn" ${U.running ? 'disabled' : ''} onclick="capture()">${ic('camera')}촬영 추가</button></div></div>
+    <div class="card"><div class="card-title">검사 목록 · 결과<span class="sp"></span>${done.length && !U.running ? `<button class="btn sm outline" onclick="queueClearDone()">완료 항목 치우기</button>` : ''}</div>
+      ${total ? `<div class="qsum"><div class="bar-track"><div class="bar-fill ok" style="width:${pct}%"></div></div><b>${done.length} / ${total}</b><span class="pill green">정상 ${done.length - anom.length}</span><span class="pill orange">이상 의심 ${anom.length}</span>${anom.length && !U.running ? `<button class="btn sm primary" onclick="openReview(${anom[0].rec.n})">이상 의심 건 판정하기</button>` : ''}</div>
+        <div class="qlist">${q.map(row).join('')}</div>` : `<div class="empty">${ic('upload')}검사할 이미지가 없습니다.<br>위 영역에 사진을 끌어다 놓거나 파일을 선택하세요.</div>`}</div>
+    <button class="btn primary block mt14" onclick="runBatch()" ${U.running || off || !waiting ? 'disabled' : ''}>${U.running ? '<span class="spin"></span>PatchCore API 호출 중…' : off ? 'API 오프라인 — 검사 불가' : waiting ? `검사 시작 (${waiting}장)` : total ? '모든 이미지를 검사했습니다' : '검사할 이미지를 추가하세요'}</button>
+    <p class="note">여러 장을 올리면 순서대로 한 장씩 PatchCore API에 보내 한 번에 검사합니다. 이상 의심 건은 검사 관리의 검토 대기로 들어가고, 정상은 자동 확정됩니다. (Heatmap은 API 확장 이후 추가)</p>
     ${isAdmin() ? `<div class="card mt14"><details><summary>외부 PatchCore API 호출 계약(안) 보기 <span class="pill role-admin">관리자 전용</span></summary>
-      <div class="note" style="margin:6px 0 8px">자체 모델 구현 없이 공개 Industrial PatchCore API를 호출만 합니다. 아래는 어댑터가 사용할 요청·응답 계약(안)입니다.</div>
+      <div class="note" style="margin:6px 0 8px">자체 모델 구현 없이 공개 Industrial PatchCore API를 호출만 합니다. 이미지마다 한 번씩 호출합니다. 아래는 어댑터가 사용할 요청·응답 계약(안)입니다.</div>
       <div class="grid2"><div><div class="small muted">요청</div><div class="code">${esc(req)}</div></div><div><div class="small muted">응답</div><div class="code">${esc(res)}</div></div></div></details></div>` : ''}`;
 }
+
+/**
+ * 검사 전 대기열 이미지를 확대 뷰어로 크게 본다(검사 기록이 없는 이미지용 단순 뷰어).
+ * @param {number} uid 대기열 항목 번호
+ */
+function openQueueImg(uid) {
+  const x = U.queue.find(v => v.uid === uid); if (!x) return;
+  openModal(`<div class="row between mb8"><b style="font-size:18px">${esc(x.name)}</b><button class="icon-btn" onclick="closeModal()" aria-label="닫기">${ic('x')}</button></div>
+    <div class="photo"><img src="${x.src}" alt="${esc(x.name)}"></div><div class="note">검사 전 이미지입니다. 검사가 끝나면 확대 · 다운로드 · 판정이 가능합니다.</div>`);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   6-2. PCB 종류별 데이터뱅크 (데이터 관리 메뉴) — 정상 기준 이미지 · Memory Bank 파일 업로드 (시연: 브라우저 메모리에만 보관)
+   ═══════════════════════════════════════════════════════════════════════════ */
+/** 선택한 PCB 종류의 데이터뱅크 파일 목록을 돌려준다(없으면 빈 배열). @param {string} id PCB 종류 이름 */
+const bankOf = id => S.banks[id] || (S.banks[id] = []);
+
+/** 데이터뱅크 대상 PCB 종류를 바꾼다. @param {string} id PCB 종류 이름 */
+function setBankPcb(id) { U.bankPcb = id; render(); }
+
+/**
+ * 데이터뱅크에 파일 여러 개를 올린다. 이미지는 '정상 이미지', 그 밖의 파일(.zip · .npy · .pt …)은 'Memory Bank 파일'로 분류한다.
+ * 시연에서는 파일을 서버로 보내지 않고 브라우저 메모리에만 보관한다(새로고침하면 사라짐).
+ * @param {FileList|File[]} files 선택하거나 끌어다 놓은 파일들
+ */
+function addBankFiles(files) {
+  if (!isAdmin()) return toast('데이터뱅크 업로드는 관리자만 할 수 있습니다');
+  const arr = bankOf(U.bankPcb), list = [...files]; if (!list.length) return;
+  const room = Math.max(0, 200 - arr.length), take = list.slice(0, room);
+  take.forEach(f => {
+    const img = /^image\//.test(f.type) || /\.(png|jpe?g|bmp|webp)$/i.test(f.name);
+    arr.push({ id: Date.now() + '-' + arr.length + Math.random().toString(36).slice(2, 5), name: f.name, size: f.size, kind: img ? 'image' : 'bank', at: Date.now(), src: img ? URL.createObjectURL(f) : '' });
+  });
+  render(); toast(`${take.length}개를 ${U.bankPcb} 데이터뱅크에 추가했습니다 (시연: 브라우저 메모리)` + (list.length > take.length ? ` · 200개 초과 ${list.length - take.length}개 제외` : ''));
+}
+document.getElementById('bankInput').addEventListener('change', e => { const a = [...e.target.files]; e.target.value = ''; addBankFiles(a); });
+
+/** 데이터뱅크 파일을 하나 지운다. @param {string} id PCB 종류 @param {string} fid 파일 id */
+function bankDelete(id, fid) {
+  if (!isAdmin()) return;
+  const arr = bankOf(id), f = arr.find(x => x.id === fid); if (!f) return;
+  if (f.src) URL.revokeObjectURL(f.src);
+  S.banks[id] = arr.filter(x => x.id !== fid); render(); toast(`${f.name} 삭제`);
+}
+
+/**
+ * 데이터 관리 화면의 'PCB 종류별 데이터뱅크' 카드를 생성한다.
+ * 종류별 요약 표 + 선택한 종류의 업로드 영역(관리자) · 파일 목록. 실서비스에서는 서버 저장소와 pcb_banks 테이블을 사용하고,
+ * 학습 연결(Custom PatchCore)은 후속 확장이다.
+ * @param {boolean} adm 관리자 여부
+ * @returns {string} HTML
+ */
+function bankCardHtml(adm) {
+  if (!S.pcbs.some(p => p.id === U.bankPcb)) U.bankPcb = S.pcbs[0].id;
+  const cur = U.bankPcb, files = bankOf(cur), imgs = files.filter(f => f.kind === 'image').length, banks = files.length - imgs;
+  const sum = S.pcbs.map(p => { const a = S.banks[p.id] || [], im = a.filter(f => f.kind === 'image').length;
+    return `<tr class="click ${p.id === cur ? 'sel' : ''}" onclick="setBankPcb('${esc(p.id)}')"><td>${pcbTag(p.id)}</td><td>공개 Memory Bank ${S.model.active} <span class="muted small">(Industrial PatchCore)</span></td><td>${im}장</td><td>${a.length - im}개</td><td>${a.length ? '<span class="pill orange">자체 데이터 있음 · 학습 연결 예정</span>' : '<span class="pill green">공개 뱅크 사용 중</span>'}</td></tr>`; }).join('');
+  const kindPill = f => f.kind === 'image' ? '<span class="pill green">정상 이미지</span>' : '<span class="pill">Memory Bank 파일</span>';
+  const upload = adm ? `<div class="drop dz" role="button" tabindex="0" onclick="document.getElementById('bankInput').click()" onkeydown="if(event.key==='Enter')document.getElementById('bankInput').click()" ondragover="dzOver(event)" ondragleave="dzLeave(event)" ondrop="dzDrop(event,'bank')">${ic('upload', 'lg')}<div class="mt6"><b>${esc(cur)} 데이터뱅크 파일을 끌어다 놓거나 클릭해서 선택</b></div><div class="small dz-note">정상 PCB 사진(PNG · JPG …) 또는 Memory Bank 파일(.zip · .npy · .pt · .pth · .ckpt · .faiss · .pkl · .bin · .json) · 여러 개 동시 선택 가능</div></div>`
+    : `<div class="mode-note">${ic('lock', 'lg')}<span><b>조회 전용</b> — 데이터뱅크 업로드·삭제는 관리자만 할 수 있습니다.</span></div>`;
+  return `<div class="card"><div class="card-title">${ic('db', 'lg')}PCB 종류별 데이터뱅크<span class="pill">시연</span></div>
+      <div class="muted small mb10">PCB 종류마다 <b>정상 기준 이미지</b>나 <b>Memory Bank 파일</b>을 모아 두는 곳입니다. 지금의 검사는 외부 PatchCore API의 공개 Memory Bank를 사용하며, 여기에 올린 자체 데이터는 이후 자체 모델(Custom PatchCore) 학습·기준 데이터로 연결할 예정입니다.</div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>PCB 종류</th><th>현재 적용 기준</th><th>정상 이미지</th><th>뱅크 파일</th><th>상태</th></tr></thead><tbody>${sum}</tbody></table></div>
+      <div class="divider"></div>
+      <div class="row mb10"><b>${pcbTag(cur)} 데이터뱅크</b><span class="muted small">정상 이미지 ${imgs}장 · 뱅크 파일 ${banks}개</span><span class="sp"></span>
+        <select class="inp" style="width:auto" aria-label="데이터뱅크 PCB 종류" onchange="setBankPcb(this.value)">${S.pcbs.map(p => `<option ${p.id === cur ? 'selected' : ''}>${esc(p.id)}</option>`).join('')}</select></div>
+      ${upload}
+      <div class="bk-list mt10">${files.length ? files.map(f => `<div class="bk-row"><div class="bk-ico">${f.src ? `<img src="${f.src}" alt="">` : ic('db')}</div><div style="flex:1;min-width:0"><b class="qname" title="${esc(f.name)}">${esc(f.name)}</b><div class="small muted">${fmtBytes(f.size)} · ${mdhm(f.at)}</div></div>${kindPill(f)}${adm ? `<button class="icon-btn" onclick="bankDelete('${esc(cur)}','${f.id}')" aria-label="삭제" title="삭제">${ic('x')}</button>` : ''}</div>`).join('') : `<div class="empty">${esc(cur)}에 올린 자체 데이터뱅크 파일이 없습니다.<br>공개 Memory Bank(${S.model.active})를 사용 중입니다.</div>`}</div>
+      <div class="note">시연에서는 파일을 서버로 보내지 않고 브라우저 메모리에만 보관합니다(새로고침하면 사라짐). 실서비스는 서버 스토리지(/storage/banks/{PCB 종류}/)에 저장하고 pcb_banks 테이블에 기록합니다. 학습 연결은 후속 확장(자체 Memory Bank)입니다.</div></div>`;
+}
+
+// 시작 시 검사 대기열에 샘플 이미지 1장을 넣어 두어, 바로 '검사 시작'을 눌러 볼 수 있게 한다.
+U.queue.push(newQueueItem({ name: '샘플 촬영 이미지', src: SAMPLE_IMG, sample: true }));
 
 /* ═══════════════════════════════════════════════════════════════════════════
    7. [메뉴 3] 검사 관리 — 검사원 최종 판정 · 판정 사유 · 피드백 + (관리자) AI 판단 근거
@@ -1045,14 +1239,15 @@ function viewReview() {
       <div class="card-title mt16">AI 판단 근거 <span class="pill">관리자 전용</span></div>
       <div class="row mb8">${modes.map(([k, l]) => `<button class="pill ${U.evMode === k ? 'active' : ''}" onclick="U.evMode='${k}';render()">${l}</button>`).join('')}
         <label class="small muted" style="margin-left:auto">투명도 <input type="range" min="20" max="100" value="${U.evOpacity}" oninput="U.evOpacity=+this.value;document.getElementById('evLayer').innerHTML=evidenceLayer(S.inspections.find(r=>r.n===U.rvSel),U.evMode,U.evOpacity)"></label></div>
-      <div class="photo"><img src="${cur.img}" alt="AI 판단 근거 원본" style="${U.evMode === 'mask' && cur.ai === 'ANOMALY' ? 'visibility:hidden' : ''}"><div id="evLayer">${evidenceLayer(cur, U.evMode, U.evOpacity)}</div></div>
+      <div class="photo zoomable" title="클릭하면 크게 볼 수 있습니다(선택한 판단 근거 포함)" onclick="openViewer(${cur.n})"><img src="${cur.img}" alt="AI 판단 근거 원본" style="${U.evMode === 'mask' && cur.ai === 'ANOMALY' ? 'visibility:hidden' : ''}"><div id="evLayer">${evidenceLayer(cur, U.evMode, U.evOpacity)}</div><span class="zoom-hint">${ic('zoom')}확대</span></div>
       <div class="note">${cur.ai === 'ANOMALY' ? 'AI가 어떤 영역을 근거로 이상으로 판단했는지 보여주는 자료입니다 (시안: 위치는 시뮬레이션).' : 'AI 정상 판정 — 표시할 이상 영역이 없습니다.'} 실제 Heatmap · Mask · Overlay는 API 확장 이후 연동됩니다.</div>`
       : `<div class="locked mt16">${ic('lock', 'lg')}<div><b>AI 판단 근거(Heatmap · Mask · Overlay)</b><br>관리자 전용 화면에서 제공됩니다. 검사원은 점수와 원본 이미지로 판정합니다.</div></div>`;
     detail = `
       <div class="row" style="align-items:flex-start;flex-wrap:nowrap;gap:16px">
-        <div style="width:46%;min-width:0"><div class="photo"><img src="${cur.img}" alt="${cur.id} 원본"></div></div>
+        <div style="width:46%;min-width:0"><div class="photo zoomable" role="button" tabindex="0" title="클릭하면 크게 볼 수 있습니다" onclick="openViewer(${cur.n})" onkeydown="if(event.key==='Enter')openViewer(${cur.n})"><img src="${cur.img}" alt="${cur.id} 원본"><span class="zoom-hint">${ic('zoom')}확대</span></div>
+          <div class="row mt8"><button class="btn sm" onclick="openViewer(${cur.n})">${ic('zoom')}확대 보기</button><button class="btn sm outline" onclick="downloadImage(${cur.n})">${ic('download')}다운로드</button></div></div>
         <div style="flex:1;min-width:0"><div style="font-size:20px;font-weight:800">${cur.id}</div>
-          <div class="muted" style="margin:2px 0 8px">${cur.pcb} · Industrial PatchCore ${cur.ver}</div>
+          <div class="muted" style="margin:2px 0 8px">PCB 종류 ${pcbTag(cur.pcb)} · Industrial PatchCore ${cur.ver}</div>
           <span class="pill ${cur.ai === 'ANOMALY' ? 'orange' : 'green'}">${cur.ai === 'ANOMALY' ? 'AI 이상 의심' : 'AI 정상'}</span>
           <div class="mt10">이상 점수: <b>${cur.score.toFixed(2)}</b></div><div>임계값: <b>${cur.thr.toFixed(2)}</b> <span class="muted small">(검사 당시)</span></div>
           <div class="note">현재 상태: ${finalBadge(cur)}</div></div></div>
@@ -1067,7 +1262,7 @@ function viewReview() {
   return `${pageHead('검사 관리', '이상 의심 건 확인 · 최종 판정 · 사유 기록', `<span class="pill orange lg">${st.pending}건 대기</span>`)}
     <div class="row" style="margin:6px 0 14px">${chip('all', '전체')}${chip('pending', '검토 대기')}${chip('done', '검토 완료')}</div>
     <div class="split rv">
-      <div class="rv-list">${list.map(r => `<button class="rv-item ${r.n === U.rvSel ? 'sel' : ''}" onclick="U.rvSel=${r.n};U.rvMemo='';U.evMode='orig';render()"><div class="thumb" style="${thumbStyle(r)}"></div><div style="flex:1;min-width:0"><div class="rv-h"><span class="t">${r.id}</span>${finalBadge(r)}</div><div class="small muted">${r.pcb} · 점수 <b>${r.score.toFixed(2)}</b> · ${hhmm(r.at)}</div></div></button>`).join('') || '<div class="empty">항목이 없습니다.</div>'}</div>
+      <div class="rv-list">${list.map(r => `<button class="rv-item ${r.n === U.rvSel ? 'sel' : ''}" onclick="U.rvSel=${r.n};U.rvMemo='';U.evMode='orig';render()"><div class="thumb" style="${thumbStyle(r)}"></div><div style="flex:1;min-width:0"><div class="rv-h"><span class="t">${r.id}</span>${finalBadge(r)}</div><div class="small muted">${pcbTag(r.pcb)} · 점수 <b>${r.score.toFixed(2)}</b> · ${hhmm(r.at)}</div></div></button>`).join('') || '<div class="empty">항목이 없습니다.</div>'}</div>
       <div class="card">${detail}</div></div>`;
 }
 
@@ -1119,12 +1314,12 @@ function viewHistory() {
   return `${pageHead('검사 이력', '결과 조회 · 검색 · 이미지 및 CSV 다운로드')}
     <div class="card"><div class="row mb12">
       ${sel('period', [['all', '기간: 전체'], ['am', '기간: 오전'], ['pm', '기간: 오후'], ['eve', '기간: 저녁']])}
-      ${sel('pcb', [['all', 'PCB: 전체'], ...S.pcbs.map(p => [p.id, 'PCB: ' + p.id])])}
+      ${sel('pcb', [['all', 'PCB 종류: 전체'], ...S.pcbs.map(p => [p.id, 'PCB 종류: ' + p.id])])}
       ${sel('result', [['all', '결과: 전체'], ['NORMAL', '결과: 정상'], ['DEFECT', '결과: 불량'], ['PENDING', '결과: 검토 대기']])}
       <input class="inp" style="width:170px" placeholder="검사 ID · 번호 검색" value="${esc(U.hf.q)}" onchange="U.hf.q=this.value;U.hpage=1;render()">
       ${U.hf.hour != null ? `<button class="pill" onclick="U.hf.hour=null;U.hpage=1;render()" title="시간 필터 해제">${U.hf.hour}시대 ✕</button>` : ''}<span class="muted small">${all.length}건</span><button class="btn sm outline" style="margin-left:auto" onclick="exportCsv()">${ic('download')}CSV 다운로드</button></div>
-      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>번호</th><th>PCB</th><th>AI 점수</th><th>AI 판정</th><th>최종 판정</th><th>검사 시각</th>${isAdmin() ? '<th>당시 임계값</th><th>모델</th>' : ''}</tr></thead><tbody>
-      ${rows.map(r => `<tr class="click ${r.ai === 'ANOMALY' ? 'anom' : ''}" onclick="openDetail(${r.n})"><td>${r.n}</td><td>${r.pcb}</td><td><span class="sc">${r.score.toFixed(2)}<i class="${r.score >= r.thr ? 'hi' : ''}"><b style="width:${Math.round(r.score * 100)}%"></b></i></span></td><td>${aiBadge(r.ai)}</td><td>${finalBadge(r)}</td><td>${mdhm(r.at)}</td>${isAdmin() ? `<td>${r.thr.toFixed(2)}</td><td>${r.ver}</td>` : ''}</tr>`).join('') || `<tr><td colspan="${isAdmin() ? 8 : 6}" class="empty">${ic('history')}조건에 맞는 검사가 없습니다.<br><button class="btn sm outline mt10" onclick="U.hf={period:'all',pcb:'all',result:'all',q:''};U.hpage=1;render()">필터 초기화</button></td></tr>`}</tbody></table></div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>번호</th><th>PCB 종류</th><th>AI 점수</th><th>AI 판정</th><th>최종 판정</th><th>검사 시각</th>${isAdmin() ? '<th>당시 임계값</th><th>모델</th>' : ''}</tr></thead><tbody>
+      ${rows.map(r => `<tr class="click ${r.ai === 'ANOMALY' ? 'anom' : ''}" onclick="openDetail(${r.n})"><td>${r.n}</td><td>${pcbTag(r.pcb)}</td><td><span class="sc">${r.score.toFixed(2)}<i class="${r.score >= r.thr ? 'hi' : ''}"><b style="width:${Math.round(r.score * 100)}%"></b></i></span></td><td>${aiBadge(r.ai)}</td><td>${finalBadge(r)}</td><td>${mdhm(r.at)}</td>${isAdmin() ? `<td>${r.thr.toFixed(2)}</td><td>${r.ver}</td>` : ''}</tr>`).join('') || `<tr><td colspan="${isAdmin() ? 8 : 6}" class="empty">${ic('history')}조건에 맞는 검사가 없습니다.<br><button class="btn sm outline mt10" onclick="U.hf={period:'all',pcb:'all',result:'all',q:''};U.hpage=1;render()">필터 초기화</button></td></tr>`}</tbody></table></div>
       <div class="pager"><button class="btn sm" ${U.hpage <= 1 ? 'disabled' : ''} onclick="U.hpage--;render()">이전</button><span class="small muted">${U.hpage} / ${pages}</span><button class="btn sm" ${U.hpage >= pages ? 'disabled' : ''} onclick="U.hpage++;render()">다음</button></div>
     </div>`;
 }
@@ -1136,10 +1331,10 @@ function viewHistory() {
 function openDetail(n) {
   const r = S.inspections.find(x => x.n === n); if (!r) return;
   openModal(`<div class="row between"><b style="font-size:18px">${r.id}</b><button class="icon-btn" onclick="closeModal()" aria-label="닫기">${ic('x')}</button></div>
-    <div class="photo" style="margin:12px 0"><img src="${r.img}" alt="${r.id}"></div>
-    <dl class="kv"><dt>PCB / 모델</dt><dd>${r.pcb} · Industrial PatchCore ${r.ver}</dd><dt>검사 시각</dt><dd>${mdhm(r.at)} · 처리 ${r.ms}ms</dd>
+    <div class="photo zoomable" style="margin:12px 0" title="클릭하면 크게 볼 수 있습니다" onclick="openViewer(${r.n})"><img src="${r.img}" alt="${r.id}"><span class="zoom-hint">${ic('zoom')}확대</span></div>
+    <dl class="kv"><dt>PCB 종류 / 모델</dt><dd>${pcbTag(r.pcb)} · Industrial PatchCore ${r.ver}</dd><dt>검사 시각</dt><dd>${mdhm(r.at)} · 처리 ${r.ms}ms</dd>
       <dt>AI 점수</dt><dd>${r.score.toFixed(2)} (당시 임계값 ${r.thr.toFixed(2)})</dd><dt>AI 판정</dt><dd>${aiBadge(r.ai)}</dd><dt>최종 판정</dt><dd>${finalBadge(r)}</dd><dt>판정 사유</dt><dd>${esc(r.memo) || '<span class="muted">—</span>'}</dd></dl>
-    <div class="row" style="margin-top:16px;justify-content:flex-end"><a class="btn outline" href="${r.img}" download="${r.id}.png">${ic('download')}이미지 다운로드</a><button class="btn primary" onclick="openReview(${r.n})">검사 관리에서 열기</button></div>`);
+    <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn outline" onclick="downloadImage(${r.n})">${ic('download')}이미지 다운로드</button><button class="btn primary" onclick="openReview(${r.n})">검사 관리에서 열기</button></div>`);
 }
 
 /**
@@ -1226,6 +1421,94 @@ function chartTable(head, rows) {
 
 /** 대시보드 시간대 막대 클릭: 해당 시간대의 검사 이력으로 이동한다. @param {number} hr 시(0~23) */
 function gotoHour(hr) { U.hf = { period: 'all', pcb: 'all', result: 'all', q: '', hour: hr }; go('history'); }
+
+/**
+ * 다운로드 파일명을 만든다(검사 ID + 이미지 형식 확장자).
+ * @param {object} r 검사 레코드
+ * @returns {string} 예: INS-000120.png
+ */
+function dlName(r) {
+  const src = r.img || '', m = /^data:image\/(\w+)/.exec(src);
+  const ext = m ? (m[1] === 'jpeg' ? 'jpg' : m[1]) : ((/\.(\w{3,4})$/.exec(src) || [])[1] || 'png');
+  return `${r.id}.${ext}`;
+}
+
+/**
+ * 검사 이미지를 파일로 내려받는다.
+ * 같은 출처(배포 주소)에서는 Blob으로 바로 저장하고, file:// 로 직접 열었을 때처럼 브라우저가 fetch·download 속성을 막으면
+ * 새 탭에서 이미지를 열어 '다른 이름으로 저장'하도록 안내한다.
+ * @param {number} n 검사 번호
+ */
+async function downloadImage(n) {
+  const r = S.inspections.find(x => x.n === n); if (!r) return;
+  try {
+    const blob = await (await fetch(r.img)).blob(), url = URL.createObjectURL(blob);
+    const a = Object.assign(document.createElement('a'), { href: url, download: dlName(r) });
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1500);
+    toast(`${dlName(r)} 저장을 시작했습니다`);
+  } catch (e) {
+    window.open(r.img, '_blank');
+    toast('새 탭에서 이미지를 열었습니다 — 마우스 오른쪽 버튼으로 저장하세요');
+  }
+}
+
+/** 확대 뷰어 상태: s=배율(1~6), x·y=이동량(px) */
+const VZ = { s: 1, x: 0, y: 0 };
+
+/** 확대 뷰어의 현재 배율·이동을 화면에 반영한다(이동은 이미지가 화면 밖으로 벗어나지 않게 제한). */
+function vzApply() {
+  const box = document.getElementById('vz'), inn = document.getElementById('vzIn'); if (!box || !inn) return;
+  const w = box.clientWidth, hh = box.clientHeight;
+  VZ.x = Math.min(0, Math.max(w - w * VZ.s, VZ.x)); VZ.y = Math.min(0, Math.max(hh - hh * VZ.s, VZ.y));
+  inn.style.transform = `translate(${VZ.x}px,${VZ.y}px) scale(${VZ.s})`;
+  box.classList.toggle('zoomed', VZ.s > 1);
+  const pct = document.getElementById('vzPct'); if (pct) pct.textContent = Math.round(VZ.s * 100) + '%';
+}
+
+/**
+ * 지정한 지점을 기준으로 확대·축소한다.
+ * @param {number} f 배율 변화 비율(1.25 = 25% 확대)
+ * @param {number} [cx] 기준점 x(뷰어 안 좌표, 기본 중앙)
+ * @param {number} [cy] 기준점 y
+ */
+function vzZoom(f, cx, cy) {
+  const box = document.getElementById('vz'); if (!box) return;
+  cx = cx ?? box.clientWidth / 2; cy = cy ?? box.clientHeight / 2;
+  const ns = Math.min(6, Math.max(1, VZ.s * f)), k = ns / VZ.s;
+  VZ.x = cx - (cx - VZ.x) * k; VZ.y = cy - (cy - VZ.y) * k; VZ.s = ns; vzApply();
+}
+
+/** 확대 뷰어를 원래 크기(맞춤)로 되돌린다. */
+function vzReset() { VZ.s = 1; VZ.x = 0; VZ.y = 0; vzApply(); }
+
+/**
+ * 검사 이미지를 크게 보는 뷰어를 연다 — 휠·버튼 확대/축소, 끌어서 이동, 더블클릭 확대, 다운로드.
+ * 관리자가 검사 관리에서 AI 판단 근거(Heatmap·Mask·Overlay)를 선택해 둔 상태면 같은 표시를 이미지 위에 겹쳐 보여 준다.
+ * @param {number} n 검사 번호
+ */
+function openViewer(n) {
+  const r = S.inspections.find(x => x.n === n); if (!r) return;
+  Object.assign(VZ, { s: 1, x: 0, y: 0 });
+  const ev = isAdmin() && U.evMode !== 'orig' && r.ai === 'ANOMALY';
+  openModal(`<div class="row between mb8"><b style="font-size:18px">${r.id} · ${pcbTag(r.pcb)}</b><button class="icon-btn" onclick="closeModal()" aria-label="닫기">${ic('x')}</button></div>
+    <div class="vz" id="vz"><div class="vz-in" id="vzIn"><img src="${r.img}" alt="${r.id} 원본" draggable="false" style="${ev && U.evMode === 'mask' ? 'visibility:hidden' : ''}">${ev ? evidenceLayer(r, U.evMode, U.evOpacity) : ''}</div></div>
+    <div class="row between mt10"><div class="row"><button class="btn sm" onclick="vzZoom(1/1.25)" aria-label="축소">−</button><span id="vzPct" class="small muted" style="min-width:48px;text-align:center">100%</span><button class="btn sm" onclick="vzZoom(1.25)" aria-label="확대">+</button><button class="btn sm outline" onclick="vzReset()">맞춤</button></div>
+      <button class="btn sm primary" onclick="downloadImage(${r.n})">${ic('download')}이미지 다운로드</button></div>
+    <div class="note">마우스 휠 · +/− 로 확대·축소, 끌어서 이동, 더블클릭으로 확대/복귀. 다운로드는 원본 이미지입니다${ev ? '(판단 근거 표시는 화면용)' : ''}.</div>`);
+  document.querySelector('.modal-card').classList.add('wide');
+  const box = document.getElementById('vz'); let p = null;
+  const pos = e => { const b = box.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
+  box.addEventListener('wheel', e => { e.preventDefault(); const [cx, cy] = pos(e); vzZoom(e.deltaY < 0 ? 1.2 : 1 / 1.2, cx, cy); }, { passive: false });
+  box.addEventListener('dblclick', e => { const [cx, cy] = pos(e); if (VZ.s > 1) vzReset(); else vzZoom(2.5, cx, cy); });
+  box.addEventListener('pointerdown', e => { e.stopPropagation(); if (VZ.s <= 1) return; p = { x: e.clientX, y: e.clientY, sx: VZ.x, sy: VZ.y }; box.setPointerCapture(e.pointerId); box.classList.add('pan'); });
+  box.addEventListener('pointermove', e => { if (!p) return; VZ.x = p.sx + e.clientX - p.x; VZ.y = p.sy + e.clientY - p.y; vzApply(); });
+  const end = () => { p = null; box.classList.remove('pan'); };
+  box.addEventListener('pointerup', end); box.addEventListener('pointercancel', end);
+}
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('vz') || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+  if (e.key === '+' || e.key === '=') vzZoom(1.25); else if (e.key === '-') vzZoom(1 / 1.25); else if (e.key === '0') vzReset();
+});
 
 /** 도넛 범례에 마우스를 올리면 해당 유형의 호만 강조한다. @param {string} [k] 유형명(없으면 해제) */
 function hiArc(k) { document.querySelectorAll('circle.arc').forEach(c => { c.style.opacity = !k || c.dataset.k === k ? '' : '.3'; }); }
@@ -1371,8 +1654,10 @@ function viewData() {
       <div class="grid2">${IMPORT_FIELDS.map(([k, l]) => `<div class="field"><label>${l}</label><select class="inp" onchange="setImportMap('${k}',this.value)"><option value="-1">선택 안 함</option>${imp.head.map((h, i) => `<option value="${i}" ${imp.map[k] === i ? 'selected' : ''}>${esc(h)}</option>`).join('')}</select></div>`).join('')}</div>
       <div class="tbl-wrap"><table class="tbl"><thead><tr>${imp.head.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${imp.rows.slice(0, 3).map(r => `<tr>${imp.head.map((_, i) => `<td>${esc(r[i] ?? '')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
       <div class="row" style="justify-content:flex-end;margin-top:12px"><button class="btn primary" onclick="runImport()">매핑 검증 · 가져오기</button></div>` : '';
-  return `${pageHead('데이터 관리', '검사 데이터 현황 · CSV 가져오기 · 내보내기 · 보관 정책')}
+  const bankCard = bankCardHtml(adm);
+  return `${pageHead('데이터 관리', '검사 데이터 현황 · PCB 종류별 데이터뱅크 · CSV 가져오기 · 내보내기 · 보관 정책')}
     <div class="kpi-grid">${kpi('검사 레코드', n.toLocaleString() + '건', '정상 · 불량 · 대기 포함')}${kpi('저장 이미지', n + '장', '원본 촬영 이미지')}${kpi('사용 용량', gb.toFixed(1) + ' GB', '100 GB 중')}${kpi('보관 기간', S.settings.retention, adm ? '시스템 설정에서 변경' : '관리자 설정')}</div>
+    ${bankCard}
     <div class="split"><div class="card"><div class="card-title">${ic('upload', 'lg')}CSV 가져오기<span class="sp"></span><button class="btn sm outline" onclick="downloadSampleCsv()">샘플 CSV</button></div>
         <label class="drop" style="display:block;cursor:pointer">${ic('folder', 'lg')}<div class="mt6"><b>CSV 파일 선택</b></div><div class="small">기업별 컬럼명이 달라도 표준 항목(PCB ID · 검사 일시 · 판정 · 점수)에 연결합니다</div><input type="file" accept=".csv,text/csv" style="display:none" onchange="onImportFile(this)"></label>${preview}</div>
       <div class="card"><div class="card-title">${ic('download', 'lg')}내보내기</div>
@@ -1424,10 +1709,10 @@ function applyThreshold() {
  */
 function viewModels() {
   const adm = isAdmin();
-  return `${pageHead('PCB 및 모델 관리', 'PCB 등록 · 모델 연결 · 모델 버전 관리', adm ? `<button class="btn sm primary" onclick="openPcbForm()">${ic('plus')}PCB 등록</button>` : '')}
+  return `${pageHead('PCB 종류 및 모델 관리', 'PCB 종류(검사 대상 제품) 등록 · 모델 연결 · 모델 버전 관리', adm ? `<button class="btn sm primary" onclick="openPcbForm()">${ic('plus')}PCB 종류 등록</button>` : '')}
     ${adm ? '' : `<div class="mode-note">${ic('lock', 'lg')}<span><b>조회 전용</b> — 검사원 계정은 현재 설정을 확인만 할 수 있습니다. 변경은 관리자에게 요청하세요.</span></div>`}
-    <div class="card"><div class="card-title">등록된 PCB</div>
-      <div class="pcb-grid">${S.pcbs.map(p => `<div class="pcb-card"><div class="photo"><img src="${SAMPLE_IMG}" alt=""></div><div class="row between"><b style="font-size:16px">${esc(p.id)}</b><span class="pill green">${p.status}</span></div><div class="muted small">연결 모델: ${p.model}</div></div>`).join('')}${adm ? `<button class="pcb-card add" onclick="openPcbForm()">${ic('plus', 'lg')}PCB 등록</button>` : ''}</div></div>
+    <div class="card"><div class="card-title">등록된 PCB 종류 <span class="small muted" style="font-weight:400">— 검사할 제품(기판) 이름이며 정상 기준 사진이 아닙니다. 종류별 데이터뱅크는 데이터 관리에서 올립니다.</span></div>
+      <div class="pcb-grid">${S.pcbs.map(p => `<div class="pcb-card"><div class="photo"><img src="${SAMPLE_IMG}" alt=""></div><div class="row between"><b style="font-size:16px">${esc(p.id)}</b><span class="pill green">${p.status}</span></div><div class="muted small">연결 모델: ${p.model}</div><div class="small muted">자체 데이터뱅크 ${(S.banks[p.id] || []).length}건</div></div>`).join('')}${adm ? `<button class="pcb-card add" onclick="openPcbForm()">${ic('plus', 'lg')}PCB 등록</button>` : ''}</div></div>
     <div class="card"><div class="card-title">등록된 추론 모델</div>
       <div class="card" style="box-shadow:none"><div class="card-title mb6">${ic('db', 'lg')}Industrial PatchCore<span class="sp"></span><span class="pill green">활성화</span></div>
         <div class="muted">${S.model.active} · 공개 Memory Bank</div><div class="muted">특징 추출기: ResNet18 | 입력: 256 × 256</div>
@@ -1439,7 +1724,7 @@ function viewModels() {
       ${S.model.versions.map(x => `<div class="ver-row"><div style="flex:1"><b>${x.v}</b> <span class="muted small">${x.date}</span><div class="small muted">${x.note}</div></div>${x.v === S.model.active ? '<span class="pill green">활성화</span>' : (adm ? `<button class="btn sm outline" onclick="activateVersion('${x.v}')">이 버전으로 전환</button>` : '<span class="pill">대기</span>')}</div>`).join('')}
       ${adm ? '' : '<div class="note">버전 전환 · 임계값 변경 · PCB 등록은 관리자 권한이 필요합니다.</div>'}</div>
     <div class="card"><div class="card-title">후속 확장 예정 (MVP 이후)</div>
-      <div class="road">${['촬영 품질 자동 검사 및 이미지 보정', 'Best Frame 선정', 'Heatmap, Mask, Overlay 제공 (API 연동)', '픽셀 직접 비교 기반 정밀 검사', '자체 Memory Bank 생성 및 관리', 'PCB 종류 자동 인식', '전기적 결함 검사', '여러 장 한꺼번에 업로드 (배치 검사)'].map(t => `<div><span class="pill">예정</span>${t}</div>`).join('')}</div></div>`;
+      <div class="road">${['촬영 품질 자동 검사 및 이미지 보정', 'Best Frame 선정', 'Heatmap, Mask, Overlay 제공 (API 연동)', '픽셀 직접 비교 기반 정밀 검사', '자체 Memory Bank 생성 및 관리', 'PCB 종류 자동 인식', '전기적 결함 검사', '대량 배치 고도화 (폴더 감시 · ZIP 업로드 · 백그라운드 큐)'].map(t => `<div><span class="pill">예정</span>${t}</div>`).join('')}</div></div>`;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1515,7 +1800,7 @@ function render() {
 /** 데모 데이터를 초기 상태(120건)로 되돌린다. 테마와 로그인은 유지한다. */
 function resetDemo() {
   S = createInitialState({ theme: S.theme, user: S.user, api: S.api }); U.rvSel = null; U.hf = { period: 'all', pcb: 'all', result: 'all', q: '' }; U.hpage = 1; U.anim = true;
-  U.img = SAMPLE_IMG; U.imgName = '샘플 촬영 이미지'; render(); toast('데모 데이터를 초기화했습니다');
+  U.queue = [newQueueItem({ name: '샘플 촬영 이미지', src: SAMPLE_IMG, sample: true })]; U.bankPcb = 'PCB1'; render(); toast('데모 데이터를 초기화했습니다');
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
