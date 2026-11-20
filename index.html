@@ -562,7 +562,7 @@ function createInitialState(keep = {}) {
     user: keep.user || null,
     inspections: list,
     pcbs: [{ id: 'PCB1', model: 'Industrial PatchCore', status: '검사 가능' }],
-    banks: {},          // PCB 종류별 데이터뱅크 파일 { 'PCB1': [{ id, name, size, kind, at, src }] } — 시연용(브라우저 메모리)
+    banks: Object.create(null),   // PCB 종류별 데이터뱅크 파일 { 'PCB1': [{ id, name, size, kind, at, src }] } — 시연용(브라우저 메모리)
     model: { active: 'v0.3.0', threshold: 0.60, versions: [
       { v: 'v0.3.0', note: '공개 Memory Bank · 현재 운영', date: '2026-11-18' },
       { v: 'v0.2.1', note: '공개 Memory Bank · 이전 버전', date: '2026-11-10' }
@@ -1054,7 +1054,7 @@ const sleep = ms => new Promise(r => setTimeout(r, REDUCED ? Math.min(ms, 120) :
 /**
  * 일괄 검사: 대기 중인 이미지를 순서대로 PatchCore API에 보내고(시뮬레이션) 결과를 검사 이력에 저장한다.
  * AI 이상 → '검토 대기' 큐 편입 / AI 정상 → 정상 자동 확정. 실서비스에서는 같은 POST /api/inspections 를 이미지마다 호출한다.
- * 서버 연결이 끊기면 남은 이미지는 대기 상태로 두고 중단한다.
+ * 서버 연결이 끊기면 남은 이미지는 대기 상태로 두고 중단한다. 검사 도중 로그아웃하거나 데모를 초기화하면 이후 이미지는 저장하지 않고 멈춘다.
  */
 async function runBatch() {
   if (U.running) return;
@@ -1062,11 +1062,13 @@ async function runBatch() {
   const todo = U.queue.filter(q => q.st !== 'done');
   if (!todo.length) return toast('검사할 이미지를 추가하세요');
   U.running = true; render();
-  const redraw = () => { if (U.route === 'inspect') render(); };
-  let ok = 0, anom = 0, stopped = false;
+  const S0 = S, redraw = () => { if (U.route === 'inspect') render(); };   // S0: 도중에 로그아웃·데모 초기화로 상태가 바뀌면 이어서 저장하지 않기 위한 기준
+  let ok = 0, anom = 0, stopped = false, aborted = false;
   for (const q of todo) {
+    if (S !== S0 || !S.user) { aborted = true; break; }
     if (!S.api.online) { stopped = true; break; }
     q.st = 'run'; redraw(); await sleep(650);
+    if (S !== S0 || !S.user) { aborted = true; break; }
     const thr = S.model.threshold, score = mockApiScore(q), last = Math.max(...S.inspections.map(r => r.n)), prevAt = S.inspections.find(r => r.n === last).at;
     const n = last + 1, rng = makeRng((Date.now() + n * 97) % 100000), ai = score >= thr ? 'ANOMALY' : 'NORMAL';
     const rec = { n, id: 'INS-' + String(n).padStart(6, '0'), pcb: U.pcb, score, thr, ver: S.model.active, ai, final: ai === 'NORMAL' ? 'NORMAL' : null, memo: '',
@@ -1076,7 +1078,9 @@ async function runBatch() {
     redraw();
   }
   for (const q of U.queue) if (q.st === 'run') q.st = 'wait';
-  U.running = false; U.fresh = true; render();
+  U.running = false;
+  if (aborted) { if (S.user) render(); return; }   // 로그아웃·데모 초기화로 중단: 새 상태에는 아무것도 저장하지 않는다
+  U.fresh = true; render();
   toast(stopped ? `서버 연결이 끊겨 ${ok}장까지 검사하고 중단했습니다` : `${ok}장 검사 완료 · 정상 ${ok - anom} · 이상 의심 ${anom}${anom ? ' — 검토 대기로 등록' : ''}`);
 }
 
@@ -1175,9 +1179,9 @@ function bankDelete(id, fid) {
  */
 function bankCardHtml(adm) {
   if (!S.pcbs.some(p => p.id === U.bankPcb)) U.bankPcb = S.pcbs[0].id;
-  const cur = U.bankPcb, files = bankOf(cur), imgs = files.filter(f => f.kind === 'image').length, banks = files.length - imgs;
+  const cur = U.bankPcb, files = S.banks[cur] || [], imgs = files.filter(f => f.kind === 'image').length, banks = files.length - imgs;
   const sum = S.pcbs.map(p => { const a = S.banks[p.id] || [], im = a.filter(f => f.kind === 'image').length;
-    return `<tr class="click ${p.id === cur ? 'sel' : ''}" onclick="setBankPcb('${esc(p.id)}')"><td>${pcbTag(p.id)}</td><td>공개 Memory Bank ${S.model.active} <span class="muted small">(Industrial PatchCore)</span></td><td>${im}장</td><td>${a.length - im}개</td><td>${a.length ? '<span class="pill orange">자체 데이터 있음 · 학습 연결 예정</span>' : '<span class="pill green">공개 뱅크 사용 중</span>'}</td></tr>`; }).join('');
+    return `<tr class="click ${p.id === cur ? 'sel' : ''}" data-pcb="${esc(p.id)}" onclick="setBankPcb(this.dataset.pcb)"><td>${pcbTag(p.id)}</td><td>공개 Memory Bank ${S.model.active} <span class="muted small">(Industrial PatchCore)</span></td><td>${im}장</td><td>${a.length - im}개</td><td>${a.length ? '<span class="pill orange">자체 데이터 있음 · 학습 연결 예정</span>' : '<span class="pill green">공개 뱅크 사용 중</span>'}</td></tr>`; }).join('');
   const kindPill = f => f.kind === 'image' ? '<span class="pill green">정상 이미지</span>' : '<span class="pill">Memory Bank 파일</span>';
   const upload = adm ? `<div class="drop dz" role="button" tabindex="0" onclick="document.getElementById('bankInput').click()" onkeydown="if(event.key==='Enter')document.getElementById('bankInput').click()" ondragover="dzOver(event)" ondragleave="dzLeave(event)" ondrop="dzDrop(event,'bank')">${ic('upload', 'lg')}<div class="mt6"><b>${esc(cur)} 데이터뱅크 파일을 끌어다 놓거나 클릭해서 선택</b></div><div class="small dz-note">정상 PCB 사진(PNG · JPG …) 또는 Memory Bank 파일(.zip · .npy · .pt · .pth · .ckpt · .faiss · .pkl · .bin · .json) · 여러 개 동시 선택 가능</div></div>`
     : `<div class="mode-note">${ic('lock', 'lg')}<span><b>조회 전용</b> — 데이터뱅크 업로드·삭제는 관리자만 할 수 있습니다.</span></div>`;
@@ -1188,7 +1192,7 @@ function bankCardHtml(adm) {
       <div class="row mb10"><b>${pcbTag(cur)} 데이터뱅크</b><span class="muted small">정상 이미지 ${imgs}장 · 뱅크 파일 ${banks}개</span><span class="sp"></span>
         <select class="inp" style="width:auto" aria-label="데이터뱅크 PCB 종류" onchange="setBankPcb(this.value)">${S.pcbs.map(p => `<option ${p.id === cur ? 'selected' : ''}>${esc(p.id)}</option>`).join('')}</select></div>
       ${upload}
-      <div class="bk-list mt10">${files.length ? files.map(f => `<div class="bk-row"><div class="bk-ico">${f.src ? `<img src="${f.src}" alt="">` : ic('db')}</div><div style="flex:1;min-width:0"><b class="qname" title="${esc(f.name)}">${esc(f.name)}</b><div class="small muted">${fmtBytes(f.size)} · ${mdhm(f.at)}</div></div>${kindPill(f)}${adm ? `<button class="icon-btn" onclick="bankDelete('${esc(cur)}','${f.id}')" aria-label="삭제" title="삭제">${ic('x')}</button>` : ''}</div>`).join('') : `<div class="empty">${esc(cur)}에 올린 자체 데이터뱅크 파일이 없습니다.<br>공개 Memory Bank(${S.model.active})를 사용 중입니다.</div>`}</div>
+      <div class="bk-list mt10">${files.length ? files.map(f => `<div class="bk-row"><div class="bk-ico">${f.src ? `<img src="${f.src}" alt="">` : ic('db')}</div><div style="flex:1;min-width:0"><b class="qname" title="${esc(f.name)}">${esc(f.name)}</b><div class="small muted">${fmtBytes(f.size)} · ${mdhm(f.at)}</div></div>${kindPill(f)}${adm ? `<button class="icon-btn" data-pcb="${esc(cur)}" data-fid="${f.id}" onclick="bankDelete(this.dataset.pcb,this.dataset.fid)" aria-label="삭제" title="삭제">${ic('x')}</button>` : ''}</div>`).join('') : `<div class="empty">${esc(cur)}에 올린 자체 데이터뱅크 파일이 없습니다.<br>공개 Memory Bank(${S.model.active})를 사용 중입니다.</div>`}</div>
       <div class="note">시연에서는 파일을 서버로 보내지 않고 브라우저 메모리에만 보관합니다(새로고침하면 사라짐). 실서비스는 서버 스토리지(/storage/banks/{PCB 종류}/)에 저장하고 pcb_banks 테이블에 기록합니다. 학습 연결은 후속 확장(자체 Memory Bank)입니다.</div></div>`;
 }
 
@@ -1686,6 +1690,7 @@ function openPcbForm() {
 function addPcb() {
   const name = document.getElementById('pcbName').value.trim();
   if (!name) return toast('PCB 이름을 입력하세요');
+  if (name.length > 30) return toast('PCB 이름은 30자 이내로 입력하세요');
   if (S.pcbs.some(p => p.id.toLowerCase() === name.toLowerCase())) return toast('이미 등록된 PCB입니다');
   S.pcbs.push({ id: name, model: document.getElementById('pcbModel').value, status: '검사 가능' }); closeModal(); render(); toast(`${name} 등록 완료`);
 }
@@ -1799,6 +1804,7 @@ function render() {
 
 /** 데모 데이터를 초기 상태(120건)로 되돌린다. 테마와 로그인은 유지한다. */
 function resetDemo() {
+  Object.values(S.banks).forEach(a => a.forEach(f => f.src && URL.revokeObjectURL(f.src)));   // 데이터뱅크 미리보기 Blob URL 해제
   S = createInitialState({ theme: S.theme, user: S.user, api: S.api }); U.rvSel = null; U.hf = { period: 'all', pcb: 'all', result: 'all', q: '' }; U.hpage = 1; U.anim = true;
   U.queue = [newQueueItem({ name: '샘플 촬영 이미지', src: SAMPLE_IMG, sample: true })]; U.bankPcb = 'PCB1'; render(); toast('데모 데이터를 초기화했습니다');
 }
