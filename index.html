@@ -318,6 +318,27 @@ button.pill.api.green .dot { animation: ringg 2.2s ease-out infinite; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-delay: 0ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
 
+/* UI 개선 패치 — 차트 보조선 · 목록 · 빈 상태 · 단계 안내 */
+.rv-h { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.rv-item .small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.kpi .s { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+.sc { display: inline-flex; align-items: center; gap: 8px; min-width: 96px; }
+.sc i { position: relative; display: inline-block; width: 54px; height: 6px; border-radius: 4px; background: var(--bg-muted); overflow: hidden; flex: none; }
+.sc i b { position: absolute; left: 0; top: 0; bottom: 0; background: var(--bar-normal); border-radius: 4px; }
+.sc i.hi b { background: var(--bar-defect); }
+.tbl tr.anom td:first-child { box-shadow: inset 3px 0 0 var(--bar-defect); }
+.pager .btn { min-height: 36px; min-width: 56px; }
+.steps { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 8px; }
+.steps li { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 10px; color: var(--text-2); }
+.steps li .n { width: 22px; height: 22px; border-radius: 50%; background: var(--bg-muted); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex: none; }
+.steps li.ok .n { background: var(--primary); color: var(--primary-fg); }
+.steps li.ok { border-color: color-mix(in srgb, var(--primary) 40%, var(--border)); }
+.empty .ic { width: 28px; height: 28px; display: block; margin: 0 auto 6px; opacity: .55; }
+.pcb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+.pcb-card { border: 1px solid var(--border); border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 8px; background: var(--bg-card); text-align: left; }
+.pcb-card .photo { width: 100%; aspect-ratio: 475/350; border-radius: 8px; }
+.pcb-card.add { border-style: dashed; align-items: center; justify-content: center; color: var(--text-3); min-height: 150px; font-weight: 600; }
+.pcb-card.add:hover { background: var(--bg-muted); }
 /* 반응형 — 현장 모바일/태블릿: 사이드 메뉴 → 하단 탭바 */
 @media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 900px) {
@@ -328,7 +349,8 @@ button.pill.api.green .dot { animation: ringg 2.2s ease-out infinite; }
   .nav-item span { text-align: center; white-space: nowrap; line-height: 1.2; }
   .nav-item.active { background: var(--bg-hover); }
   .nav-item .cnt { position: absolute; top: 0; right: 4px; margin: 0; }
-  .nav-item .lk { position: absolute; top: 3px; right: 6px; margin: 0; }
+  .nav-item .lk { position: absolute; top: 7px; right: 13px; margin: 0; width: 7px; height: 7px; border-radius: 50%; background: var(--text-3); opacity: .7; }
+  .nav-item .lk .ic { display: none; }
   /* 터치 영역 최소 36px 이상 확보 */
   .btn { min-height: 42px; } .btn.sm { min-height: 38px; padding: 6px 14px; } button.pill { min-height: 36px; padding: 6px 14px; } .icon-btn { width: 40px; height: 40px; }
   .role-strip .rs-act { margin-left: 0; width: 100%; } .role-strip .rs-act .btn { flex: 1; }
@@ -353,7 +375,7 @@ button.pill.api.green .dot { animation: ringg 2.2s ease-out infinite; }
 .vw-dev.phone iframe { border-radius: 28px; }
 .vw-cap { color: var(--text-3); font-size: 12.5px; text-align: center; margin-top: 8px; }
 @media (max-width: 440px) { .brand-t { display: none; } .topbar { padding: 0 10px; } .icon-btn { width: 38px !important; } }
-@media (max-width: 700px) { .lbl-s { display: inline; } .lbl-f { display: none; } }
+@media (max-width: 700px) { .lbl-s { display: inline; } .lbl-f { display: none; } .sub-hint { display: none; } svg .ct { font-size: 14px; } }
 @media (max-width: 520px) { .api-name { display: none; } .rank-row { grid-template-columns: 18px 72px 1fr 58px; } .topbar { gap: 6px; } .main { padding: 14px 12px 20px; } .rv-list { max-height: 360px; } }
 </style>
 </head>
@@ -812,14 +834,16 @@ function hourlyChart() {
   const hours = Array.from({ length: 12 }, (_, i) => 8 + i);
   const data = hours.map(h => { const rs = S.inspections.filter(r => new Date(r.at).getHours() === h); return { h, n: rs.filter(r => r.final === 'NORMAL').length, d: rs.filter(r => r.final === 'DEFECT').length, p: rs.filter(r => r.final === null).length }; });
   const max = Math.max(1, ...data.map(x => x.n + x.d + x.p)), W = 480, H = 170, bw = 26, gap = (W - 20 - bw * 12) / 11;
+  const curH = Math.max(...data.filter(x => x.n + x.d + x.p > 0).map(x => x.h)); // 가장 최근 검사가 있는 시간대(현재)
+  const grid = [0.5, 1].map(f => `<line x1="6" x2="${W - 6}" y1="${H - 22 - f * (H - 40)}" y2="${H - 22 - f * (H - 40)}" stroke="var(--border)" stroke-dasharray="3 4"/>`).join('');
   const bars = data.map((x, i) => {
     const X = 10 + i * (bw + gap); let y = H - 22; let out = '';
     [['n', 'var(--bar-normal)'], ['d', 'var(--bar-defect)'], ['p', 'var(--bar-pending)']].forEach(([k, c]) => {
       const h = x[k] / max * (H - 40); if (h > 0) { y -= h; out += `<rect class="bar" style="animation-delay:${i * 50}ms" x="${X}" y="${y}" width="${bw}" height="${h}" rx="2" fill="${c}"/>`; }
     });
-    return out + `<text x="${X + bw / 2}" y="${H - 6}" text-anchor="middle" font-size="10" fill="var(--text-3)">${x.h}</text><text class="bar-l" x="${X + bw / 2}" y="${y - 4}" text-anchor="middle" font-size="10" fill="var(--text-2)">${x.n + x.d + x.p}</text>`;
+    return out + `<text class="ct" x="${X + bw / 2}" y="${H - 6}" text-anchor="middle" font-size="10" fill="${x.h === curH ? 'var(--primary)' : 'var(--text-3)'}" font-weight="${x.h === curH ? 800 : 400}">${x.h}</text><text class="bar-l ct" x="${X + bw / 2}" y="${y - 4}" text-anchor="middle" font-size="10" fill="var(--text-2)">${x.n + x.d + x.p}</text>`;
   }).join('');
-  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="시간대별 검사 건수">${bars}</svg>
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="시간대별 검사 건수">${grid}${bars}</svg>
     <div class="row small muted" style="gap:14px"><span><span class="dot" style="color:var(--bar-normal);display:inline-block"></span> 정상</span><span><span class="dot" style="color:var(--bar-defect);display:inline-block"></span> 불량</span><span><span class="dot" style="color:var(--bar-pending);display:inline-block"></span> 검토 대기</span></div>`;
 }
 
@@ -831,7 +855,8 @@ function viewDashboard() {
   const st = getStats();
   const recent = [...S.inspections].sort((a, b) => b.n - a.n).slice(0, 5);
   const pend = S.inspections.filter(r => r.final === null).sort((a, b) => b.n - a.n).slice(0, 5);
-  const kpi = (label, v, cls, flt) => `<button class="kpi" onclick="gotoHistory('${flt}')"><div class="l">${label}</div><div class="v ${cls}">${v}</div></button>`;
+  const pc = n => (st.total ? (n / st.total * 100).toFixed(1) : '0.0') + '%';
+  const kpi = (label, v, cls, flt, sub) => `<button class="kpi" onclick="gotoHistory('${flt}')"><div class="l">${label}</div><div class="v ${cls}">${v}</div><div class="s">${sub}</div></button>`;
   const first = S.inspections.filter(r => r.final === null).sort((a, b) => b.n - a.n)[0];
   const roleStrip = isAdmin()
     ? `<div class="role-strip admin"><span class="rs-t">${ic('shield', 'lg')}관리자 현황</span>
@@ -842,13 +867,13 @@ function viewDashboard() {
     : `<div class="role-strip insp"><span class="rs-t">${ic('user', 'lg')}내 작업</span>
         <span class="rs-i"><small>검토 대기</small><b style="color:var(--warn)">${st.pending}건</b></span><span class="rs-i"><small>오늘 검사</small><b>${st.total}건</b></span>
         <span class="rs-act">${first ? `<button class="btn sm primary" onclick="openReview(${first.n})">바로 판정하기</button>` : ''}<button class="btn sm outline" onclick="go('inspect')">새 검사 시작</button></span></div>`;
-  return `<h1 class="page-title">오늘의 검사 현황</h1><p class="page-sub">2026-11-20 · 카드를 누르면 해당 조건의 검사 이력으로 이동합니다.</p>
+  return `<h1 class="page-title">오늘의 검사 현황</h1><p class="page-sub">2026-11-20<span class="sub-hint"> · 카드를 누르면 해당 조건의 검사 이력으로 이동합니다.</span></p>
     ${roleStrip}
-    <div class="kpi-grid">${kpi('전체 검사', st.total, '', 'all')}${kpi('정상 확정', st.normal, 'good', 'NORMAL')}${kpi('불량 확정', st.defect, 'bad', 'DEFECT')}${kpi('검토 대기', st.pending, 'warn', 'PENDING')}</div>
+    <div class="kpi-grid">${kpi('전체 검사', st.total, '', 'all', '오늘 08~19시 · 이력 보기')}${kpi('정상 확정', st.normal, 'good', 'NORMAL', '전체의 ' + pc(st.normal))}${kpi('불량 확정', st.defect, 'bad', 'DEFECT', '전체의 ' + pc(st.defect))}${kpi('검토 대기', st.pending, 'warn', 'PENDING', '전체의 ' + pc(st.pending))}</div>
     <div class="split">
-      <div class="card"><div class="card-title">시간대별 검사 건수</div>${hourlyChart()}</div>
+      <div class="card"><div class="card-title">시간대별 검사 건수</div>${hourlyChart()}<div class="divider"></div><div class="card-title">불량 유형별 분포 <span class="pill">최근 7일</span><span class="sp"></span><button class="btn sm" onclick="go('stats')">통계 분석</button></div>${defectDist(statsData(7).byType)}</div>
       <div class="card"><div class="card-title">검토 대기 <span class="pill orange">${st.pending}건</span><span class="sp"></span><button class="btn sm" onclick="go('review')">검토하기</button></div>
-        ${pend.length ? pend.map(r => `<div class="ver-row"><div class="thumb" style="${thumbStyle(r)}"></div><div style="flex:1"><b>${r.id}</b><div class="small muted">${r.pcb} · 점수 ${r.score.toFixed(2)} · ${hhmm(r.at)}</div></div><button class="btn sm outline" onclick="openReview(${r.n})">판정</button></div>`).join('') : '<div class="empty">검토 대기 건이 없습니다.</div>'}
+        ${pend.length ? pend.map(r => `<div class="ver-row"><div class="thumb" style="${thumbStyle(r)}"></div><div style="flex:1"><b>${r.id}</b><div class="small muted">${r.pcb} · 점수 ${r.score.toFixed(2)} · ${hhmm(r.at)}</div></div><button class="btn sm outline" onclick="openReview(${r.n})">판정</button></div>`).join('') : `<div class="empty">검토 대기 건이 없습니다.<br><button class="btn sm outline" style="margin-top:10px" onclick="go('inspect')">새 검사 시작</button></div>`}
         <div class="divider"></div><div class="row between"><span class="muted">AI-검사원 판정 일치율</span><b style="font-size:20px">${st.match}%</b></div>
         <div class="note" style="margin-top:4px">검사원 확정 건 중 AI 최초 판정과 같은 비율 (AI 원본 판정은 보존)</div></div>
     </div>
@@ -929,7 +954,7 @@ function viewInspect() {
       <div class="muted">추론 모델</div><div style="font-weight:600;margin-bottom:6px">Industrial PatchCore <span class="muted small">${r.ver}</span></div>
       <div class="muted">처리 시간: ${r.ms}ms</div>
       ${r.ai === 'ANOMALY' ? `<button class="btn outline sm" style="margin-top:12px" onclick="openReview(${r.n})">검사 관리에서 판정하기</button>` : `<div class="note">정상 판정은 자동 확정됩니다. 이상 의심 건만 검사원 검토가 필요합니다.</div>`}</div>`
-    : `<span class="pill lg">검사 대기</span><div class="empty" style="padding:30px 0">이미지를 준비하고 <b>검사 시작</b>을 누르면<br>PatchCore API 결과가 여기에 표시됩니다.</div>`;
+    : `<span class="pill lg">검사 대기</span><ul class="steps"><li class="${U.pcb ? 'ok' : ''}"><span class="n">1</span>PCB 선택 <span class="muted small">${esc(U.pcb || '')}</span></li><li class="${U.img ? 'ok' : ''}"><span class="n">2</span>이미지 준비 (촬영 또는 업로드)</li><li><span class="n">3</span>검사 시작 → PatchCore API 결과가 여기에 표시됩니다</li></ul>`;
   const off = !S.api.online;
   return `<h1 class="page-title">PCB 외관 검사</h1>
     ${off ? `<div class="banner-off">${ic('lock', 'lg')}<span>PatchCore API 서버 오프라인 — 검사를 시작할 수 없습니다. 상단의 상태 배지를 눌러 연결을 확인하세요.</span></div>` : ''}
@@ -1017,7 +1042,7 @@ function viewReview() {
   return `<div class="row between"><h1 class="page-title">검사 관리</h1><span class="pill orange lg">${st.pending}건 대기</span></div>
     <div class="row" style="margin:6px 0 14px">${chip('all', '전체')}${chip('pending', '검토 대기')}${chip('done', '검토 완료')}</div>
     <div class="split rv">
-      <div class="rv-list">${list.map(r => `<button class="rv-item ${r.n === U.rvSel ? 'sel' : ''}" onclick="U.rvSel=${r.n};U.rvMemo='';U.evMode='orig';render()"><div class="thumb" style="${thumbStyle(r)}"></div><div style="flex:1;min-width:0"><div class="t">${r.id}</div><div class="small muted">${r.pcb} · ${r.score.toFixed(2)} · ${hhmm(r.at)}</div></div>${finalBadge(r)}</button>`).join('') || '<div class="empty">항목이 없습니다.</div>'}</div>
+      <div class="rv-list">${list.map(r => `<button class="rv-item ${r.n === U.rvSel ? 'sel' : ''}" onclick="U.rvSel=${r.n};U.rvMemo='';U.evMode='orig';render()"><div class="thumb" style="${thumbStyle(r)}"></div><div style="flex:1;min-width:0"><div class="rv-h"><span class="t">${r.id}</span>${finalBadge(r)}</div><div class="small muted">${r.pcb} · 점수 <b>${r.score.toFixed(2)}</b> · ${hhmm(r.at)}</div></div></button>`).join('') || '<div class="empty">항목이 없습니다.</div>'}</div>
       <div class="card">${detail}</div></div>`;
 }
 
@@ -1071,11 +1096,11 @@ function viewHistory() {
       ${sel('pcb', [['all', 'PCB: 전체'], ...S.pcbs.map(p => [p.id, 'PCB: ' + p.id])])}
       ${sel('result', [['all', '결과: 전체'], ['NORMAL', '결과: 정상'], ['DEFECT', '결과: 불량'], ['PENDING', '결과: 검토 대기']])}
       <input class="inp" style="width:170px" placeholder="검사 ID · 번호 검색" value="${esc(U.hf.q)}" onchange="U.hf.q=this.value;U.hpage=1;render()">
-      <span class="muted small">${all.length}건</span></div>
+      <span class="muted small">${all.length}건</span><button class="btn sm outline" style="margin-left:auto" onclick="exportCsv()">${ic('download')}CSV 다운로드</button></div>
       <div class="tbl-wrap"><table class="tbl"><thead><tr><th>번호</th><th>PCB</th><th>AI 점수</th><th>AI 판정</th><th>최종 판정</th><th>검사 시각</th>${isAdmin() ? '<th>당시 임계값</th><th>모델</th>' : ''}</tr></thead><tbody>
-      ${rows.map(r => `<tr class="click" onclick="openDetail(${r.n})"><td>${r.n}</td><td>${r.pcb}</td><td>${r.score.toFixed(2)}</td><td>${aiBadge(r.ai)}</td><td>${finalBadge(r)}</td><td>${mdhm(r.at)}</td>${isAdmin() ? `<td>${r.thr.toFixed(2)}</td><td>${r.ver}</td>` : ''}</tr>`).join('') || `<tr><td colspan="${isAdmin() ? 8 : 6}" class="empty">조건에 맞는 검사가 없습니다.</td></tr>`}</tbody></table></div>
+      ${rows.map(r => `<tr class="click ${r.ai === 'ANOMALY' ? 'anom' : ''}" onclick="openDetail(${r.n})"><td>${r.n}</td><td>${r.pcb}</td><td><span class="sc">${r.score.toFixed(2)}<i class="${r.score >= r.thr ? 'hi' : ''}"><b style="width:${Math.round(r.score * 100)}%"></b></i></span></td><td>${aiBadge(r.ai)}</td><td>${finalBadge(r)}</td><td>${mdhm(r.at)}</td>${isAdmin() ? `<td>${r.thr.toFixed(2)}</td><td>${r.ver}</td>` : ''}</tr>`).join('') || `<tr><td colspan="${isAdmin() ? 8 : 6}" class="empty">${ic('history')}조건에 맞는 검사가 없습니다.<br><button class="btn sm outline" style="margin-top:10px" onclick="U.hf={period:'all',pcb:'all',result:'all',q:''};U.hpage=1;render()">필터 초기화</button></td></tr>`}</tbody></table></div>
       <div class="pager"><button class="btn sm" ${U.hpage <= 1 ? 'disabled' : ''} onclick="U.hpage--;render()">이전</button><span class="small muted">${U.hpage} / ${pages}</span><button class="btn sm" ${U.hpage >= pages ? 'disabled' : ''} onclick="U.hpage++;render()">다음</button></div>
-      <div class="row" style="justify-content:flex-end;margin-top:8px"><button class="btn outline" onclick="exportCsv()">${ic('download')}CSV 다운로드</button></div></div>`;
+    </div>`;
 }
 
 /**
@@ -1154,11 +1179,11 @@ function setStatDays(d) { U.statDays = d; render(); }
 
 /** 일별 검사 추이 라인 차트(SVG): 전체 검사 · 불량. */
 function trendChart(d) {
-  const W = 520, H = 220, L = 38, R = 14, T = 16, B = 28, n = d.labels.length;
+  const W = 520, H = 220, L = 50, R = 18, T = 16, B = 28, n = d.labels.length;
   const max = Math.ceil(Math.max(...d.tot) / 40) * 40, X = i => L + (W - L - R) * i / (n - 1), Y = v => T + (H - T - B) * (1 - v / max);
-  const line = (arr, c) => `<polyline class="draw" fill="none" stroke="${c}" stroke-width="2.4" stroke-linejoin="round" points="${arr.map((v, i) => `${X(i)},${Y(v)}`).join(' ')}"/>${arr.map((v, i) => `<circle class="pt" style="animation-delay:${0.35 + i * 0.12}s" cx="${X(i)}" cy="${Y(v)}" r="3.2" fill="${c}"/>${n <= 8 ? `<text class="pt" style="animation-delay:${0.35 + i * 0.12}s" x="${X(i)}" y="${Y(v) - 8}" text-anchor="middle" font-size="10.5" fill="var(--text-2)">${v}</text>` : ''}`).join('')}`;
-  const grid = [0, .25, .5, .75, 1].map(f => `<line x1="${L}" x2="${W - R}" y1="${Y(max * f)}" y2="${Y(max * f)}" stroke="var(--border)"/><text x="${L - 6}" y="${Y(max * f) + 4}" text-anchor="end" font-size="10.5" fill="var(--text-3)">${Math.round(max * f)}</text>`).join('');
-  const xl = d.labels.map((l, i) => (n <= 8 || i % 2 === 0) ? `<text x="${X(i)}" y="${H - 8}" text-anchor="middle" font-size="10.5" fill="var(--text-3)">${l}</text>` : '').join('');
+  const line = (arr, c) => `<polyline class="draw" fill="none" stroke="${c}" stroke-width="2.4" stroke-linejoin="round" points="${arr.map((v, i) => `${X(i)},${Y(v)}`).join(' ')}"/>${arr.map((v, i) => `<circle class="pt" style="animation-delay:${0.35 + i * 0.12}s" cx="${X(i)}" cy="${Y(v)}" r="3.2" fill="${c}"/>${n <= 8 ? `<text class="pt ct" style="animation-delay:${0.35 + i * 0.12}s" x="${X(i) + (i === 0 ? 4 : i === n - 1 ? -4 : 0)}" y="${Y(v) - 8}" text-anchor="${i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle'}" font-size="10.5" fill="var(--text-2)">${v}</text>` : ''}`).join('')}`;
+  const grid = [0, .25, .5, .75, 1].map(f => `<line x1="${L}" x2="${W - R}" y1="${Y(max * f)}" y2="${Y(max * f)}" stroke="var(--border)"/><text class="ct" x="${L - 8}" y="${Y(max * f) + 4}" text-anchor="end" font-size="10.5" fill="var(--text-3)">${Math.round(max * f)}</text>`).join('');
+  const xl = d.labels.map((l, i) => (n <= 8 || i % 2 === 0) ? `<text class="ct" x="${X(i)}" y="${H - 8}" text-anchor="middle" font-size="10.5" fill="var(--text-3)">${l}</text>` : '').join('');
   return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="일별 검사 건수 추이">${grid}${xl}${line(d.tot, 'var(--bar-normal)')}${line(d.bad, 'var(--bar-defect)')}</svg>
     <div class="row small muted" style="gap:14px"><span><span class="dot" style="color:var(--bar-normal);display:inline-block"></span> 전체 검사</span><span><span class="dot" style="color:var(--bar-defect);display:inline-block"></span> 불량·대기</span></div>`;
 }
@@ -1171,19 +1196,29 @@ function donutChart(byType) {
 }
 
 /**
+ * 불량 유형별 분포(도넛 + 범례)를 생성한다. 통계 분석(SC-07)과 대시보드(SC-01)가 같은 마크업을 공유해 숫자·색이 어긋나지 않게 한다.
+ * @param {{k: string, c: string, n: number}[]} byType 유형명 · 색 · 건수 (statsData().byType)
+ * @returns {string} 도넛 SVG + 범례 HTML
+ */
+function defectDist(byType) {
+  const tot = byType.reduce((a, t) => a + t.n, 0) || 1;
+  return `<div class="donut-wrap">${donutChart(byType)}<div>${byType.map(t => `<div class="legend-row"><i style="background:${t.c}"></i>${t.k} <b>${t.n}</b> <span class="muted">${(t.n / tot * 100).toFixed(1)}%</span></div>`).join('')}</div></div>`;
+}
+
+/**
  * 통계 분석 화면을 생성한다.
  * @returns {string} 본문 HTML
  */
 function viewStats() {
   const days = U.statDays || 7, d = statsData(days), st = getStats();
   const rate = (d.badSum / d.sum * 100).toFixed(1), avgMs = Math.round(S.inspections.reduce((a, r) => a + r.ms, 0) / S.inspections.length);
-  const sorted = [...d.byType].sort((a, b) => b.n - a.n), tot = d.byType.reduce((a, t) => a + t.n, 0) || 1, top = sorted[0].n || 1;
+  const sorted = [...d.byType].sort((a, b) => b.n - a.n), top = sorted[0].n || 1;
   const kpi = (l, v, sub) => `<div class="kpi" style="cursor:default"><div class="l">${l}</div><div class="v">${v}</div>${sub ? `<div class="small muted" style="margin-top:4px">${sub}</div>` : ''}</div>`;
   return `<div class="row between"><div><h1 class="page-title">통계 분석</h1><p class="page-sub">기간별 검사 추이 · 불량 유형 분포 · 품질 지표 (시연용 합성 이력 포함)</p></div>
       <div class="seg-row"><button class="btn sm ${days === 7 ? 'primary' : 'outline'}" onclick="setStatDays(7)">7일</button><button class="btn sm ${days === 14 ? 'primary' : 'outline'}" onclick="setStatDays(14)">14일</button><button class="btn sm outline" onclick="exportStatsCsv()">${ic('download')}통계 CSV</button></div></div>
     <div class="kpi-grid">${kpi('기간 검사 건수', d.sum.toLocaleString(), `${days}일 합계`)}${kpi('불량·대기 비율', rate + '%', '불량 확정 + 검토 대기')}${kpi('AI-검사원 일치율', st.match + '%', '확정 건 기준')}${kpi('평균 응답 시간', avgMs + 'ms', 'PatchCore API')}</div>
     <div class="split"><div class="card"><div class="card-title">일별 검사 추이</div>${trendChart(d)}</div>
-      <div class="card"><div class="card-title">불량 유형별 분포</div><div class="donut-wrap">${donutChart(d.byType)}<div>${d.byType.map(t => `<div class="legend-row"><i style="background:${t.c}"></i>${t.k} <b>${t.n}</b> <span class="muted">${(t.n / tot * 100).toFixed(1)}%</span></div>`).join('')}</div></div></div></div>
+      <div class="card"><div class="card-title">불량 유형별 분포</div>${defectDist(d.byType)}</div></div>
     <div class="card"><div class="card-title">불량 유형 TOP 5</div>
       ${sorted.map((t, i) => `<div class="rank-row"><b>${i + 1}</b><span>${t.k}</span><div class="rank-bar"><i style="width:${t.n / top * 100}%;background:${t.c}"></i></div><span class="muted" style="text-align:right">${t.n}건</span></div>`).join('')}
       <div class="note">불량 유형은 데모용 분류입니다. 외부 PatchCore API는 정상/이상 점수만 반환하므로, 유형 분류는 검사원 입력(검사 관리) 또는 후속 확장으로 제공합니다.</div></div>`;
@@ -1315,7 +1350,7 @@ function viewModels() {
   return `<h1 class="page-title">PCB 및 모델 관리</h1><p class="page-sub">PCB 등록 · 모델 연결 · 모델 버전 관리</p>
     ${adm ? '' : `<div class="mode-note">${ic('lock', 'lg')}<span><b>조회 전용</b> — 검사원 계정은 현재 설정을 확인만 할 수 있습니다. 변경은 관리자에게 요청하세요.</span></div>`}
     <div class="card"><div class="card-title">등록된 PCB<span class="sp"></span>${adm ? `<button class="btn sm primary" onclick="openPcbForm()">${ic('plus')}PCB 등록</button>` : ''}</div>
-      ${S.pcbs.map(p => `<div class="ver-row"><div class="photo" style="width:84px;aspect-ratio:475/350;border-radius:8px"><img src="${SAMPLE_IMG}" alt=""></div><div style="flex:1"><b style="font-size:16px">${esc(p.id)}</b><div class="muted">연결 모델: ${p.model}</div></div><span class="pill green">${p.status}</span></div>`).join('')}</div>
+      <div class="pcb-grid">${S.pcbs.map(p => `<div class="pcb-card"><div class="photo"><img src="${SAMPLE_IMG}" alt=""></div><div class="row between"><b style="font-size:16px">${esc(p.id)}</b><span class="pill green">${p.status}</span></div><div class="muted small">연결 모델: ${p.model}</div></div>`).join('')}${adm ? `<button class="pcb-card add" onclick="openPcbForm()">${ic('plus', 'lg')}PCB 등록</button>` : ''}</div></div>
     <div class="card"><div class="card-title">등록된 추론 모델</div>
       <div class="card" style="box-shadow:none"><div class="card-title" style="margin-bottom:6px">${ic('db', 'lg')}Industrial PatchCore<span class="sp"></span><span class="pill green">활성화</span></div>
         <div class="muted">${S.model.active} · 공개 Memory Bank</div><div class="muted">특징 추출기: ResNet18 | 입력: 256 × 256</div>
@@ -1327,7 +1362,7 @@ function viewModels() {
       ${S.model.versions.map(x => `<div class="ver-row"><div style="flex:1"><b>${x.v}</b> <span class="muted small">${x.date}</span><div class="small muted">${x.note}</div></div>${x.v === S.model.active ? '<span class="pill green">활성화</span>' : (adm ? `<button class="btn sm outline" onclick="activateVersion('${x.v}')">이 버전으로 전환</button>` : '<span class="pill">대기</span>')}</div>`).join('')}
       ${adm ? '' : '<div class="note">버전 전환 · 임계값 변경 · PCB 등록은 관리자 권한이 필요합니다.</div>'}</div>
     <div class="card"><div class="card-title">후속 확장 예정 (MVP 이후)</div>
-      <div class="road">${['촬영 품질 자동 검사 및 이미지 보정', 'Best Frame 선정', 'Heatmap, Mask, Overlay 제공 (API 연동)', '픽셀 직접 비교 기반 정밀 검사', '자체 Memory Bank 생성 및 관리', 'PCB 종류 자동 인식', '전기적 결함 검사'].map(t => `<div><span class="pill">예정</span>${t}</div>`).join('')}</div></div>`;
+      <div class="road">${['촬영 품질 자동 검사 및 이미지 보정', 'Best Frame 선정', 'Heatmap, Mask, Overlay 제공 (API 연동)', '픽셀 직접 비교 기반 정밀 검사', '자체 Memory Bank 생성 및 관리', 'PCB 종류 자동 인식', '전기적 결함 검사', '여러 장 한꺼번에 업로드 (배치 검사)'].map(t => `<div><span class="pill">예정</span>${t}</div>`).join('')}</div></div>`;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1382,8 +1417,8 @@ function viewSettings() {
         <div class="field"><label>이미지 보관 기간</label><select class="inp" ${adm ? '' : 'disabled'} onchange="setSetting('retention',this.value)">${opt(['30일', '90일', '180일', '1년'], S.settings.retention)}</select></div>
         <div class="muted small">저장 위치: <code>/storage/inspections</code></div></div></div>
     <div class="card"><div class="card-title">${ic('lock', 'lg')}사용자 관리<span class="sp"></span>${adm ? `<button class="btn sm primary" onclick="openUserForm()">${ic('plus')}사용자 추가</button>` : '<span class="pill">조회 전용</span>'}</div>
-      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>이름</th><th>소속</th><th>역할</th><th>상태</th>${adm ? '<th></th>' : ''}</tr></thead><tbody>
-      ${S.users.map((u, i) => `<tr><td><b>${esc(u.name)}</b></td><td>${esc(u.company)}</td><td>${u.role}</td><td><span class="pill ${u.status === '활성' ? 'green' : ''}">${u.status}</span></td>${adm ? `<td><button class="btn sm outline" onclick="toggleUser(${i})">${u.status === '활성' ? '비활성화' : '활성화'}</button></td>` : ''}</tr>`).join('')}</tbody></table></div></div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>이름</th><th>소속</th><th>역할</th><th>상태</th>${adm ? '<th>관리</th>' : ''}</tr></thead><tbody>
+      ${S.users.map((u, i) => `<tr><td><b>${esc(u.name)}</b>${u.name === S.user.name ? ' <span class="pill">나</span>' : ''}</td><td>${esc(u.company)}</td><td>${u.role}</td><td><span class="pill ${u.status === '활성' ? 'green' : ''}">${u.status}</span></td>${adm ? `<td><button class="btn sm outline" ${u.name === S.user.name ? 'disabled title="본인 계정은 비활성화할 수 없습니다"' : ''} onclick="toggleUser(${i})">${u.status === '활성' ? '비활성화' : '활성화'}</button></td>` : ''}</tr>`).join('')}</tbody></table></div></div>
     <div class="card"><div class="card-title">참고</div><div class="muted">담당자 피드백에 따라 <b>추론 서버 설정</b>은 MVP 범위에서 제외했습니다. PatchCore API 엔드포인트와 인증키는 서버 환경변수로 고정 관리합니다.</div></div>`;
 }
 
