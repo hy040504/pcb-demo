@@ -370,6 +370,39 @@ circle.arc { transition: opacity .15s, stroke-width .15s; } circle.arc:hover { s
 .bk-ico { width: 44px; height: 34px; border-radius: 6px; background: var(--bg-muted); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; flex: none; overflow: hidden; color: var(--text-3); }
 .bk-ico img { width: 100%; height: 100%; object-fit: cover; }
 .bk-list { max-height: 320px; overflow-y: auto; }
+/* 서버 저장소 파일 관리자(팝업) */
+.modal-card.fmc { max-width: 980px; padding: 0; overflow: hidden; display: flex; flex-direction: column; height: min(86vh, 700px); }
+.fm-head { padding: 14px 18px 10px; border-bottom: 1px solid var(--border); }
+.fm-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.fm-path { flex: 1 1 260px; min-width: 0; font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
+.fm-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: 2px; margin-top: 8px; font-size: 13px; }
+.fm-crumbs button { background: none; border: 0; padding: 3px 6px; border-radius: 6px; color: var(--text-2); cursor: pointer; font: inherit; }
+.fm-crumbs button:hover { background: var(--bg-muted); color: var(--text); }
+.fm-crumbs i { color: var(--text-3); font-style: normal; }
+.fm-main { flex: 1; min-height: 0; display: grid; grid-template-columns: 188px 1fr; }
+.fm-side { border-right: 1px solid var(--border); padding: 10px; overflow-y: auto; background: var(--bg-muted); display: flex; flex-direction: column; gap: 2px; }
+.fm-side button { display: flex; gap: 8px; align-items: center; text-align: left; background: none; border: 0; padding: 7px 9px; border-radius: 8px; cursor: pointer; color: var(--text-2); font: inherit; font-size: 13px; }
+.fm-side button:hover, .fm-side button.on { background: var(--bg-card); color: var(--text); }
+.fm-side .lbl { font-size: 11px; color: var(--text-3); margin: 8px 6px 2px; letter-spacing: .02em; }
+.fm-body { overflow-y: auto; padding: 4px 8px; }
+.fm-row { display: grid; grid-template-columns: 26px 46px 1fr 136px 84px; gap: 10px; align-items: center; padding: 6px 8px; border-radius: 8px; cursor: pointer; border-bottom: 1px solid transparent; }
+.fm-row:hover { background: var(--bg-muted); } .fm-row.sel { background: color-mix(in srgb, var(--primary) 14%, transparent); }
+.fm-row.dim { opacity: .5; cursor: default; }
+.fm-row.hd { cursor: default; font-size: 12px; color: var(--text-3); position: sticky; top: 0; background: var(--bg-card); z-index: 1; } .fm-row.hd:hover { background: var(--bg-card); }
+.fm-row input { accent-color: var(--primary); width: 16px; height: 16px; }
+.fm-nm { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; }
+.fm-row .bk-ico { width: 46px; height: 34px; }
+.fm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 10px; padding: 8px; }
+.fm-card { position: relative; border: 1px solid var(--border); border-radius: 10px; padding: 6px; cursor: pointer; background: var(--bg-card); }
+.fm-card:hover { border-color: var(--primary); } .fm-card.sel { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 14%, transparent); }
+.fm-card .th { aspect-ratio: 4 / 3; border-radius: 6px; background: var(--bg-muted); display: flex; align-items: center; justify-content: center; overflow: hidden; color: var(--text-3); }
+.fm-card .th img { width: 100%; height: 100%; object-fit: cover; } .fm-card .th .ic { width: 34px; height: 34px; }
+.fm-card input { position: absolute; left: 10px; top: 10px; width: 16px; height: 16px; accent-color: var(--primary); }
+.fm-card .fm-nm { font-size: 12px; margin-top: 5px; }
+.fm-foot { padding: 10px 18px; border-top: 1px solid var(--border); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.fm-foot .sp { flex: 1; }
+.fm-err { color: #ef4444; font-size: 12px; margin-top: 6px; }
+@media (max-width: 640px) { .fm-main { grid-template-columns: 1fr; } .fm-side { display: none; } .fm-row { grid-template-columns: 26px 46px 1fr 70px; } .fm-row .fm-dt { display: none; } .modal-card.fmc { height: 92vh; } }
 .tbl tr.sel td { background: var(--bg-muted); }
 /* 이미지 확대 뷰어 */
 .zoomable { cursor: zoom-in; }
@@ -680,7 +713,7 @@ function createInitialState(keep = {}) {
       { name: '박현장', role: '검사원', company: '디엘정보기술', status: '활성' }
     ],
     api: keep.api || { online: true, ms: 142, checkedAt: Date.now() },   // 외부 PatchCore API 연결 상태 (시연용)
-    settings: { camera: '기본 카메라 (USB 현미경)', resolution: '1920 × 1080', retention: '90일' },
+    settings: { camera: '기본 카메라 (USB 현미경)', resolution: '1920 × 1080', retention: '90일', serverOs: 'Linux', storagePath: '/srv/circuiteye/storage', dbKind: 'PostgreSQL' },
     result: null,       // PCB 검사 화면의 최근 API 응답
     demoSeq: 0          // 시연용 점수 순환 인덱스
   };
@@ -1086,7 +1119,7 @@ function fmtBytes(b) { return b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toF
  * @param {{name: string, src: string, size?: number, seed?: number, sample?: boolean}} o 이미지 정보
  * @returns {object} 대기열 항목 (st: wait | run | done)
  */
-function newQueueItem(o) { return { uid: ++U.qSeq, name: o.name, src: o.src, key: o.key || '', size: o.size || 0, seed: o.seed || 7, sample: !!o.sample, st: 'wait', rec: null }; }
+function newQueueItem(o) { return { uid: ++U.qSeq, name: o.name, src: o.src, key: o.key || '', size: o.size || 0, seed: o.seed || 7, sample: !!o.sample, path: o.path || '', st: 'wait', rec: null }; }
 
 /** 대기열에 이미지를 추가하고 화면을 갱신한다. @param {object[]} list newQueueItem 입력 배열 */
 function queueAdd(list) { list.forEach(o => U.queue.push(newQueueItem(o))); render(); }
@@ -1219,7 +1252,7 @@ function viewInspect() {
     const act = x.st === 'done' ? `${r.ai === 'ANOMALY' ? `<button class="btn sm outline" onclick="openReview(${r.n})">판정하기</button>` : ''}`
       : `<button class="icon-btn" ${U.running ? 'disabled' : ''} onclick="queueRemove(${x.uid})" aria-label="목록에서 빼기" title="목록에서 빼기">${ic('x')}</button>`;
     return `<div class="qrow ${x.st}" data-st="${x.st}"><div class="photo ${x.st === 'run' ? 'scanning' : ''}" onclick="${x.st === 'done' ? `openViewer(${r.n})` : `openQueueImg(${x.uid})`}" title="클릭하면 크게 볼 수 있습니다"><img src="${x.src}" alt="${esc(x.name)}">${x.st === 'done' ? markerHtml(r, true) : ''}</div>
-      <div class="qinfo"><b class="qname" title="${esc(x.name)}">${esc(x.name)}</b><div class="small muted">${x.sample ? '샘플 이미지' : fmtBytes(x.size)}${x.st === 'done' ? ` · ${r.id} · ${r.ms}ms` : ''}</div>${x.st === 'done' && r.ai === 'ANOMALY' ? `<div class="small" style="color:#ef4444;font-weight:600">의심 영역 ${(r.boxes && r.boxes.length) || 1}곳 — 썸네일의 빨간 박스 (클릭하면 크게 확인)</div>` : ''}</div>
+      <div class="qinfo"><b class="qname" title="${esc(x.path ? fsDisplay(x.path) : x.name)}">${esc(x.name)}</b><div class="small muted">${x.path ? `서버 저장소 · ${fmtBytes(x.size)}` : x.sample ? '샘플 이미지' : fmtBytes(x.size)}${x.st === 'done' ? ` · ${r.id} · ${r.ms}ms` : ''}</div>${x.st === 'done' && r.ai === 'ANOMALY' ? `<div class="small" style="color:#ef4444;font-weight:600">의심 영역 ${(r.boxes && r.boxes.length) || 1}곳 — 썸네일의 빨간 박스 (클릭하면 크게 확인)</div>` : ''}</div>
       <div class="qres">${state}</div><div class="qact">${act}</div></div>`;
   };
   return `${pageHead('PCB 외관 검사', 'PCB 종류 선택 → 사진 여러 장 올리기 → 한 번에 검사')}
@@ -1233,6 +1266,8 @@ function viewInspect() {
       <div class="drop dz" role="button" tabindex="0" ${U.running ? '' : 'onclick="pickFile()" onkeydown="if(event.key===\'Enter\')pickFile()"'} ondragover="dzOver(event)" ondragleave="dzLeave(event)" ondrop="dzDrop(event,'queue')">
         ${ic('upload', 'lg')}<div class="mt6"><b>PCB 사진을 여기로 끌어다 놓으세요</b></div><div class="small dz-note">또는 클릭해서 파일 선택 — <b>여러 장 동시 선택 가능</b> · 최대 ${MAX_BATCH}장 · PNG · JPG · BMP · WebP</div></div>
       <div class="grid2 mt10"><button class="btn" ${U.running ? 'disabled' : ''} onclick="pickFile()">${ic('upload')}파일 선택 (여러 장)</button><button class="btn" ${U.running ? 'disabled' : ''} onclick="capture()">${ic('camera')}촬영 추가</button></div>
+      <button class="btn block mt8" id="fmOpen" ${U.running ? 'disabled' : ''} onclick="openFileManager()">${ic('folder')}서버 저장소에서 폴더·사진 선택</button>
+      <div class="small muted mt4">서버(${esc(S.settings.serverOs)})에 저장된 사진을 폴더째 둘러보며 여러 장을 한꺼번에 고릅니다 · 현재 저장소: <code>${esc(S.settings.storagePath)}</code></div>
       <div class="row mt8"><button class="btn sm outline" ${U.running ? 'disabled' : ''} onclick="loadSampleSet()">${ic('chip')}샘플 세트 불러오기 (10장)</button><span class="small muted">공개 PCB 사진(정상 기판 4장 + 불량 6종) — 정상·불량이 섞여 있어 의심 영역 표시를 바로 볼 수 있습니다</span></div></div>
     <div class="card"><div class="card-title">검사 목록 · 결과<span class="sp"></span>${done.length && !U.running ? `<button class="btn sm outline" onclick="queueClearDone()">완료 항목 치우기</button>` : ''}</div>
       ${total ? `<div class="qsum"><div class="bar-track"><div class="bar-fill ok" style="width:${pct}%"></div></div><b>${done.length} / ${total}</b><span class="pill green">정상 ${done.length - anom.length}</span><span class="pill orange">이상 의심 ${anom.length}</span>${anom.length && !U.running ? `<button class="btn sm primary" onclick="openReview(${anom[0].rec.n})">이상 의심 건 판정하기</button>` : ''}</div>
@@ -1252,6 +1287,233 @@ function openQueueImg(uid) {
   const x = U.queue.find(v => v.uid === uid); if (!x) return;
   openModal(`<div class="row between mb8"><b style="font-size:18px">${esc(x.name)}</b><button class="icon-btn" onclick="closeModal()" aria-label="닫기">${ic('x')}</button></div>
     <div class="photo"><img src="${x.src}" alt="${esc(x.name)}"></div><div class="note">검사 전 이미지입니다. 검사가 끝나면 확대 · 다운로드 · 판정이 가능합니다.</div>`);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   6-1. 서버 저장소 파일 관리자 (PCB 검사 → 팝업) — 시안: 서버 저장소를 흉내 낸 가상 폴더 트리
+   - 내부 경로는 항상 '저장소 기준 상대 경로 + / 구분자'(예: /입고/2026-11-21/a.jpg)로 다루고, 화면 표시·입력만 서버 OS(Linux · Windows)에 맞춘다.
+     DB에도 이 상대 경로만 저장하면 서버 OS가 바뀌어도(Linux ↔ Windows) 데이터를 그대로 쓸 수 있다.
+   - 실서비스에서는 GET /api/storage/list?path= (목록) 와 POST /api/inspections (선택한 경로로 검사) 로 연동한다.
+   ═══════════════════════════════════════════════════════════════════════════ */
+/** OS별 저장소 기본 경로 */
+const FS_DEFAULT = { Linux: '/srv/circuiteye/storage', Windows: 'D:\\circuiteye\\storage' };
+/** @param {'Linux'|'Windows'} os @returns {string} 해당 OS의 기본 저장소 경로 */
+function defaultStoragePath(os) { return FS_DEFAULT[os] || FS_DEFAULT.Linux; }
+
+/**
+ * 저장소 경로가 서버 OS 규칙에 맞는지 검사한다.
+ * @param {'Linux'|'Windows'} os 서버 OS
+ * @param {string} p 입력 경로
+ * @returns {{ok: boolean, msg?: string}} 결과(실패 시 안내 문구)
+ */
+function checkStoragePath(os, p) {
+  p = String(p || '').trim();
+  if (!p) return { ok: false, msg: '경로를 입력하세요' };
+  if (p.length > 200) return { ok: false, msg: '경로가 너무 깁니다 (200자 이내)' };
+  if (p.split(/[\\/]+/).includes('..')) return { ok: false, msg: '상위 경로(..)는 사용할 수 없습니다' };
+  if (os === 'Windows') {
+    if (!/^[A-Za-z]:[\\/]/.test(p) && !/^[\\/]{2}[^\\/]+[\\/]+[^\\/]+/.test(p)) return { ok: false, msg: 'Windows 경로는 드라이브(D:\\…) 또는 네트워크 경로(\\\\서버\\공유)로 시작해야 합니다' };
+    if (/[<>"|?*\0]/.test(p) || /:/.test(p.slice(2))) return { ok: false, msg: 'Windows에서 쓸 수 없는 문자가 있습니다 ( < > : " | ? * )' };
+    return { ok: true };
+  }
+  if (p[0] !== '/') return { ok: false, msg: 'Linux 경로는 /로 시작하는 절대 경로여야 합니다 (예: /srv/circuiteye/storage)' };
+  if (/\\/.test(p)) return { ok: false, msg: 'Linux 경로에는 역슬래시(\\) 대신 /를 사용하세요' };
+  if (/\0/.test(p)) return { ok: false, msg: '쓸 수 없는 문자가 있습니다' };
+  return { ok: true };
+}
+
+/** 경로를 OS 표기로 정리한다 (구분자 통일 · 중복·끝 구분자 제거). */
+function normStoragePath(os, p) {
+  p = String(p).trim();
+  if (os === 'Windows') { const unc = /^[\\/]{2}/.test(p); p = p.replace(/[\\/]+/g, '\\'); if (unc) p = '\\' + p; return p.length > 3 ? p.replace(/\\$/, '') : p; }
+  p = p.replace(/\/+/g, '/'); return p.length > 1 ? p.replace(/\/$/, '') : p;
+}
+
+/** 시스템 설정: 저장소 경로를 저장한다 (관리자). 형식이 틀리면 거부하고 되돌린다. */
+function setStoragePath(v) {
+  if (!isAdmin()) return;
+  const os = S.settings.serverOs, c = checkStoragePath(os, v);
+  if (!c.ok) { toast(c.msg); return render(); }
+  S.settings.storagePath = normStoragePath(os, v); toast('저장소 경로를 저장했습니다'); render();
+}
+
+/** 시스템 설정: 서버 운영체제를 바꾼다. 현재 경로가 새 OS 규칙에 맞지 않으면 그 OS의 기본 경로로 바꾼다. */
+function setServerOs(v) {
+  if (!isAdmin() || !FS_DEFAULT[v]) return;
+  S.settings.serverOs = v;
+  const keep = checkStoragePath(v, S.settings.storagePath).ok;
+  if (!keep) S.settings.storagePath = defaultStoragePath(v);
+  U.fmLast = ''; toast(`서버 OS를 ${v}(으)로 설정했습니다` + (keep ? '' : ` · 저장소 경로를 기본값(${S.settings.storagePath})으로 바꿨습니다`)); render();
+}
+
+/** 가상 저장소 트리(최초 1회 생성). 폴더 {n,d,c} · 이미지 {n,f,sz,t} · 그 밖의 파일 {n,sz,t,other} */
+let FS_TREE = null;
+function fsTree() {
+  if (FS_TREE) return FS_TREE;
+  const N = SAMPLE_NORM, A = SAMPLE_ANOM;
+  const sz = n => 62000 + ([...n].reduce((a, c) => a + c.charCodeAt(0), 0) * 131 % 34000);   // 파일명으로 정한 고정 크기(시안)
+  const f = t => n => ({ n, f: n, sz: sz(n), t }), d = (n, c) => ({ n, d: 1, c });
+  const mix = (nn, aa, t) => [...nn, ...aa].sort().map(f(t));
+  return FS_TREE = d('', [
+    d('입고', [
+      d('2026-11-21', [...mix(N.slice(0, 8), A.slice(0, 3), '2026-11-21 09:12'), { n: '촬영기록.csv', sz: 2140, t: '2026-11-21 09:12', other: 1 }]),
+      d('2026-11-20', mix(N.slice(8, 16), A.slice(3, 5), '2026-11-20 17:40')),
+      d('라인B', [d('2026-11-19', mix(N.slice(16, 20), A.slice(5, 9), '2026-11-19 15:05'))])
+    ]),
+    d('보관', [d('PCB1', [d('정상', N.slice(20).map(f('2026-11-10 11:00'))), d('불량', A.slice(9, 21).map(f('2026-11-12 14:30')))])]),
+    { n: '메모.txt', sz: 318, t: '2026-11-01 10:00', other: 1 }
+  ]);
+}
+
+/** 폴더 이름 비교: Linux는 대소문자 구분, Windows는 구분하지 않는다. */
+const fsSame = (a, b) => S.settings.serverOs === 'Windows' ? a.toLowerCase() === b.toLowerCase() : a === b;
+
+/**
+ * 상대 경로의 노드를 찾는다.
+ * @param {string} rel 예: /입고/2026-11-21
+ * @returns {{node: object, path: string}|null} 노드와 실제 이름으로 정리한 경로
+ */
+function fsNode(rel) {
+  let node = fsTree(), path = '';
+  for (const seg of String(rel).split('/').filter(Boolean)) {
+    const nx = node.d && node.c.find(x => fsSame(x.n, seg)); if (!nx) return null;
+    node = nx; path += '/' + nx.n;
+  }
+  return { node, path: path || '/' };
+}
+
+/** 상대 경로를 서버 OS 표기의 전체 경로로 바꾼다 (예: /srv/circuiteye/storage/입고 · D:\circuiteye\storage\입고). */
+function fsDisplay(rel) {
+  const win = S.settings.serverOs === 'Windows', root = S.settings.storagePath.replace(/[\\/]+$/, '');
+  const tail = rel === '/' ? '' : (win ? rel.replace(/\//g, '\\') : rel);
+  return (root + tail) || S.settings.storagePath;
+}
+
+/**
+ * 사용자가 경로 입력칸에 쓴 문자열(Linux · Windows 표기 모두 허용)을 저장소 상대 경로로 바꾼다.
+ * 저장소 밖 · 상위 경로(..) · 없는 폴더는 거부한다.
+ * @param {string} text 입력 문자열
+ * @returns {{path?: string, err?: string}}
+ */
+function fsParse(text) {
+  let t = String(text || '').trim().replace(/^["']|["']$/g, '').replace(/\\/g, '/');
+  if (!t) return { err: '경로를 입력하세요' };
+  const root = S.settings.storagePath.replace(/\\/g, '/').replace(/\/+$/, ''), win = S.settings.serverOs === 'Windows';
+  const eq = (a, b) => win ? a.toLowerCase() === b.toLowerCase() : a === b;
+  const abs = /^\//.test(t) || /^[A-Za-z]:/.test(t);
+  if (abs) { if (!(t.length >= root.length && eq(t.slice(0, root.length), root) && (t.length === root.length || t[root.length] === '/'))) return { err: `저장소(${fsDisplay('/')}) 밖의 경로는 열 수 없습니다` }; t = t.slice(root.length); }
+  const segs = t.split('/').filter(s => s && s !== '.');
+  if (segs.includes('..')) return { err: '상위 경로(..)는 사용할 수 없습니다' };
+  const hit = fsNode('/' + segs.join('/'));
+  if (!hit) return { err: '해당 폴더를 찾을 수 없습니다' + (win ? '' : ' (Linux는 대소문자를 구분합니다)') };
+  if (!hit.node.d) return { err: '폴더가 아니라 파일입니다' };
+  return { path: hit.path };
+}
+
+/** 폴더 아래의 이미지 파일을 모두 모은다. @returns {{p: string, n: object}[]} 경로와 파일 노드 */
+function fsImages(node, base) {
+  const out = [];
+  (function walk(nd, p) { nd.c.forEach(x => { const q = (p === '/' ? '' : p) + '/' + x.n; if (x.d) walk(x, q); else if (x.f) out.push({ p: q, n: x }); }); })(node, base);
+  return out;
+}
+
+/** 파일 관리자 팝업을 연다. */
+function openFileManager() {
+  if (U.running) return;
+  U.fm = { path: fsNode(U.fmLast || '/입고') ? (U.fmLast || '/입고') : '/', sel: new Set(), q: '', view: (U.fm && U.fm.view) || 'list', err: '', ents: [], last: -1 };
+  openModal(fmInner()); document.querySelector('#modal .modal-card').classList.add('fmc');
+}
+
+/** 팝업 전체 내용 */
+function fmInner() {
+  const m = U.fm, segs = m.path.split('/').filter(Boolean), os = S.settings.serverOs;
+  const crumbs = [`<button onclick="fmGo('/')">저장소</button>`].concat(segs.map((s, i) => `<i>${os === 'Windows' ? '\\' : '/'}</i><button onclick="fmGo('/${segs.slice(0, i + 1).map(x => encodeURIComponent(x)).join('/')}',1)">${esc(s)}</button>`)).join('');
+  const sc = (p, lbl) => `<button class="${m.path === p || (p !== '/' && m.path.startsWith(p + '/')) ? 'on' : ''}" onclick="fmGo('${p}')">${ic('folder')}${lbl}</button>`;
+  return `<div class="fm-head"><div class="row between"><b style="font-size:17px">서버 저장소에서 선택</b><button class="icon-btn" onclick="closeModal()" aria-label="닫기">${ic('x')}</button></div>
+      <div class="fm-bar mt8"><button class="btn sm outline" onclick="fmUp()" ${m.path === '/' ? 'disabled' : ''} title="상위 폴더">↑ 위로</button>
+        <input class="inp fm-path" id="fmPath" value="${esc(fsDisplay(m.path))}" aria-label="경로 (Linux · Windows 표기 모두 입력 가능)" spellcheck="false" onkeydown="if(event.key==='Enter')fmGoText(this.value)">
+        <button class="btn sm outline" onclick="fmGoText(document.getElementById('fmPath').value)">이동</button>
+        <button class="btn sm ${m.view === 'list' ? 'primary' : 'outline'}" onclick="fmView('list')">목록</button><button class="btn sm ${m.view === 'grid' ? 'primary' : 'outline'}" onclick="fmView('grid')">격자</button></div>
+      <div class="fm-crumbs">${crumbs}</div><div class="fm-err" id="fmErr" role="alert">${esc(m.err)}</div>
+      <div class="row mt6"><input class="inp" style="max-width:260px" id="fmQ" placeholder="이 폴더에서 파일 이름 검색" value="${esc(m.q)}" oninput="fmSearch(this.value)" aria-label="이 폴더에서 파일 이름 검색"><span class="small muted">서버 OS: <b>${esc(os)}</b> · ${os === 'Windows' ? '경로는 대소문자를 구분하지 않음' : '경로는 대소문자를 구분'}</span></div></div>
+    <div class="fm-main"><div class="fm-side"><div class="lbl">빠른 이동</div>${sc('/', '저장소 전체')}${sc('/입고', '입고 (촬영 사진)')}${sc('/보관', '보관 (검사 완료)')}
+        <div class="lbl">내 컴퓨터</div><button onclick="fmLocal()">${ic('upload')}내 컴퓨터에서 파일 선택</button></div>
+      <div class="fm-body" id="fmBody">${fmBodyHtml()}</div></div>
+    <div class="fm-foot" id="fmFoot">${fmFootHtml()}</div>`;
+}
+
+/** 현재 폴더 목록(목록형/격자형). 폴더 → 이미지 → 그 밖의 파일 순. */
+function fmBodyHtml() {
+  const m = U.fm, here = fsNode(m.path);
+  if (!here) return '<div class="empty">폴더를 찾을 수 없습니다</div>';
+  const q = m.q.trim().toLowerCase(), base = m.path === '/' ? '' : m.path;
+  const kids = here.node.c.filter(x => !q || x.n.toLowerCase().includes(q));
+  const ents = [...kids.filter(x => x.d), ...kids.filter(x => x.f), ...kids.filter(x => x.other)].map(x => ({ k: x.d ? 'd' : x.f ? 'f' : 'o', x, p: base + '/' + x.n }));
+  m.ents = ents;
+  if (!ents.length) return `<div class="empty">${ic('folder')}${q ? '검색 결과가 없습니다' : '비어 있는 폴더입니다'}</div>`;
+  const info = e => { if (e.k !== 'd') return null; const im = fsImages(e.x, e.p); return { total: im.length, n: im.filter(v => m.sel.has(v.p)).length }; };
+  const dim = e => e.k === 'o';
+  if (m.view === 'grid') return `<div class="fm-grid">${ents.map((e, i) => { const f = e.k === 'd' ? info(e) : null, on = e.k === 'f' ? m.sel.has(e.p) : f && f.total && f.n === f.total;
+    return `<div class="fm-card ${on ? 'sel' : ''} ${dim(e) ? 'dim' : ''}" onclick="fmClick(${i},event)">${dim(e) ? '' : `<input type="checkbox" ${on ? 'checked' : ''} onclick="event.stopPropagation()" onchange="fmToggle(${i},event.shiftKey)" aria-label="${esc(e.x.n)} 선택">`}
+      <div class="th">${e.k === 'f' ? `<img loading="lazy" src="${esc(sampleSrc(e.x.f))}" alt="">` : ic(e.k === 'd' ? 'folder' : 'db')}</div>
+      <div class="fm-nm" title="${esc(e.x.n)}">${esc(e.x.n)}</div><div class="small muted">${e.k === 'd' ? `이미지 ${f.total}장${f.n ? ` · ${f.n} 선택` : ''}` : e.k === 'f' ? fmtBytes(e.x.sz) : '이미지 아님'}</div></div>`; }).join('')}</div>`;
+  return `<div class="fm-row hd"><span></span><span></span><span>이름</span><span class="fm-dt">수정한 날짜</span><span>크기</span></div>` + ents.map((e, i) => {
+    const f = e.k === 'd' ? info(e) : null, on = e.k === 'f' ? m.sel.has(e.p) : f && f.total && f.n === f.total;
+    return `<div class="fm-row ${on ? 'sel' : ''} ${dim(e) ? 'dim' : ''}" onclick="fmClick(${i},event)">${dim(e) ? '<span></span>' : `<input type="checkbox" ${on ? 'checked' : ''} onclick="event.stopPropagation()" onchange="fmToggle(${i},event.shiftKey)" aria-label="${esc(e.x.n)} 선택">`}
+      <span class="bk-ico">${e.k === 'f' ? `<img loading="lazy" src="${esc(sampleSrc(e.x.f))}" alt="">` : ic(e.k === 'd' ? 'folder' : 'db')}</span><span class="fm-nm" title="${esc(e.x.n)}">${esc(e.x.n)}${e.k === 'o' ? ' <span class="small muted">· 이미지 아님</span>' : ''}</span>
+      <span class="small muted fm-dt">${e.k === 'd' ? '' : esc(e.x.t || '')}</span><span class="small muted">${e.k === 'd' ? `${f.total}장${f.n ? ` (${f.n} 선택)` : ''}` : fmtBytes(e.x.sz)}</span></div>`; }).join('');
+}
+
+/** 하단 바: 선택 장수 · 일괄 선택 · 추가 버튼 */
+function fmFootHtml() {
+  const m = U.fm, n = m.sel.size, room = MAX_BATCH - U.queue.length, here = fsNode(m.path), deep = here ? fsImages(here.node, m.path).length : 0;
+  return `<button class="btn sm outline" onclick="fmSelAll()" ${deep ? '' : 'disabled'}>이 폴더 이미지 모두 선택 (하위 포함 ${deep}장)</button><button class="btn sm outline" onclick="fmClear()" ${n ? '' : 'disabled'}>선택 해제</button>
+    <span class="sp"></span><span class="small ${n > room ? '' : 'muted'}" ${n > room ? 'style="color:#ef4444;font-weight:600"' : ''}><b>${n}장</b> 선택${n > room ? ` · 대기열 여유 ${Math.max(0, room)}장만 추가됩니다` : ` · 대기열 여유 ${room}장`}</span>
+    <button class="btn" onclick="closeModal()">취소</button><button class="btn primary" id="fmAdd" onclick="fmAdd()" ${n ? '' : 'disabled'}>검사 대기열에 추가</button>`;
+}
+
+/** 팝업 일부(목록 · 하단)만 다시 그린다 (검색 입력칸의 커서를 유지). */
+function fmRedrawBody() { const b = document.getElementById('fmBody'), f = document.getElementById('fmFoot'); if (b) b.innerHTML = fmBodyHtml(); if (f) f.innerHTML = fmFootHtml(); }
+/** 팝업 전체를 다시 그린다. */
+function fmRedraw() { const c = document.querySelector('#modal .modal-card'); if (c) c.innerHTML = fmInner(); }
+/** 폴더로 이동한다. @param {string} p 저장소 상대 경로 @param {number} [enc] 1이면 URI 인코딩된 경로 */
+function fmGo(p, enc) { if (enc) p = decodeURIComponent(p).replace(/%2F/g, '/'); const h = fsNode(p); if (!h || !h.node.d) return; U.fm.path = U.fmLast = h.path; U.fm.q = ''; U.fm.err = ''; U.fm.last = -1; fmRedraw(); }
+/** 상위 폴더로 이동한다. */
+function fmUp() { const s = U.fm.path.split('/').filter(Boolean); s.pop(); fmGo('/' + s.join('/')); }
+/** 입력칸에 쓴 경로로 이동한다 (Linux · Windows 표기 모두). */
+function fmGoText(t) { const r = fsParse(t); if (r.err) { U.fm.err = r.err; const e = document.getElementById('fmErr'); if (e) e.textContent = r.err; return; } fmGo(r.path); }
+/** 보기 방식(목록 · 격자)을 바꾼다. */
+function fmView(v) { U.fm.view = v; fmRedraw(); }
+/** 현재 폴더 안에서 이름으로 거른다. */
+function fmSearch(q) { U.fm.q = q; U.fm.last = -1; fmRedrawBody(); }
+/** 항목 행을 눌렀을 때: 폴더는 열고, 이미지는 선택을 바꾼다. */
+function fmClick(i, ev) { const e = U.fm.ents[i]; if (!e || e.k === 'o') return; if (e.k === 'd') return fmGo(e.p); fmToggle(i, ev && ev.shiftKey); }
+/** 선택 바꾸기: 이미지는 개별 · Shift는 범위, 폴더는 하위 이미지 전체. */
+function fmToggle(i, shift) {
+  const m = U.fm, e = m.ents[i]; if (!e) return;
+  if (e.k === 'd') { const im = fsImages(e.x, e.p), all = im.every(v => m.sel.has(v.p)); im.forEach(v => all ? m.sel.delete(v.p) : m.sel.add(v.p)); }
+  else if (e.k === 'f') {
+    if (shift && m.last >= 0) { const [a, b] = [Math.min(m.last, i), Math.max(m.last, i)], on = !m.sel.has(e.p); for (let k = a; k <= b; k++) if (m.ents[k].k === 'f') on ? m.sel.add(m.ents[k].p) : m.sel.delete(m.ents[k].p); }
+    else m.sel.has(e.p) ? m.sel.delete(e.p) : m.sel.add(e.p);
+    m.last = i;
+  }
+  fmRedrawBody();
+}
+/** 현재 폴더의 이미지를 하위 폴더까지 모두 선택한다. */
+function fmSelAll() { const h = fsNode(U.fm.path); if (h) fsImages(h.node, U.fm.path).forEach(v => U.fm.sel.add(v.p)); fmRedrawBody(); }
+/** 선택을 모두 해제한다. */
+function fmClear() { U.fm.sel.clear(); fmRedrawBody(); }
+/** 내 컴퓨터의 파일 선택 창으로 전환한다. */
+function fmLocal() { closeModal(); pickFile(); }
+/** 선택한 이미지를 검사 대기열에 추가한다 (이미 담긴 경로 · 최대 장수 초과분은 제외). */
+function fmAdd() {
+  if (U.running) return;
+  const have = new Set(U.queue.map(q => q.path).filter(Boolean)), picked = [...U.fm.sel].sort(), fresh = picked.filter(p => !have.has(p));
+  const room = Math.max(0, MAX_BATCH - U.queue.length), take = fresh.slice(0, room), dup = picked.length - fresh.length, over = fresh.length - take.length;
+  if (!take.length) return toast(dup ? '이미 대기열에 있는 이미지입니다' : `한 번에 최대 ${MAX_BATCH}장까지 검사할 수 있습니다`);
+  const items = take.map(p => { const h = fsNode(p), nm = h.node.f; return { ...sampleItem(nm), path: h.path, size: h.node.sz }; });
+  closeModal(); queueAdd(items);
+  toast(`서버 저장소에서 ${items.length}장을 추가했습니다` + (dup ? ` · 이미 담긴 ${dup}장 제외` : '') + (over ? ` · 최대 ${MAX_BATCH}장 초과 ${over}장 제외` : ''));
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1836,7 +2098,10 @@ function downloadSampleCsv() {
 }
 
 /** 보관 기간이 지난 이미지 정리를 시연한다 (관리자). */
-function purgeExpired() { toast(`보관 기간 ${S.settings.retention} 초과 이미지 0장 — 정리할 항목이 없습니다 (시연)`); }
+function purgeExpired() {
+  if (S.settings.retention === '무제한') return toast('보관 기간이 무제한이라 자동으로 삭제되는 이미지가 없습니다 (용량 한도에 유의)');
+  toast(`보관 기간 ${S.settings.retention} 초과 이미지 0장 — 정리할 항목이 없습니다 (시연)`);
+}
 
 /**
  * 데이터 관리 화면을 생성한다.
@@ -1861,7 +2126,7 @@ function viewData() {
         <div style="height:8px"></div><button class="btn outline block" onclick="exportStatsCsv()">${ic('chart')}통계 요약 CSV</button>
         <div class="note">.xlsx 출력은 후속 확장(OpenPyXL) 항목입니다.</div></div></div>
     <div class="card"><div class="card-title">${ic('lock', 'lg')}보관 · 정리${adm ? '' : '<span class="sp"></span><span class="pill">관리자 전용</span>'}</div>
-      <div class="row between"><div><b>만료 이미지 정리</b><div class="small muted">보관 기간(${S.settings.retention})이 지난 원본 이미지를 삭제합니다. 검사 결과 기록은 유지됩니다.</div></div>
+      <div class="row between"><div><b>만료 이미지 정리</b><div class="small muted">${S.settings.retention === '무제한' ? '보관 기간이 <b>무제한</b>이라 이미지를 자동 삭제하지 않습니다. 필요하면 시스템 설정에서 기간을 정하세요.' : `보관 기간(${S.settings.retention})이 지난 원본 이미지를 삭제합니다. 검사 결과 기록은 유지됩니다.`}</div></div>
         <button class="btn outline" ${adm ? '' : 'disabled'} onclick="purgeExpired()">지금 정리</button></div></div>`;
 }
 
@@ -1931,7 +2196,7 @@ function viewModels() {
  * @param {string} key S.settings의 키
  * @param {string} v 선택값
  */
-function setSetting(key, v) { S.settings[key] = v; toast('설정을 저장했습니다'); }
+function setSetting(key, v) { S.settings[key] = v; toast('설정을 저장했습니다'); if (key === 'retention') render(); }   // 보관 기간은 안내 문구(무제한 경고)가 바뀌므로 다시 그린다
 
 /** 사용자 추가 모달을 연다 (관리자). */
 function openUserForm() {
@@ -1972,8 +2237,11 @@ function viewSettings() {
         <div class="note">촬영 품질 자동 검사 · Best Frame 선정은 후속 확장 항목입니다.</div></div>
       <div class="card"><div class="card-title">${ic('db', 'lg')}저장소</div>
         <div class="row between small"><span class="muted">검사 이미지 · 결과</span><b>${bytes.toFixed(1)} GB / 100 GB</b></div><div class="usage" style="margin:6px 0 12px"><i style="width:${bytes}%"></i></div>
-        <div class="field"><label>이미지 보관 기간</label><select class="inp" ${adm ? '' : 'disabled'} onchange="setSetting('retention',this.value)">${opt(['30일', '90일', '180일', '1년'], S.settings.retention)}</select></div>
-        <div class="muted small">저장 위치: <code>/storage/inspections</code></div></div></div>
+        <div class="field"><label>이미지 보관 기간</label><select class="inp" ${adm ? '' : 'disabled'} onchange="setSetting('retention',this.value)">${opt(['30일', '90일', '180일', '1년', '무제한'], S.settings.retention)}</select>${S.settings.retention === '무제한' ? '<div class="note" style="margin-top:6px">무제한은 이미지를 자동 삭제하지 않습니다. 저장 용량(100 GB)이 가득 차면 새 이미지를 저장할 수 없으니 용량을 확인하세요.</div>' : ''}</div>
+        <div class="field"><label>서버 운영체제</label><select class="inp" ${adm ? '' : 'disabled'} onchange="setServerOs(this.value)">${opt(['Linux', 'Windows'], S.settings.serverOs)}</select></div>
+        <div class="field"><label>저장소 경로 (검사 이미지 보관 위치)</label><input class="inp" id="stPath" ${adm ? '' : 'disabled'} value="${esc(S.settings.storagePath)}" onchange="setStoragePath(this.value)" spellcheck="false" placeholder="${esc(defaultStoragePath(S.settings.serverOs))}"><div class="small muted mt4">${S.settings.serverOs === 'Linux' ? '예: <code>/srv/circuiteye/storage</code> · 대소문자를 구분합니다' : '예: <code>D:\\circuiteye\\storage</code> 또는 <code>\\\\NAS\\pcb</code> · 대소문자를 구분하지 않습니다'}</div></div>
+        <div class="field"><label>데이터베이스</label><select class="inp" ${adm ? '' : 'disabled'} onchange="setSetting('dbKind',this.value)">${opt(['PostgreSQL', 'SQLite'], S.settings.dbKind)}</select><div class="small muted mt4">두 종류 모두 Linux · Windows에서 동작합니다. DB에는 파일 경로를 <b>저장소 기준 상대 경로(/로 통일)</b>로 저장해 서버를 옮겨도 그대로 쓸 수 있습니다.</div></div>
+        <div class="muted small">현재 저장 위치: <code>${esc(S.settings.storagePath)}</code></div></div></div>
     <div class="card"><div class="card-title">${ic('lock', 'lg')}사용자 관리<span class="sp"></span>${adm ? `<button class="btn sm primary" onclick="openUserForm()">${ic('plus')}사용자 추가</button>` : '<span class="pill">조회 전용</span>'}</div>
       <div class="tbl-wrap"><table class="tbl"><thead><tr><th>이름</th><th>소속</th><th>역할</th><th>상태</th>${adm ? '<th>관리</th>' : ''}</tr></thead><tbody>
       ${S.users.map((u, i) => `<tr><td><b>${esc(u.name)}</b>${u.name === S.user.name ? ' <span class="pill">나</span>' : ''}</td><td>${esc(u.company)}</td><td>${u.role}</td><td><span class="pill ${u.status === '활성' ? 'green' : ''}">${u.status}</span></td>${adm ? `<td><button class="btn sm outline" ${u.name === S.user.name ? 'disabled title="본인 계정은 비활성화할 수 없습니다"' : ''} onclick="toggleUser(${i})">${u.status === '활성' ? '비활성화' : '활성화'}</button></td>` : ''}</tr>`).join('')}</tbody></table></div></div>
@@ -1997,7 +2265,7 @@ function render() {
 function resetDemo() {
   Object.values(S.banks).forEach(a => a.forEach(f => f.src && URL.revokeObjectURL(f.src)));   // 데이터뱅크 미리보기 Blob URL 해제
   S = createInitialState({ theme: S.theme, user: S.user, api: S.api }); U.rvSel = null; U.rvQ = ''; U.rvFilter = 'all'; U.hf = { period: 'all', pcb: 'all', result: 'all', q: '' }; U.hpage = 1; U.anim = true;
-  U.queue = [newQueueItem({ ...sampleItem(SAMPLE_NORM[0]), name: '샘플 촬영 이미지' })]; U.capSeq = 0; U.bankPcb = 'PCB1'; render(); toast('데모 데이터를 초기화했습니다');
+  U.queue = [newQueueItem({ ...sampleItem(SAMPLE_NORM[0]), name: '샘플 촬영 이미지' })]; U.capSeq = 0; U.fmLast = ''; U.bankPcb = 'PCB1'; render(); toast('데모 데이터를 초기화했습니다');
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
