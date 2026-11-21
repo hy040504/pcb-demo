@@ -240,6 +240,7 @@ textarea.inp { min-height: 84px; resize: vertical; line-height: 1.5; }
 .rv-chips b { margin-left: 2px; font-variant-numeric: tabular-nums; }
 .rv-sep { width: 1px; height: 18px; background: var(--border-strong); margin: 0 2px; }
 .rv-count { margin: 0 0 8px; }
+.srctag { display: inline-block; padding: 0 7px; border-radius: 6px; font-size: 11px; font-weight: 600; line-height: 1.7; background: var(--bg-muted); border: 1px solid var(--border); color: var(--text-2); white-space: nowrap; }
 .rv-item { display: flex; gap: 12px; align-items: center; padding: 10px; border: 1px solid var(--border); border-radius: 12px; text-align: left; width: 100%; background: var(--bg-card); }
 .rv-item:hover { background: var(--bg-muted); }
 .rv-item.sel { border-color: var(--primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 22%, transparent); }
@@ -531,6 +532,21 @@ const SAMPLE_ANOM = Object.keys(SAMPLES).filter(n => SAMPLES[n][0] === 'A');
 const SAMPLE_IMG = sampleSrc(SAMPLE_NORM[0]);
 /** 샘플 파일명으로 정답 상자를 찾는다(큰 것부터). 목록에 없는 파일이면 빈 배열. @param {string} name 파일명 */
 function boxesOf(name) { const m = SAMPLES[name]; return m ? m[2].map(([x, y, w, h, k]) => ({ x, y, w, h, k })).sort((a, b) => b.w * b.h - a.w * a.h) : []; }
+/** 샘플 이미지의 출처 데이터셋 표기 — P: PCB-DSLR, R: Roboflow, K: PKU-Market-PCB. short=목록용 짧은 이름, full=상세용(라이선스 포함). */
+const SAMPLE_SRC = {
+  P: { short: 'PCB-DSLR', full: 'PCB-DSLR 데이터셋 (TU Wien · 실제 기판 사진 · CC BY 4.0)' },
+  R: { short: 'Roboflow', full: 'Roboflow pcb_component_detection_2 (기판 사진 · CC BY 4.0)' },
+  K: { short: 'PKU-Market-PCB', full: 'PKU-Market-PCB (베이징대 · 실제 기판 사진에 불량을 합성한 데이터셋 · 라이선스 미확인)' }
+};
+/**
+ * 검사 레코드 이미지의 출처를 돌려준다. 샘플 이미지는 파일명으로 데이터셋을 찾고, 직접 올린 이미지(Blob·data URL)는 '업로드 이미지'로 표기한다.
+ * @param {object} r 검사 레코드
+ * @returns {{short: string, full: string}} 출처 표기(목록용 · 상세용)
+ */
+function srcOf(r) {
+  const name = String((r && r.img) || '').split('/').pop(), m = SAMPLES[name];
+  return m && SAMPLE_SRC[m[1]] ? SAMPLE_SRC[m[1]] : { short: '업로드 이미지', full: '직접 업로드한 이미지 (공개 데이터셋 아님)' };
+}
 /** 상자들의 대표 위치(가장 큰 상자 중심·크기)를 spot 형식으로 만든다. @param {object[]} bx boxesOf 결과 */
 function spotOf(bx) { const b = bx[0]; return { x: Math.round(b.x + b.w / 2), y: Math.round(b.y + b.h / 2), r: Math.max(6, Math.min(16, Math.round(Math.max(b.w, b.h) / 1.6))) }; }
 /** 샘플 한 장을 대기열 입력 형식으로 만든다. @param {string} name 샘플 파일명 */
@@ -1357,7 +1373,7 @@ function evidenceLayer(r, mode, op) {
 const RV_FILTERS = { all: () => true, pending: r => r.final === null, done: r => r.final !== null, normal: r => r.final === 'NORMAL', defect: r => r.final === 'DEFECT' };
 
 /**
- * 검색어가 검사 레코드와 맞는지 본다 — 검사 ID(INS-000120) · 번호(120) · 판정 사유 메모를 대소문자 구분 없이 부분 일치로 찾는다.
+ * 검색어가 검사 레코드와 맞는지 본다 — 검사 ID(INS-000120) · 번호(120) · 판정 사유 메모 · 이미지 출처 이름을 대소문자 구분 없이 부분 일치로 찾는다.
  * @param {object} r 검사 레코드
  * @param {string} q 검색어(빈 값이면 모두 일치)
  * @returns {boolean} 일치 여부
@@ -1365,7 +1381,7 @@ const RV_FILTERS = { all: () => true, pending: r => r.final === null, done: r =>
 function rvMatch(r, q) {
   const s = (q || '').trim().toLowerCase(); if (!s) return true;
   const num = s.replace(/^ins-?/, '').replace(/^0+(?=\d)/, '');
-  return r.id.toLowerCase().includes(s) || (/^\d+$/.test(num) && String(r.n).includes(num)) || (r.memo || '').toLowerCase().includes(s);
+  return r.id.toLowerCase().includes(s) || (/^\d+$/.test(num) && String(r.n).includes(num)) || (r.memo || '').toLowerCase().includes(s) || srcOf(r).short.toLowerCase().includes(s);
 }
 
 /** 상태 필터 칩 HTML. 칩의 건수는 현재 검색어를 적용한 결과 기준이다. */
@@ -1427,7 +1443,8 @@ function viewReview() {
           <div class="row mt8"><button class="btn sm" onclick="openViewer(${cur.n})">${ic('zoom')}확대 보기</button><button class="btn sm outline" onclick="downloadImage(${cur.n})">${ic('download')}다운로드</button>${cur.ai === 'ANOMALY' ? markBtn() : ''}</div>
           ${cur.ai === 'ANOMALY' ? `<div class="small mt6" style="color:#ef4444">빨간 박스: AI가 이상으로 의심한 영역${cur.boxes && cur.boxes.length && cur.boxes[0].k ? ` · 데이터셋 정답 유형(참고): ${KIND_KO[cur.boxes[0].k] || cur.boxes[0].k}${cur.boxes.length > 1 ? ' 외' : ''}` : ' (시연용 위치)'}</div>` : ''}</div>
         <div style="flex:1;min-width:0"><div style="font-size:20px;font-weight:800">${cur.id}</div>
-          <div class="muted" style="margin:2px 0 8px">PCB 종류 ${pcbTag(cur.pcb)} · Industrial PatchCore ${cur.ver}</div>
+          <div class="muted" style="margin:2px 0 4px">PCB 종류 ${pcbTag(cur.pcb)} · Industrial PatchCore ${cur.ver}</div>
+          <div class="small muted" style="margin-bottom:8px">이미지 출처: <b>${esc(srcOf(cur).full)}</b></div>
           <span class="pill ${cur.ai === 'ANOMALY' ? 'orange' : 'green'}">${cur.ai === 'ANOMALY' ? 'AI 이상 의심' : 'AI 정상'}</span>
           <div class="mt10">이상 점수: <b>${cur.score.toFixed(2)}</b></div><div>임계값: <b>${cur.thr.toFixed(2)}</b> <span class="muted small">(검사 당시)</span></div>
           <div class="note">현재 상태: ${finalBadge(cur)}</div></div></div>
@@ -1440,9 +1457,9 @@ function viewReview() {
       ${evidence}`;
   }
   return `${pageHead('검사 관리', '이상 의심 건 확인 · 최종 판정 · 사유 기록', `<span class="pill orange lg">${st.pending}건 대기</span>`)}
-    <div class="rv-tools"><div class="rv-search"><input class="inp" id="rvSearch" type="text" autocomplete="off" placeholder="검사 ID · 번호 · 메모 검색 (예: INS-000120, 120)" aria-label="검사 검색" value="${esc(U.rvQ)}" oninput="rvSearch(this.value)" onkeydown="if(event.key==='Enter')rvFirst()"><button class="icon-btn x" onclick="rvSearch('', true)" aria-label="검색어 지우기" title="검색어 지우기">${ic('x')}</button></div><div class="rv-chips" id="rvChips">${rvChipsHtml()}</div></div>
+    <div class="rv-tools"><div class="rv-search"><input class="inp" id="rvSearch" type="text" autocomplete="off" placeholder="ID · 번호 · 메모 · 출처 검색 (예: INS-000120)" aria-label="검사 검색" value="${esc(U.rvQ)}" oninput="rvSearch(this.value)" onkeydown="if(event.key==='Enter')rvFirst()"><button class="icon-btn x" onclick="rvSearch('', true)" aria-label="검색어 지우기" title="검색어 지우기">${ic('x')}</button></div><div class="rv-chips" id="rvChips">${rvChipsHtml()}</div></div>
     <div class="split rv">
-      <div><div class="small muted rv-count" id="rvCount">${rvCountHtml(hits.length, list.length)}</div><div class="rv-list" id="rvList">${list.map(r => `<button class="rv-item ${r.n === U.rvSel ? 'sel' : ''}" onclick="U.rvSel=${r.n};U.rvMemo='';U.evMode='orig';render()"><div class="thumb" style="${thumbStyle(r)}"></div><div style="flex:1;min-width:0"><div class="rv-h"><span class="t">${r.id}</span>${finalBadge(r)}</div><div class="small muted">${pcbTag(r.pcb)} · 점수 <b>${r.score.toFixed(2)}</b> · ${hhmm(r.at)}</div></div></button>`).join('') || '<div class="empty">조건에 맞는 검사가 없습니다.<br><button class="btn sm outline mt10" onclick="rvReset()">검색·필터 초기화</button></div>'}</div></div>
+      <div><div class="small muted rv-count" id="rvCount">${rvCountHtml(hits.length, list.length)}</div><div class="rv-list" id="rvList">${list.map(r => `<button class="rv-item ${r.n === U.rvSel ? 'sel' : ''}" onclick="U.rvSel=${r.n};U.rvMemo='';U.evMode='orig';render()"><div class="thumb" style="${thumbStyle(r)}"></div><div style="flex:1;min-width:0"><div class="rv-h"><span class="t">${r.id}</span>${finalBadge(r)}</div><div class="small muted">${pcbTag(r.pcb)} · 점수 <b>${r.score.toFixed(2)}</b> · ${hhmm(r.at)}</div><div class="mt4"><span class="srctag" title="${esc(srcOf(r).full)}">출처 ${esc(srcOf(r).short)}</span></div></div></button>`).join('') || '<div class="empty">조건에 맞는 검사가 없습니다.<br><button class="btn sm outline mt10" onclick="rvReset()">검색·필터 초기화</button></div>'}</div></div>
       <div class="card" id="rvCard">${detail}</div></div>`;
 }
 
@@ -1512,7 +1529,7 @@ function openDetail(n) {
   const r = S.inspections.find(x => x.n === n); if (!r) return;
   openModal(`<div class="row between"><b style="font-size:18px">${r.id}</b><button class="icon-btn" onclick="closeModal()" aria-label="닫기">${ic('x')}</button></div>
     <div class="photo zoomable" style="margin:12px 0" title="클릭하면 크게 볼 수 있습니다" onclick="openViewer(${r.n})"><img src="${r.img}" alt="${r.id}">${markerHtml(r)}<span class="zoom-hint">${ic('zoom')}확대</span></div>
-    <dl class="kv"><dt>PCB 종류 / 모델</dt><dd>${pcbTag(r.pcb)} · Industrial PatchCore ${r.ver}</dd><dt>검사 시각</dt><dd>${mdhm(r.at)} · 처리 ${r.ms}ms</dd>
+    <dl class="kv"><dt>PCB 종류 / 모델</dt><dd>${pcbTag(r.pcb)} · Industrial PatchCore ${r.ver}</dd><dt>이미지 출처</dt><dd>${esc(srcOf(r).full)}</dd><dt>검사 시각</dt><dd>${mdhm(r.at)} · 처리 ${r.ms}ms</dd>
       <dt>AI 점수</dt><dd>${r.score.toFixed(2)} (당시 임계값 ${r.thr.toFixed(2)})</dd><dt>AI 판정</dt><dd>${aiBadge(r.ai)}</dd><dt>최종 판정</dt><dd>${finalBadge(r)}</dd><dt>판정 사유</dt><dd>${esc(r.memo) || '<span class="muted">—</span>'}</dd></dl>
     <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn outline" onclick="downloadImage(${r.n})">${ic('download')}이미지 다운로드</button><button class="btn primary" onclick="openReview(${r.n})">검사 관리에서 열기</button></div>`);
 }
