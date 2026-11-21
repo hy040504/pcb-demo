@@ -231,6 +231,15 @@ textarea.inp { min-height: 84px; resize: vertical; line-height: 1.5; }
 .thumb { width: 64px; height: 48px; border-radius: 8px; border: 1px solid var(--border); background-repeat: no-repeat; flex: none; }
 .split.rv { grid-template-columns: minmax(260px, .62fr) 1.6fr; }
 .rv-list { display: flex; flex-direction: column; gap: 8px; max-height: 640px; overflow-y: auto; padding-right: 2px; }
+.rv-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 6px 0 12px; }
+.rv-search { flex: 1 1 240px; max-width: 360px; position: relative; }
+.rv-search .inp { width: 100%; padding-right: 34px; }
+.rv-search .x { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); }
+.rv-search .inp:placeholder-shown + .x { display: none; }
+.rv-chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.rv-chips b { margin-left: 2px; font-variant-numeric: tabular-nums; }
+.rv-sep { width: 1px; height: 18px; background: var(--border-strong); margin: 0 2px; }
+.rv-count { margin: 0 0 8px; }
 .rv-item { display: flex; gap: 12px; align-items: center; padding: 10px; border: 1px solid var(--border); border-radius: 12px; text-align: left; width: 100%; background: var(--bg-card); }
 .rv-item:hover { background: var(--bg-muted); }
 .rv-item.sel { border-color: var(--primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 22%, transparent); }
@@ -456,50 +465,69 @@ circle.arc { transition: opacity .15s, stroke-width .15s; } circle.arc:hover { s
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /** 데모에 사용하는 PCB 샘플 촬영 이미지 경로 */
-/* 샘플 이미지: VisA PCB1(CC BY 4.0, Zou et al. ECCV 2022) · DeepPCB(연구용, Tang et al. 2019). 불량 상자는 각 데이터셋의 정답(마스크·주석)에서 가져온 값(x,y,너비,높이 %, 유형) */
-const SAMPLE_DIR = './docs/assets/samples/';
+/* 데모 샘플 이미지(docs/assets/demo_images, 출처·라이선스: SOURCES.md): 정상 = PCB-DSLR(P, CC BY 4.0) · PKU-Market-PCB 원본 기판(K) · Roboflow pcb_component_detection_2(R, CC BY 4.0),
+   불량 = PKU-Market-PCB(K, 실제 기판 사진에 불량을 합성한 데이터셋). 불량 상자는 PKU 정답 주석(VOC XML)에서 가져온 값(x,y,너비,높이 %, 유형)이다. 원본은 docs/assets/samples/ (Git 제외). */
+const SAMPLE_DIR = './docs/assets/demo_images/';
 const SAMPLES = {
-  'visa_pcb1_normal_01.jpg': ['N', 'V', []],
-  'visa_pcb1_normal_02.jpg': ['N', 'V', []],
-  'visa_pcb1_normal_03.jpg': ['N', 'V', []],
-  'visa_pcb1_normal_04.jpg': ['N', 'V', []],
-  'visa_pcb1_normal_05.jpg': ['N', 'V', []],
-  'visa_pcb1_normal_06.jpg': ['N', 'V', []],
-  'visa_pcb1_normal_07.jpg': ['N', 'V', []],
-  'visa_pcb1_normal_08.jpg': ['N', 'V', []],
-  'visa_pcb1_normal_09.jpg': ['N', 'V', []],
-  'visa_pcb1_normal_10.jpg': ['N', 'V', []],
-  'visa_pcb1_normal_11.jpg': ['N', 'V', []],
-  'visa_pcb1_normal_12.jpg': ['N', 'V', []],
-  'visa_pcb1_normal_13.jpg': ['N', 'V', []],
-  'visa_pcb1_normal_14.jpg': ['N', 'V', []],
-  'visa_pcb1_anomaly_01_melt.jpg': ['A', 'V', [[45.4,54.3,9.2,4.3,'melt']]],
-  'visa_pcb1_anomaly_02_melt.jpg': ['A', 'V', [[46.7,55.1,6.5,5.7,'melt']]],
-  'visa_pcb1_anomaly_03_melt.jpg': ['A', 'V', [[44.3,52.5,11.6,6,'melt']]],
-  'visa_pcb1_anomaly_04_melt.jpg': ['A', 'V', [[45.6,43.7,8.9,12.7,'melt']]],
-  'visa_pcb1_anomaly_05_melt.jpg': ['A', 'V', [[40.2,18.8,19.8,62.3,'melt']]],
-  'visa_pcb1_anomaly_06_missing.jpg': ['A', 'V', [[10.9,29,78.4,42,'missing']]],
-  'visa_pcb1_anomaly_07_missing.jpg': ['A', 'V', [[12.8,33,74.4,34.1,'missing']]],
-  'visa_pcb1_anomaly_08_missing.jpg': ['A', 'V', [[41.9,60.4,16.1,16.5,'missing']]],
-  'visa_pcb1_anomaly_09_missing.jpg': ['A', 'V', [[22.3,33.6,24.6,33,'missing']]],
-  'visa_pcb1_anomaly_10_bent.jpg': ['A', 'V', [[47.8,62,3.4,12.3,'bent']]],
-  'visa_pcb1_anomaly_11_bent.jpg': ['A', 'V', [[42.3,62.8,7.8,9.2,'bent']]],
-  'visa_pcb1_anomaly_12_bent.jpg': ['A', 'V', [[43.5,60.6,13.2,15.8,'bent']]],
-  'visa_pcb1_anomaly_13_scratch.jpg': ['A', 'V', [[41.6,46.9,16.9,6.4,'scratch']]],
-  'visa_pcb1_anomaly_14_scratch.jpg': ['A', 'V', [[36.5,43.8,23.2,13.9,'scratch']]],
-  'visa_pcb1_anomaly_15_scratch.jpg': ['A', 'V', [[39.3,41.1,21.5,19.8,'scratch']]],
-  'deeppcb_01_12300063.jpg': ['A', 'D', [[8.6,71.2,18.8,8.1,'open'],[32,94.1,6.1,5.9,'mousebite'],[17.3,28,5.6,8.7,'pin-hole'],[41.3,33.5,5.8,7.6,'copper']]],
-  'deeppcb_02_50600004.jpg': ['A', 'D', [[29.2,53,5.3,7.6,'open'],[46.4,64.4,5.5,11.4,'short'],[11.4,88.6,4.4,6.4,'pin-hole'],[23.1,76.7,4.7,6.1,'mousebite']]],
-  'deeppcb_03_92000010.jpg': ['A', 'D', [[21.4,87.5,15.9,10.6,'open'],[56.9,82.6,14.4,7.2,'short'],[56.3,52.5,6.7,9.1,'spur'],[30.2,40.7,6.7,9.1,'mousebite']]],
-  'deeppcb_04_00041008.jpg': ['A', 'D', [[62.8,24.4,10.6,9.3,'open'],[59.7,1.7,9.5,8.9,'short'],[71.1,37.7,6.4,5.9,'mousebite'],[33.9,89.2,5,8.5,'copper'],[82.2,35.2,5.5,6.1,'pin-hole']]],
-  'deeppcb_05_12000085.jpg': ['A', 'D', [[25.2,92.4,4.1,7.2,'open'],[22.5,3.2,5.6,8.7,'short'],[34.5,22.2,4.8,7.4,'spur'],[39.1,11.7,6.7,5.9,'mousebite'],[15.3,57.4,7.7,7.8,'open']]],
-  'deeppcb_06_12100010.jpg': ['A', 'D', [[28.3,74.4,9.2,5.9,'open'],[46.7,58.5,6.4,8.5,'short'],[90.2,72.5,5.6,7.4,'short'],[30.9,93,4.8,6.8,'pin-hole'],[27.5,60,6.1,7.2,'spur']]]
+  'anomaly_01_open_pku06.jpg': ['A', 'K', [[48.8,48,2.5,4.1,'open'],[11.9,28.2,3.1,4.3,'open'],[40.8,3.9,3,3.3,'open']]],
+  'anomaly_02_short_pku08.jpg': ['A', 'K', [[73.9,47,4,5.9,'short']]],
+  'anomaly_03_mousebite_pku04.jpg': ['A', 'K', [[46.2,66.2,7.6,7.8,'mousebite']]],
+  'anomaly_04_spur_pku04.jpg': ['A', 'K', [[47.6,45.9,4.8,8.1,'spur']]],
+  'anomaly_05_copper_pku05.jpg': ['A', 'K', [[46.9,48.1,6.1,3.8,'copper'],[56.3,12.3,4.9,7,'copper']]],
+  'anomaly_06_missing_hole_pku07.jpg': ['A', 'K', [[47.4,46.1,5.2,7.8,'missing_hole'],[79.4,75.9,5.1,7.7,'missing_hole']]],
+  'anomaly_07_open_pku07.jpg': ['A', 'K', [[48.1,17.6,3.9,4.9,'open'],[45.6,85.6,4.6,5.1,'open'],[76.4,85.9,3.9,5,'open']]],
+  'anomaly_08_short_pku09.jpg': ['A', 'K', [[47,46.3,6,7.5,'short']]],
+  'anomaly_09_mousebite_pku10.jpg': ['A', 'K', [[47.3,39.8,5.4,8.5,'mousebite'],[87.7,91.2,7.2,7.9,'mousebite']]],
+  'anomaly_10_spur_pku05.jpg': ['A', 'K', [[41.4,47.5,4.6,5,'spur'],[65.6,1,6.8,5.1,'spur']]],
+  'anomaly_11_copper_pku06.jpg': ['A', 'K', [[77.2,44.1,3.2,11.8,'copper'],[12.1,77.5,6.2,3.2,'copper']]],
+  'anomaly_12_missing_hole_pku08.jpg': ['A', 'K', [[69,47.1,3.8,5.7,'missing_hole'],[45.5,86.9,4.6,6.5,'missing_hole']]],
+  'anomaly_13_open_pku08.jpg': ['A', 'K', [[48.5,47.4,3.1,5.1,'open'],[67.9,28.8,3.4,4,'open']]],
+  'anomaly_14_short_pku10.jpg': ['A', 'K', [[43.8,44.7,12.4,10.6,'short']]],
+  'anomaly_15_mousebite_pku11.jpg': ['A', 'K', [[47.9,36.4,4.2,5.5,'mousebite'],[67.9,38.9,4.8,5.7,'mousebite'],[19.5,82.7,5.1,6.7,'mousebite']]],
+  'anomaly_16_spur_pku06.jpg': ['A', 'K', [[32.3,47,8.9,6,'spur'],[68.9,77.7,3,8.3,'spur']]],
+  'anomaly_17_copper_pku07.jpg': ['A', 'K', [[45.3,23.7,9.5,5.2,'copper'],[79.3,85.2,4.4,10.2,'copper'],[89.3,79.4,3.4,9.8,'copper']]],
+  'anomaly_18_missing_hole_pku09.jpg': ['A', 'K', [[47.8,46.8,4.4,6.3,'missing_hole'],[70,94.2,4.5,5.4,'missing_hole']]],
+  'anomaly_19_open_pku09.jpg': ['A', 'K', [[48.6,44.2,2.7,4.3,'open'],[21.7,92.4,2.9,3.6,'open']]],
+  'anomaly_20_short_pku11.jpg': ['A', 'K', [[46.5,31.9,6.9,9.7,'short']]],
+  'anomaly_21_mousebite_pku12.jpg': ['A', 'K', [[48.1,44.9,3.7,7.2,'mousebite']]],
+  'anomaly_22_spur_pku12.jpg': ['A', 'K', [[47.8,45.2,4.4,9.7,'spur'],[2.6,70.7,8,5.8,'spur']]],
+  'anomaly_23_copper_pku08.jpg': ['A', 'K', [[46.3,47.5,7.5,4.9,'copper'],[37.8,15.2,3.4,10.8,'copper']]],
+  'anomaly_24_missing_hole_pku10.jpg': ['A', 'K', [[45.3,44.6,9.5,10.9,'missing_hole'],[85.3,26.4,5.4,7.9,'missing_hole'],[89.3,42.1,6.4,7.4,'missing_hole'],[77.3,89.8,6.9,8.7,'missing_hole']]],
+  'normal_01_dslr_pcb100.jpg': ['N', 'P', []],
+  'normal_02_pku_pcb01.jpg': ['N', 'K', []],
+  'normal_03_rf_ACM-109Topjpg.jpg': ['N', 'R', []],
+  'normal_04_dslr_pcb107.jpg': ['N', 'P', []],
+  'normal_05_pku_pcb04.jpg': ['N', 'K', []],
+  'normal_06_rf_ATTIOTTopJPGjpg.jpg': ['N', 'R', []],
+  'normal_07_dslr_pcb121.jpg': ['N', 'P', []],
+  'normal_08_pku_pcb06.jpg': ['N', 'K', []],
+  'normal_09_rf_ML365Topjpg.jpg': ['N', 'R', []],
+  'normal_10_dslr_pcb124.jpg': ['N', 'P', []],
+  'normal_11_pku_pcb08.jpg': ['N', 'K', []],
+  'normal_12_rf_RPI3BTopjpg.jpg': ['N', 'R', []],
+  'normal_13_dslr_pcb127.jpg': ['N', 'P', []],
+  'normal_14_pku_pcb09.jpg': ['N', 'K', []],
+  'normal_15_rf_Spartan3jpg.jpg': ['N', 'R', []],
+  'normal_16_dslr_pcb131.jpg': ['N', 'P', []],
+  'normal_17_pku_pcb11.jpg': ['N', 'K', []],
+  'normal_18_rf_Spartan6ReduxTopjpg.jpg': ['N', 'R', []],
+  'normal_19_dslr_pcb134.jpg': ['N', 'P', []],
+  'normal_20_rf_SystemAceTopjpg.jpg': ['N', 'R', []],
+  'normal_21_dslr_pcb137.jpg': ['N', 'P', []],
+  'normal_22_rf_Virtex6jpg.jpg': ['N', 'R', []],
+  'normal_23_dslr_pcb141.jpg': ['N', 'P', []],
+  'normal_24_dslr_pcb1.jpg': ['N', 'P', []],
+  'normal_25_dslr_pcb27.jpg': ['N', 'P', []],
+  'normal_26_dslr_pcb31.jpg': ['N', 'P', []],
+  'normal_27_dslr_pcb47.jpg': ['N', 'P', []],
+  'normal_28_dslr_pcb54.jpg': ['N', 'P', []],
+  'normal_29_dslr_pcb90.jpg': ['N', 'P', []],
+  'normal_30_dslr_pcb93.jpg': ['N', 'P', []]
 };
-const KIND_KO = { melt: '납 용융', missing: '부품 누락', bent: '핀 휨', scratch: '스크래치', open: '단선', short: '단락', mousebite: '쥐물림', spur: '돌기', copper: '잉여 구리', 'pin-hole': '핀홀' };
+const KIND_KO = { open: '단선', short: '단락', mousebite: '쥐물림', spur: '돌기', copper: '잉여 구리', missing_hole: '구멍 누락' };   // PKU-Market-PCB 불량 6종
 const sampleSrc = n => SAMPLE_DIR + n;
 const SAMPLE_NORM = Object.keys(SAMPLES).filter(n => SAMPLES[n][0] === 'N');
-const SAMPLE_ANOM = Object.keys(SAMPLES).filter(n => SAMPLES[n][0] === 'A' && SAMPLES[n][1] === 'V');
-const SAMPLE_DP = Object.keys(SAMPLES).filter(n => SAMPLES[n][1] === 'D');
+const SAMPLE_ANOM = Object.keys(SAMPLES).filter(n => SAMPLES[n][0] === 'A');
 const SAMPLE_IMG = sampleSrc(SAMPLE_NORM[0]);
 /** 샘플 파일명으로 정답 상자를 찾는다(큰 것부터). 목록에 없는 파일이면 빈 배열. @param {string} name 파일명 */
 function boxesOf(name) { const m = SAMPLES[name]; return m ? m[2].map(([x, y, w, h, k]) => ({ x, y, w, h, k })).sort((a, b) => b.w * b.h - a.w * a.h) : []; }
@@ -609,8 +637,10 @@ function createInitialState(keep = {}) {
     if (final === 'DEFECT') memo = n === 117 ? 'AI 정상이나 육안상 납땜 들뜸 확인 → 불량' : n === 52 ? '경계 점수 미탐 — 패드 오염 확인' : '배선/납땜 이상 육안 확인';
     if (rescued.includes(n)) memo = '표면 미세 스크래치, 기능 영향 없음 (가불량 구제)';
     const ms = 380 + Math.round(rng() * 160), spot = { x: 18 + Math.round(rng() * 64), y: 20 + Math.round(rng() * 60), r: 9 + Math.round(rng() * 7) };
-    // 이상 의심·불량 건은 VisA PCB1 불량 샘플(실제 불량 위치 상자 포함), 정상 건은 정상 샘플을 사용한다
+    // 이상 의심·불량 건은 PKU 불량 샘플(정답 위치 상자 포함), 정상 건은 정상 기판 사진(PCB-DSLR · PKU · Roboflow)을 사용한다
     const nm = ai === 'ANOMALY' || final === 'DEFECT' ? SAMPLE_ANOM[n % SAMPLE_ANOM.length] : SAMPLE_NORM[n % SAMPLE_NORM.length], bx = boxesOf(nm);
+    const ko = bx.length ? KIND_KO[bx[0].k] : '';
+    if (final === 'DEFECT') memo = n === 117 ? `AI 정상이나 육안상 ${ko} 확인 → 불량` : n === 52 ? `경계 점수 미탐 — ${ko} 확인` : `${ko} 육안 확인`;
     list.push({
       n, id: 'INS-' + String(n).padStart(6, '0'), pcb: 'PCB1', score, thr: 0.60, ver: 'v0.3.0', ai, final, memo,
       at: DEMO_DAY_START + Math.round(n * 5.5 * 60000), ms,
@@ -645,7 +675,7 @@ let S = createInitialState();
 const U = {
   anim: true, fresh: false,   // 진입 모션 / 검사 결과 갱신 모션 1회성 플래그 (playEnter가 소비)
   route: 'dashboard', pcb: 'PCB1', running: false, queue: [], qSeq: 0, bankPcb: 'PCB1',
-  rvFilter: 'all', rvSel: null, rvMemo: '', evMode: 'orig', evOpacity: 70,
+  rvFilter: 'all', rvQ: '', rvSel: null, rvMemo: '', evMode: 'orig', evOpacity: 70,
   hf: { period: 'all', pcb: 'all', result: 'all', q: '' }, hpage: 1
 };
 
@@ -711,7 +741,7 @@ function mdhm(ms) { const d = new Date(ms); return String(d.getMonth() + 1).padS
  */
 function thumbStyle(r) {
   // 이상 의심 건은 의심 위치를 확대해 보여 주고, 정상 건은 전체를 보여 준다.
-  const zoom = r.ai === 'ANOMALY' ? 320 : 115;
+  const zoom = r.ai === 'ANOMALY' ? 170 : 115;
   return `background-image:url('${r.img}');background-size:${zoom}%;background-position:${r.ai === 'ANOMALY' ? `${r.spot.x}% ${r.spot.y}%` : '50% 50%'};`;
 }
 
@@ -994,7 +1024,7 @@ function viewDashboard() {
     ${roleStrip}
     <div class="kpi-grid">${kpi('전체 검사', st.total, '', 'all', '오늘 08~19시 · 이력 보기')}${kpi('정상 확정', st.normal, 'good', 'NORMAL', '전체의 ' + pc(st.normal))}${kpi('불량 확정', st.defect, 'bad', 'DEFECT', '전체의 ' + pc(st.defect))}${kpi('검토 대기', st.pending, 'warn', 'PENDING', '전체의 ' + pc(st.pending))}</div>
     <div class="split eq">
-      <div class="card"><div class="card-title">시간대별 검사 건수</div>${hourlyChart()}<div class="divider"></div><div class="card-title">불량 유형별 분포 <span class="pill">최근 7일</span><span class="sp"></span><button class="btn sm" onclick="go('stats')">통계 분석</button></div>${defectDist(statsData(7).byType)}</div>
+      <div class="card"><div class="card-title">시간대별 검사 건수</div>${hourlyChart()}<div class="divider"></div><div class="card-title">불량 유형별 분포 <span class="pill" title="현재 검사 이력 중 불량 확정과 검토 대기 건을 이미지 라벨로 집계">확정 + 대기 기준</span><span class="sp"></span><button class="btn sm" onclick="go('stats')">통계 분석</button></div>${defectDist(statsData(7).byType)}</div>
       <div class="card"><div class="card-title">검토 대기 <span class="pill orange">${st.pending}건</span><span class="sp"></span><button class="btn sm" onclick="go('review')">검토하기</button></div>
         ${pend.length ? pend.map(r => `<div class="ver-row"><div class="thumb" style="${thumbStyle(r)}"></div><div style="flex:1"><b>${r.id}</b><div class="small muted">${pcbTag(r.pcb)} · 점수 ${r.score.toFixed(2)} · ${hhmm(r.at)}</div></div><button class="btn sm outline" onclick="openReview(${r.n})">판정</button></div>`).join('') : `<div class="empty">검토 대기 건이 없습니다.<br><button class="btn sm outline mt10" onclick="go('inspect')">새 검사 시작</button></div>`}
         <div class="divider"></div><div class="row between"><span class="muted">AI-검사원 판정 일치율</span><b style="font-size:20px">${st.match}%</b></div>
@@ -1054,12 +1084,12 @@ function capture() {
   toast('촬영 완료 — 대기열에 추가했습니다 (시안: 샘플 이미지)');
 }
 
-/** 샘플 세트(VisA PCB1 정상 3 · 불량 4 + DeepPCB 3)를 대기열에 한 번에 추가한다. 파일명으로 정답 불량 위치가 연결된다. */
+/** 샘플 세트(정상 기판 4 · 불량 6종 각 1장)를 대기열에 한 번에 추가한다. 파일명으로 정답 불량 위치가 연결된다. */
 function loadSampleSet() {
   if (U.running) return;
-  const names = [...SAMPLE_NORM.slice(0, 3), SAMPLE_ANOM[0], SAMPLE_ANOM[5], SAMPLE_ANOM[9], SAMPLE_ANOM[12], ...SAMPLE_DP.slice(0, 3)], room = MAX_BATCH - U.queue.length;
+  const names = [...SAMPLE_NORM.slice(0, 4), ...SAMPLE_ANOM.slice(0, 6)], room = MAX_BATCH - U.queue.length;
   if (room < names.length) return toast(`대기열 자리가 부족합니다 (${names.length}장 필요 · 최대 ${MAX_BATCH}장)`);
-  queueAdd(names.map(sampleItem)); toast(`샘플 ${names.length}장을 추가했습니다 (VisA PCB1 · DeepPCB)`);
+  queueAdd(names.map(sampleItem)); toast(`샘플 ${names.length}장을 추가했습니다 (공개 PCB 사진)`);
 }
 
 /** 파일 선택 창을 연다 (여러 장 선택 가능). */
@@ -1173,7 +1203,7 @@ function viewInspect() {
     const act = x.st === 'done' ? `${r.ai === 'ANOMALY' ? `<button class="btn sm outline" onclick="openReview(${r.n})">판정하기</button>` : ''}`
       : `<button class="icon-btn" ${U.running ? 'disabled' : ''} onclick="queueRemove(${x.uid})" aria-label="목록에서 빼기" title="목록에서 빼기">${ic('x')}</button>`;
     return `<div class="qrow ${x.st}" data-st="${x.st}"><div class="photo ${x.st === 'run' ? 'scanning' : ''}" onclick="${x.st === 'done' ? `openViewer(${r.n})` : `openQueueImg(${x.uid})`}" title="클릭하면 크게 볼 수 있습니다"><img src="${x.src}" alt="${esc(x.name)}">${x.st === 'done' ? markerHtml(r, true) : ''}</div>
-      <div class="qinfo"><b class="qname" title="${esc(x.name)}">${esc(x.name)}</b><div class="small muted">${x.sample ? '샘플 이미지' : fmtBytes(x.size)}${x.st === 'done' ? ` · ${r.id} · ${r.ms}ms` : ''}</div>${x.st === 'done' && r.ai === 'ANOMALY' ? `<div class="small" style="color:#ef4444;font-weight:600">의심 영역 1곳 — 썸네일의 빨간 박스 (클릭하면 크게 확인)</div>` : ''}</div>
+      <div class="qinfo"><b class="qname" title="${esc(x.name)}">${esc(x.name)}</b><div class="small muted">${x.sample ? '샘플 이미지' : fmtBytes(x.size)}${x.st === 'done' ? ` · ${r.id} · ${r.ms}ms` : ''}</div>${x.st === 'done' && r.ai === 'ANOMALY' ? `<div class="small" style="color:#ef4444;font-weight:600">의심 영역 ${(r.boxes && r.boxes.length) || 1}곳 — 썸네일의 빨간 박스 (클릭하면 크게 확인)</div>` : ''}</div>
       <div class="qres">${state}</div><div class="qact">${act}</div></div>`;
   };
   return `${pageHead('PCB 외관 검사', 'PCB 종류 선택 → 사진 여러 장 올리기 → 한 번에 검사')}
@@ -1187,12 +1217,12 @@ function viewInspect() {
       <div class="drop dz" role="button" tabindex="0" ${U.running ? '' : 'onclick="pickFile()" onkeydown="if(event.key===\'Enter\')pickFile()"'} ondragover="dzOver(event)" ondragleave="dzLeave(event)" ondrop="dzDrop(event,'queue')">
         ${ic('upload', 'lg')}<div class="mt6"><b>PCB 사진을 여기로 끌어다 놓으세요</b></div><div class="small dz-note">또는 클릭해서 파일 선택 — <b>여러 장 동시 선택 가능</b> · 최대 ${MAX_BATCH}장 · PNG · JPG · BMP · WebP</div></div>
       <div class="grid2 mt10"><button class="btn" ${U.running ? 'disabled' : ''} onclick="pickFile()">${ic('upload')}파일 선택 (여러 장)</button><button class="btn" ${U.running ? 'disabled' : ''} onclick="capture()">${ic('camera')}촬영 추가</button></div>
-      <div class="row mt8"><button class="btn sm outline" ${U.running ? 'disabled' : ''} onclick="loadSampleSet()">${ic('chip')}샘플 세트 불러오기 (10장)</button><span class="small muted">VisA PCB1 · DeepPCB 공개 이미지 — 정상·불량이 섞여 있어 의심 영역 표시를 바로 볼 수 있습니다</span></div></div>
+      <div class="row mt8"><button class="btn sm outline" ${U.running ? 'disabled' : ''} onclick="loadSampleSet()">${ic('chip')}샘플 세트 불러오기 (10장)</button><span class="small muted">공개 PCB 사진(정상 기판 4장 + 불량 6종) — 정상·불량이 섞여 있어 의심 영역 표시를 바로 볼 수 있습니다</span></div></div>
     <div class="card"><div class="card-title">검사 목록 · 결과<span class="sp"></span>${done.length && !U.running ? `<button class="btn sm outline" onclick="queueClearDone()">완료 항목 치우기</button>` : ''}</div>
       ${total ? `<div class="qsum"><div class="bar-track"><div class="bar-fill ok" style="width:${pct}%"></div></div><b>${done.length} / ${total}</b><span class="pill green">정상 ${done.length - anom.length}</span><span class="pill orange">이상 의심 ${anom.length}</span>${anom.length && !U.running ? `<button class="btn sm primary" onclick="openReview(${anom[0].rec.n})">이상 의심 건 판정하기</button>` : ''}</div>
         <div class="qlist">${q.map(row).join('')}</div>` : `<div class="empty">${ic('upload')}검사할 이미지가 없습니다.<br>위 영역에 사진을 끌어다 놓거나 파일을 선택하세요.</div>`}</div>
     <button class="btn primary block mt14" onclick="runBatch()" ${U.running || off || !waiting ? 'disabled' : ''}>${U.running ? '<span class="spin"></span>PatchCore API 호출 중…' : off ? 'API 오프라인 — 검사 불가' : waiting ? `검사 시작 (${waiting}장)` : total ? '모든 이미지를 검사했습니다' : '검사할 이미지를 추가하세요'}</button>
-    <p class="note">여러 장을 올리면 순서대로 한 장씩 PatchCore API에 보내 한 번에 검사합니다. 이상 의심 건은 검사 관리의 검토 대기로 들어가고, 정상은 자동 확정됩니다. 이상 의심 건은 이미지에 빨간 박스로 의심 영역이 표시됩니다 (샘플 이미지는 데이터셋 정답 위치, 그 외 파일은 시연용 위치 · 실제 영역 좌표는 API 연동 시 제공, Heatmap은 확장 단계). 샘플 이미지 출처: VisA(CC BY 4.0, Zou et al., ECCV 2022) · DeepPCB(연구용, Tang et al.).</p>
+    <p class="note">여러 장을 올리면 순서대로 한 장씩 PatchCore API에 보내 한 번에 검사합니다. 이상 의심 건은 검사 관리의 검토 대기로 들어가고, 정상은 자동 확정됩니다. 이상 의심 건은 이미지에 빨간 박스로 의심 영역이 표시됩니다 (샘플 이미지는 데이터셋 정답 위치, 그 외 파일은 시연용 위치 · 실제 영역 좌표는 API 연동 시 제공, Heatmap은 확장 단계). 샘플 이미지 출처: PCB-DSLR(TU Wien, CC BY 4.0) · Roboflow pcb_component_detection_2(CC BY 4.0) · PKU-Market-PCB(베이징대, 합성 불량·라이선스 확인 필요).</p>
     ${isAdmin() ? `<div class="card mt14"><details><summary>외부 PatchCore API 호출 계약(안) 보기 <span class="pill role-admin">관리자 전용</span></summary>
       <div class="note" style="margin:6px 0 8px">자체 모델 구현 없이 공개 Industrial PatchCore API를 호출만 합니다. 이미지마다 한 번씩 호출합니다. 아래는 어댑터가 사용할 요청·응답 계약(안)입니다.</div>
       <div class="grid2"><div><div class="small muted">요청</div><div class="code">${esc(req)}</div></div><div><div class="small muted">응답</div><div class="code">${esc(res)}</div></div></div></details></div>` : ''}`;
@@ -1269,7 +1299,7 @@ function bankCardHtml(adm) {
 }
 
 // 시작 시 검사 대기열에 샘플 이미지 1장을 넣어 두어, 바로 '검사 시작'을 눌러 볼 수 있게 한다.
-U.queue.push(newQueueItem({ ...sampleItem(SAMPLE_ANOM[0]), name: '샘플 촬영 이미지' }));
+U.queue.push(newQueueItem({ ...sampleItem(SAMPLE_NORM[0]), name: '샘플 촬영 이미지' }));
 
 /* ═══════════════════════════════════════════════════════════════════════════
    7. [메뉴 3] 검사 관리 — 검사원 최종 판정 · 판정 사유 · 피드백 + (관리자) AI 판단 근거
@@ -1278,7 +1308,7 @@ U.queue.push(newQueueItem({ ...sampleItem(SAMPLE_ANOM[0]), name: '샘플 촬영 
  * 검사 관리 화면으로 이동해 특정 검사를 선택한다.
  * @param {number} n 검사 번호
  */
-function openReview(n) { closeModal(); U.rvSel = n; U.rvMemo = ''; U.evMode = 'orig'; U.rvFilter = 'all'; go('review'); }
+function openReview(n) { closeModal(); U.rvSel = n; U.rvMemo = ''; U.evMode = 'orig'; U.rvFilter = 'all'; U.rvQ = ''; go('review'); }
 
 /**
  * 이상 의심 영역 박스를 만든다(모든 역할 공통). 위치는 시연용 시뮬레이션이며, 실서비스에서는 PatchCore 응답의 영역 좌표를 쓴다.
@@ -1323,17 +1353,63 @@ function evidenceLayer(r, mode, op) {
     <div class="ov" style="opacity:${a}"><div style="position:absolute;left:${x - rad * 1.1}%;top:${y - rad * 1.45}%;width:${rad * 2.2}%;height:${rad * 2.9}%;border:2px solid #ef4444;border-radius:4px"></div></div>`;
 }
 
+/** 검사 관리 목록의 상태 필터: 전체 · 검토 대기 · 검토 완료 · (최종) 정상 · (최종) 불량. */
+const RV_FILTERS = { all: () => true, pending: r => r.final === null, done: r => r.final !== null, normal: r => r.final === 'NORMAL', defect: r => r.final === 'DEFECT' };
+
+/**
+ * 검색어가 검사 레코드와 맞는지 본다 — 검사 ID(INS-000120) · 번호(120) · 판정 사유 메모를 대소문자 구분 없이 부분 일치로 찾는다.
+ * @param {object} r 검사 레코드
+ * @param {string} q 검색어(빈 값이면 모두 일치)
+ * @returns {boolean} 일치 여부
+ */
+function rvMatch(r, q) {
+  const s = (q || '').trim().toLowerCase(); if (!s) return true;
+  const num = s.replace(/^ins-?/, '').replace(/^0+(?=\d)/, '');
+  return r.id.toLowerCase().includes(s) || (/^\d+$/.test(num) && String(r.n).includes(num)) || (r.memo || '').toLowerCase().includes(s);
+}
+
+/** 상태 필터 칩 HTML. 칩의 건수는 현재 검색어를 적용한 결과 기준이다. */
+function rvChipsHtml() {
+  const base = S.inspections.filter(r => rvMatch(r, U.rvQ)), cnt = id => base.filter(RV_FILTERS[id]).length;
+  const chip = (id, label, cls) => `<button class="pill ${U.rvFilter === id ? 'active' : cls}" aria-pressed="${U.rvFilter === id}" onclick="U.rvFilter='${id}';render()">${label} <b>${cnt(id)}</b></button>`;
+  return chip('all', '전체', '') + chip('pending', '검토 대기', 'orange') + chip('done', '검토 완료', 'green') + '<span class="rv-sep"></span>' + chip('normal', '정상', 'green') + chip('defect', '불량', 'red');
+}
+
+/** 목록 위의 결과 건수 문구. @param {number} total 조건에 맞는 전체 건수 @param {number} shown 화면에 보이는 건수(최대 60) */
+function rvCountHtml(total, shown) {
+  const q = (U.rvQ || '').trim();
+  return `${q ? `‘${esc(q)}’ 검색 결과 ` : ''}<b>${total}</b>건${total > shown ? ` · 상위 ${shown}건만 표시 — 검색어를 더 구체적으로 입력하세요` : ''}`;
+}
+
+/**
+ * 검색어를 바꾼다. 입력 중에는 화면 전체를 다시 그리지 않고 칩 · 건수 · 목록 · 상세만 갈아 끼워 입력 커서와 한글 조합이 끊기지 않게 한다.
+ * @param {string} q 검색어
+ * @param {boolean} [full] true면 화면 전체를 다시 그린다(지우기 버튼)
+ */
+function rvSearch(q, full) {
+  U.rvQ = q; const prev = U.rvSel;
+  if (full || !document.getElementById('rvCard')) { render(); const el = document.getElementById('rvSearch'); if (el) el.focus(); return; }
+  const t = document.createElement('div'); t.innerHTML = viewReview();
+  if (U.rvSel !== prev) { U.rvMemo = ''; U.evMode = 'orig'; t.innerHTML = viewReview(); }   // 선택 건이 바뀌면 작성 중이던 메모·근거 모드 초기화
+  ['rvChips', 'rvCount', 'rvList', 'rvCard'].forEach(id => { const n = document.getElementById(id), s = t.querySelector('#' + id); if (n && s) n.innerHTML = s.innerHTML; });
+}
+
+/** 검색창에서 Enter: 목록의 첫 번째 검사를 선택한다. */
+function rvFirst() { const el = document.querySelector('#rvList .rv-item'); if (el) el.click(); }
+
+/** 검색어와 상태 필터를 모두 초기화한다. */
+function rvReset() { U.rvQ = ''; U.rvFilter = 'all'; render(); }
+
 /**
  * 검사 관리 화면을 생성한다.
  * @returns {string} 본문 HTML
  */
 function viewReview() {
   const st = getStats();
-  const flt = { all: () => true, pending: r => r.final === null, done: r => r.final !== null }[U.rvFilter];
-  const list = S.inspections.filter(flt).sort((a, b) => (a.final === null ? 0 : 1) - (b.final === null ? 0 : 1) || b.n - a.n).slice(0, 60);
+  const hits = S.inspections.filter(r => (RV_FILTERS[U.rvFilter] || RV_FILTERS.all)(r) && rvMatch(r, U.rvQ)).sort((a, b) => (a.final === null ? 0 : 1) - (b.final === null ? 0 : 1) || b.n - a.n);
+  const list = hits.slice(0, 60);
   if (!list.find(r => r.n === U.rvSel)) U.rvSel = list.length ? list[0].n : null;
   const cur = S.inspections.find(r => r.n === U.rvSel);
-  const chip = (id, label) => `<button class="pill ${U.rvFilter === id ? 'active' : (id === 'pending' ? 'orange' : id === 'done' ? 'green' : '')}" onclick="U.rvFilter='${id}';render()">${label}</button>`;
   let detail = '<div class="empty">검토할 항목이 없습니다.</div>';
   if (cur) {
     const f = finalState(cur);
@@ -1364,10 +1440,10 @@ function viewReview() {
       ${evidence}`;
   }
   return `${pageHead('검사 관리', '이상 의심 건 확인 · 최종 판정 · 사유 기록', `<span class="pill orange lg">${st.pending}건 대기</span>`)}
-    <div class="row" style="margin:6px 0 14px">${chip('all', '전체')}${chip('pending', '검토 대기')}${chip('done', '검토 완료')}</div>
+    <div class="rv-tools"><div class="rv-search"><input class="inp" id="rvSearch" type="text" autocomplete="off" placeholder="검사 ID · 번호 · 메모 검색 (예: INS-000120, 120)" aria-label="검사 검색" value="${esc(U.rvQ)}" oninput="rvSearch(this.value)" onkeydown="if(event.key==='Enter')rvFirst()"><button class="icon-btn x" onclick="rvSearch('', true)" aria-label="검색어 지우기" title="검색어 지우기">${ic('x')}</button></div><div class="rv-chips" id="rvChips">${rvChipsHtml()}</div></div>
     <div class="split rv">
-      <div class="rv-list">${list.map(r => `<button class="rv-item ${r.n === U.rvSel ? 'sel' : ''}" onclick="U.rvSel=${r.n};U.rvMemo='';U.evMode='orig';render()"><div class="thumb" style="${thumbStyle(r)}"></div><div style="flex:1;min-width:0"><div class="rv-h"><span class="t">${r.id}</span>${finalBadge(r)}</div><div class="small muted">${pcbTag(r.pcb)} · 점수 <b>${r.score.toFixed(2)}</b> · ${hhmm(r.at)}</div></div></button>`).join('') || '<div class="empty">항목이 없습니다.</div>'}</div>
-      <div class="card">${detail}</div></div>`;
+      <div><div class="small muted rv-count" id="rvCount">${rvCountHtml(hits.length, list.length)}</div><div class="rv-list" id="rvList">${list.map(r => `<button class="rv-item ${r.n === U.rvSel ? 'sel' : ''}" onclick="U.rvSel=${r.n};U.rvMemo='';U.evMode='orig';render()"><div class="thumb" style="${thumbStyle(r)}"></div><div style="flex:1;min-width:0"><div class="rv-h"><span class="t">${r.id}</span>${finalBadge(r)}</div><div class="small muted">${pcbTag(r.pcb)} · 점수 <b>${r.score.toFixed(2)}</b> · ${hhmm(r.at)}</div></div></button>`).join('') || '<div class="empty">조건에 맞는 검사가 없습니다.<br><button class="btn sm outline mt10" onclick="rvReset()">검색·필터 초기화</button></div>'}</div></div>
+      <div class="card" id="rvCard">${detail}</div></div>`;
 }
 
 /**
@@ -1463,23 +1539,24 @@ function exportCsv(all) {
 /* ═══════════════════════════════════════════════════════════════════════════
    8-2. [메뉴 5] 통계 분석 — 기간별 추이 · 불량 유형 분포 · TOP 5 (시연용 합성 이력 포함)
    ═══════════════════════════════════════════════════════════════════════════ */
-/** 불량 유형 분류 체계 (데모 — 실제 API는 유형을 반환하지 않으므로 검사원 분류 입력 기능으로 후속 확장) */
+/** 불량 유형 분류 체계 — 샘플 이미지의 데이터셋 정답 라벨(PKU-Market-PCB)을 쓴다. 실제 API는 유형을 반환하지 않으므로 서비스에서는 검사원 분류 입력(후속 확장)이 이 값을 대신한다. */
 const DEFECT_TYPES = [
-  { k: '납땜 불량', c: '#c0463e' }, { k: '부품 누락', c: '#e08a3c' }, { k: '오염', c: '#d9b43a' },
-  { k: '위치 이탈', c: '#3aa38a' }, { k: '스크래치', c: '#3b7bbf' }
-];
+  { id: 'open', c: '#8e5bb5' }, { id: 'short', c: '#3aa38a' }, { id: 'mousebite', c: '#b5651d' }, { id: 'spur', c: '#7a8a99' },
+  { id: 'copper', c: '#c76f9a' }, { id: 'missing_hole', c: '#2f8f9d' }, { id: '', c: '#9aa3a0' }
+].map(t => ({ ...t, k: t.id ? KIND_KO[t.id] : '미분류' }));
 /** 최근 6일 합성 이력 [검사 건수, 불량 건수] (시연용 고정값) + 오늘은 실제 집계 */
 const PAST_DAYS = [[104, 9], [118, 11], [97, 8], [126, 12], [112, 10], [109, 9]];
 
 /**
- * 검사 레코드의 불량 유형을 결정적으로 배정한다 (시연용).
+ * 검사 레코드의 불량 유형 id를 돌려준다(이미지의 정답 라벨). 라벨이 없는 업로드 이미지는 '' (미분류).
  * @param {object} r 검사 레코드
- * @returns {string} 불량 유형명
+ * @returns {string} 유형 id
  */
-function defectTypeOf(r) { return DEFECT_TYPES[(r.n * 7 + 3) % DEFECT_TYPES.length].k; }
+function defectTypeOf(r) { return (r.boxes && r.boxes[0] && r.boxes[0].k) || ''; }
 
 /**
- * 통계 분석용 집계를 만든다 (기간 7/14일 중 선택, 14일은 앞쪽 7일 합성).
+ * 통계 분석용 집계를 만든다 (기간 7/14일 중 선택, 일별 추이의 과거 일자는 시연용 합성).
+ * 불량 유형 분포는 합성 없이 현재 검사 이력(불량 확정 + 검토 대기)의 실제 이미지 라벨로 집계한다.
  * @param {number} days 기간(일)
  * @returns {object} 일별 · 유형별 집계
  */
@@ -1490,13 +1567,9 @@ function statsData(days) {
   const base = new Date('2026-11-20T00:00:00+09:00');
   const all = [...past, [st.total, st.defect + st.pending]];
   all.forEach(([t, d], i) => { const dt = new Date(base.getTime() - (all.length - 1 - i) * 86400000); labels.push(`${dt.getMonth() + 1}/${dt.getDate()}`); tot.push(t); bad.push(d); });
-  const defects = S.inspections.filter(r => r.final === 'DEFECT');
-  const byType = DEFECT_TYPES.map(t => ({ ...t, n: defects.filter(r => defectTypeOf(r) === t.k).length }));
-  // 합성 과거 불량을 유형별로 균등 배분해 분포가 의미를 갖도록 보정
-  const pastBad = bad.slice(0, -1).reduce((a, b) => a + b, 0);
-  const w = [0.38, 0.26, 0.19, 0.11, 0.06];
-  byType.forEach((t, i) => { t.n += Math.round(pastBad * w[i]); });
-  return { labels, tot, bad, byType, sum: tot.reduce((a, b) => a + b, 0), badSum: bad.reduce((a, b) => a + b, 0) };
+  const bads = S.inspections.filter(r => r.final !== 'NORMAL');   // 불량 확정 + 검토 대기
+  const byType = DEFECT_TYPES.map(t => ({ ...t, n: bads.filter(r => defectTypeOf(r) === t.id).length })).filter(t => t.n > 0).sort((x, y) => y.n - x.n);
+  return { labels, tot, bad, byType, typeTotal: bads.length, sum: tot.reduce((a, b) => a + b, 0), badSum: bad.reduce((a, b) => a + b, 0) };
 }
 
 /** 통계 기간 선택(7일/14일)을 바꾼다. */
@@ -1666,6 +1739,7 @@ function donutChart(byType) {
  * @returns {string} 도넛 SVG + 범례 HTML
  */
 function defectDist(byType) {
+  if (!byType.length) return `<div class="empty">불량 확정·검토 대기 건이 없습니다.</div>`;
   const tot = byType.reduce((a, t) => a + t.n, 0) || 1;
   return `<div class="donut-wrap">${donutChart(byType)}<div>${byType.map(t => `<div class="legend-row" data-k="${t.k}" onmouseenter="hiArc(this.dataset.k)" onmouseleave="hiArc()"><i style="background:${t.c}"></i>${t.k} <b>${t.n}</b> <span class="muted">${(t.n / tot * 100).toFixed(1)}%</span></div>`).join('')}</div></div>`;
 }
@@ -1677,15 +1751,15 @@ function defectDist(byType) {
 function viewStats() {
   const days = U.statDays || 7, d = statsData(days), st = getStats();
   const rate = (d.badSum / d.sum * 100).toFixed(1), avgMs = Math.round(S.inspections.reduce((a, r) => a + r.ms, 0) / S.inspections.length);
-  const sorted = [...d.byType].sort((a, b) => b.n - a.n), top = sorted[0].n || 1;
+  const sorted = d.byType.slice(0, 5), top = sorted.length ? sorted[0].n : 1;
   const kpi = (l, v, sub) => `<div class="kpi" style="cursor:default"><div class="l">${l}</div><div class="v">${v}</div>${sub ? `<div class="small muted mt4">${sub}</div>` : ''}</div>`;
-  return `${pageHead('통계 분석', '기간별 검사 추이 · 불량 유형 분포 · 품질 지표 (시연용 합성 이력 포함)', `<div class="seg-row"><button class="btn sm ${days === 7 ? 'primary' : 'outline'}" onclick="setStatDays(7)">7일</button><button class="btn sm ${days === 14 ? 'primary' : 'outline'}" onclick="setStatDays(14)">14일</button><button class="btn sm outline" onclick="exportStatsCsv()">${ic('download')}통계 CSV</button></div>`)}
+  return `${pageHead('통계 분석', '기간별 검사 추이(과거 일자는 시연용 합성) · 불량 유형 분포(현재 이력 기준) · 품질 지표', `<div class="seg-row"><button class="btn sm ${days === 7 ? 'primary' : 'outline'}" onclick="setStatDays(7)">7일</button><button class="btn sm ${days === 14 ? 'primary' : 'outline'}" onclick="setStatDays(14)">14일</button><button class="btn sm outline" onclick="exportStatsCsv()">${ic('download')}통계 CSV</button></div>`)}
     <div class="kpi-grid">${kpi('기간 검사 건수', d.sum.toLocaleString(), `${days}일 합계`)}${kpi('불량·대기 비율', rate + '%', '불량 확정 + 검토 대기')}${kpi('AI-검사원 일치율', st.match + '%', '확정 건 기준')}${kpi('평균 응답 시간', avgMs + 'ms', 'PatchCore API')}</div>
     <div class="split"><div class="card"><div class="card-title">일별 검사 추이</div>${trendChart(d)}</div>
-      <div class="card"><div class="card-title">불량 유형별 분포</div>${defectDist(d.byType)}</div></div>
+      <div class="card"><div class="card-title">불량 유형별 분포 <span class="pill">확정 + 대기 ${d.typeTotal}건</span></div>${defectDist(d.byType)}</div></div>
     <div class="card"><div class="card-title">불량 유형 TOP 5</div>
-      ${sorted.map((t, i) => `<div class="rank-row"><b>${i + 1}</b><span>${t.k}</span><div class="rank-bar"><i style="width:${t.n / top * 100}%;background:${t.c}"></i></div><span class="muted" style="text-align:right">${t.n}건</span></div>`).join('')}
-      <div class="note">불량 유형은 데모용 분류입니다. 외부 PatchCore API는 정상/이상 점수만 반환하므로, 유형 분류는 검사원 입력(검사 관리) 또는 후속 확장으로 제공합니다.</div></div>`;
+      ${sorted.length ? '' : '<div class="empty">집계할 불량이 없습니다.</div>'}${sorted.map((t, i) => `<div class="rank-row"><b>${i + 1}</b><span>${t.k}</span><div class="rank-bar"><i style="width:${t.n / top * 100}%;background:${t.c}"></i></div><span class="muted" style="text-align:right">${t.n}건</span></div>`).join('')}
+      <div class="note">유형은 샘플 이미지의 데이터셋 정답 라벨(PKU-Market-PCB)로 집계한 실제 이력 값이며, 라벨이 없는 업로드 이미지는 &lsquo;미분류&rsquo;로 집계됩니다. 외부 PatchCore API는 정상/이상 점수만 반환하므로 서비스에서는 검사원 유형 입력(검사 관리)으로 대신합니다. 일별 추이의 과거 일자만 시연용 합성입니다.</div></div>`;
 }
 
 /** 통계 요약을 CSV로 내려받는다. */
@@ -1905,8 +1979,8 @@ function render() {
 /** 데모 데이터를 초기 상태(120건)로 되돌린다. 테마와 로그인은 유지한다. */
 function resetDemo() {
   Object.values(S.banks).forEach(a => a.forEach(f => f.src && URL.revokeObjectURL(f.src)));   // 데이터뱅크 미리보기 Blob URL 해제
-  S = createInitialState({ theme: S.theme, user: S.user, api: S.api }); U.rvSel = null; U.hf = { period: 'all', pcb: 'all', result: 'all', q: '' }; U.hpage = 1; U.anim = true;
-  U.queue = [newQueueItem({ ...sampleItem(SAMPLE_ANOM[0]), name: '샘플 촬영 이미지' })]; U.capSeq = 0; U.bankPcb = 'PCB1'; render(); toast('데모 데이터를 초기화했습니다');
+  S = createInitialState({ theme: S.theme, user: S.user, api: S.api }); U.rvSel = null; U.rvQ = ''; U.rvFilter = 'all'; U.hf = { period: 'all', pcb: 'all', result: 'all', q: '' }; U.hpage = 1; U.anim = true;
+  U.queue = [newQueueItem({ ...sampleItem(SAMPLE_NORM[0]), name: '샘플 촬영 이미지' })]; U.capSeq = 0; U.bankPcb = 'PCB1'; render(); toast('데모 데이터를 초기화했습니다');
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
