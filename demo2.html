@@ -3183,7 +3183,7 @@ function viewSettings() {
 function render() {
   const app = document.getElementById('app'), prev = document.querySelector('.main'), top = prev ? prev.scrollTop : 0;
   if (!S.user) { app.innerHTML = viewLogin(); playEnter(app); return; }
-  const keepOpen = !!(document.querySelector('.side.open') && document.querySelector('.side:hover'));   // 메뉴를 펼친 채 다른 메뉴를 눌러도 접혔다 펴지지 않도록 펼침 상태 유지
+  const keepOpen = railPtr && !!document.querySelector('.side');   // 메뉴를 펼친 채 다른 메뉴를 눌러도 접혔다 펴지지 않도록 펼침 상태 유지
   const views = { dashboard: viewDashboard, inspect: viewInspect, review: viewReview, history: viewHistory, stats: viewStats, data: viewData, models: viewModels, settings: viewSettings };
   app.innerHTML = shell((views[U.route] || viewDashboard)());
   const m = document.querySelector('.main'); if (m) m.scrollTop = top;
@@ -3191,11 +3191,14 @@ function render() {
   playEnter(app);
 }
 
-/* 왼쪽 메뉴 펼침 상태(.open): 마우스가 메뉴 위에 있거나 키보드 포커스가 메뉴에 있을 때. render()가 메뉴를 다시 그려도 유지된다. */
-document.addEventListener('mouseover', e => { const sd = document.querySelector('.side'); if (sd) sd.classList.toggle('open', !!e.target.closest('.side') || sd.matches(':has(:focus-visible)')); });
-document.addEventListener('mouseleave', () => { const sd = document.querySelector('.side'); if (sd && !sd.matches(':has(:focus-visible)')) sd.classList.remove('open'); });
-document.addEventListener('focusin', e => { const sd = document.querySelector('.side'); if (sd && e.target.closest('.side') && e.target.matches(':focus-visible')) sd.classList.add('open'); });
-document.addEventListener('focusout', e => { const sd = document.querySelector('.side'); if (sd && e.target.closest('.side') && !sd.matches(':hover')) sd.classList.remove('open'); });
+/* 왼쪽 메뉴 펼침 상태(.open): 마우스가 메뉴 위에 있거나 키보드 포커스가 메뉴에 있을 때.
+   마우스 위치(railPtr)를 직접 기억해 render()가 메뉴를 다시 그려도(:hover 판정이 늦거나 포커스가 사라져도) 펼침을 유지한다. */
+let railPtr = false;
+function syncRail() { const sd = document.querySelector('.side'); if (sd) sd.classList.toggle('open', railPtr || sd.matches(':has(:focus-visible)')); }
+document.addEventListener('mouseover', e => { railPtr = !!e.target.closest('.side'); syncRail(); });
+document.documentElement.addEventListener('mouseleave', () => { railPtr = false; syncRail(); });
+document.addEventListener('focusin', () => syncRail());
+document.addEventListener('focusout', () => setTimeout(syncRail, 0));
 
 /** 데모 데이터를 초기 상태(120건)로 되돌린다. 테마와 로그인은 유지한다. */
 function resetDemo() {
