@@ -688,6 +688,29 @@ html[data-theme="dark"] .db-board { background: #0f1520; }
   .db-call { display: none; }
 }
 
+/* ── v5: 나머지 6개 화면을 대시보드와 같은 틀로 (머리띠 · 가로 전체 · 28px 여백) ─────── */
+.main:not(:has(.db)) { padding: 0 0 32px; }
+.main:not(:has(.db)) .main-inner { max-width: none; margin: 0; padding: 0 28px; }
+.main-inner > .page-head { margin: 0 -28px 18px; padding: 16px 28px; border-bottom: 1px solid var(--border); align-items: center; gap: 14px; }
+.main-inner > .page-head > div:first-child { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; min-width: 0; }
+.main-inner > .page-head .page-title { font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+.main-inner > .page-head .page-sub { font-size: 12.5px; margin: 0; color: var(--text-3); }
+.main-inner > .page-head .page-act { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.kpi { padding: 16px 20px; }
+.kpi .l { font-size: 12.5px; font-weight: 600; }
+.kpi .v { font-size: 26px; font-weight: 700; margin-top: 6px; }
+.kpi-grid { gap: 16px; margin-bottom: 16px; }
+.split, .grid2 { gap: 16px; }
+.card-title { font-size: 14.5px; }
+.tbl-wrap, .card > .tbl { border-radius: 10px; }
+.rv-item { border-color: var(--border); }
+.pcb-card { border: 1px solid var(--border); background: var(--bg-card); }
+.drop { background: var(--bg-muted); border-color: var(--border-strong); }
+.pill.on, .chip.on { background: var(--primary); color: var(--primary-fg); border-color: var(--primary); }
+@media (max-width: 700px) {
+  .main:not(:has(.db)) .main-inner { padding: 0 14px; }
+  .main-inner > .page-head { margin: 0 -14px 14px; padding: 12px 14px; }
+}
 </style>
 </head>
 <body>
