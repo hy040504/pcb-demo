@@ -491,26 +491,27 @@ circle.arc { transition: opacity .15s, stroke-width .15s; } circle.arc:hover { s
   .side { width: 72px; padding: 18px 12px; overflow-x: hidden; white-space: nowrap; transition: width .24s var(--ease) .05s; }
   .main { min-width: 0; }
   .main-inner { max-width: 1120px; }
-  .side:hover, .side:has(:focus-visible) { width: 232px; transition-delay: .06s; }
+  .side.open { width: 232px; transition-delay: .06s; }
   /* 메뉴 라벨: 접힘 → 폭 0 · 투명, 펼침 → 표시 */
   .nav-item > span:not(.cnt):not(.lk) { max-width: 0; opacity: 0; overflow: hidden; transition: max-width .24s var(--ease) .05s, opacity .18s ease; }
-  .side:hover .nav-item > span:not(.cnt):not(.lk), .side:has(:focus-visible) .nav-item > span:not(.cnt):not(.lk) { max-width: 160px; opacity: 1; transition-delay: .09s; }
+  .side.open .nav-item > span:not(.cnt):not(.lk) { max-width: 160px; opacity: 1; transition-delay: .09s; }
   /* 접힌 상태: 알림 숫자 → 작은 점, 잠금 아이콘 숨김 */
-  .side:not(:hover):not(:has(:focus-visible)) .nav-item .cnt { position: absolute; top: 7px; right: 9px; margin: 0; width: 9px; height: 9px; min-width: 0; padding: 0; font-size: 0; border-radius: 50%; animation: none; box-shadow: 0 0 0 2px var(--bg-card); }
-  .side:not(:hover):not(:has(:focus-visible)) .nav-item .lk { display: none; }
+  .side:not(.open) .nav-item .cnt { position: absolute; top: 7px; right: 9px; margin: 0; width: 9px; height: 9px; min-width: 0; padding: 0; font-size: 0; border-radius: 50%; animation: none; box-shadow: 0 0 0 2px var(--bg-card); }
+  .side:not(.open) .nav-item .lk { display: none; }
   /* 접힌 상태: 하단 블록은 아이콘/점만 */
-  .side:not(:hover):not(:has(:focus-visible)) .perm,
-  .side:not(:hover):not(:has(:focus-visible)) .demo-reset,
-  .side:not(:hover):not(:has(:focus-visible)) .sys-card .sc-t,
-  .side:not(:hover):not(:has(:focus-visible)) .prof-n,
-  .side:not(:hover):not(:has(:focus-visible)) .prof .btn { display: none; }
-  .side:not(:hover):not(:has(:focus-visible)) .sys-card { padding: 10px 0; }
-  .side:not(:hover):not(:has(:focus-visible)) .sys-row { font-size: 0; min-height: 17px; justify-content: center; line-height: 1; }
-  .side:not(:hover):not(:has(:focus-visible)) .sys-row .st { font-size: 0; }
-  .side:not(:hover):not(:has(:focus-visible)) .prof { padding: 6px 0; background: none; }
-  .side:not(:hover):not(:has(:focus-visible)) .prof-top { justify-content: center; }
+  .side:not(.open) .perm,
+  .side:not(.open) .demo-reset,
+  .side:not(.open) .sys-card .sc-t,
+  .side:not(.open) .prof-n,
+  .side:not(.open) .prof .btn { display: none; }
+  .side:not(.open) .sys-card { padding: 10px 0; }
+  .side:not(.open) .sys-row { font-size: 0; min-height: 17px; justify-content: center; line-height: 1; }
+  .side:not(.open) .sys-row .st { font-size: 0; }
+  .side:not(.open) .prof { padding: 6px 0; background: none; }
+  .side:not(.open) .prof-top { justify-content: center; }
   .side-foot { overflow: hidden; }
   .nav-item:hover { transform: none; }
+  .side.no-tr, .side.no-tr * { transition: none !important; }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -615,7 +616,7 @@ body { background: var(--bg-app); }
 .nav-item .cnt { background: #f5b942; color: #4a3200; }
 .perm, .sys-card, .prof { background: var(--bg-muted); }
 @media (min-width: 901px) {
-  .side:not(:hover):not(:has(:focus-visible)) .nav-item .cnt { box-shadow: 0 0 0 2px var(--frame); }
+  .side:not(.open) .nav-item .cnt { box-shadow: 0 0 0 2px var(--frame); }
 }
 @media (max-width: 900px) {
   .side { border-top: 1px solid var(--border); border-right: 0; }
@@ -2536,11 +2537,19 @@ function viewSettings() {
 function render() {
   const app = document.getElementById('app'), prev = document.querySelector('.main'), top = prev ? prev.scrollTop : 0;
   if (!S.user) { app.innerHTML = viewLogin(); playEnter(app); return; }
+  const keepOpen = !!(document.querySelector('.side.open') && document.querySelector('.side:hover'));   // 메뉴를 펼친 채 다른 메뉴를 눌러도 접혔다 펴지지 않도록 펼침 상태 유지
   const views = { dashboard: viewDashboard, inspect: viewInspect, review: viewReview, history: viewHistory, stats: viewStats, data: viewData, models: viewModels, settings: viewSettings };
   app.innerHTML = shell((views[U.route] || viewDashboard)());
   const m = document.querySelector('.main'); if (m) m.scrollTop = top;
+  if (keepOpen) { const sd = document.querySelector('.side'); if (sd) { sd.classList.add('open', 'no-tr'); requestAnimationFrame(() => requestAnimationFrame(() => sd.classList.remove('no-tr'))); } }
   playEnter(app);
 }
+
+/* 왼쪽 메뉴 펼침 상태(.open): 마우스가 메뉴 위에 있거나 키보드 포커스가 메뉴에 있을 때. render()가 메뉴를 다시 그려도 유지된다. */
+document.addEventListener('mouseover', e => { const sd = document.querySelector('.side'); if (sd) sd.classList.toggle('open', !!e.target.closest('.side') || sd.matches(':has(:focus-visible)')); });
+document.addEventListener('mouseleave', () => { const sd = document.querySelector('.side'); if (sd && !sd.matches(':has(:focus-visible)')) sd.classList.remove('open'); });
+document.addEventListener('focusin', e => { const sd = document.querySelector('.side'); if (sd && e.target.closest('.side') && e.target.matches(':focus-visible')) sd.classList.add('open'); });
+document.addEventListener('focusout', e => { const sd = document.querySelector('.side'); if (sd && e.target.closest('.side') && !sd.matches(':hover')) sd.classList.remove('open'); });
 
 /** 데모 데이터를 초기 상태(120건)로 되돌린다. 테마와 로그인은 유지한다. */
 function resetDemo() {
