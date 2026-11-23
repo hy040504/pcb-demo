@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CircuitEye (써킷아이) — PCB 외관검사 MVP · 리디자인 v3</title>
+<title>CircuitEye (써킷아이) — PCB 외관검사 MVP · 리디자인 v4</title>
 <link rel="icon" type="image/png" href="./docs/assets/favicon.png">
 <link rel="apple-touch-icon" href="./docs/assets/circuiteye_icon_256.png">
 <style>
@@ -483,157 +483,209 @@ circle.arc { transition: opacity .15s, stroke-width .15s; } circle.arc:hover { s
 @media (max-width: 520px) { .api-name { display: none; } .rank-row { grid-template-columns: 18px 72px 1fr 58px; } .topbar { gap: 6px; } .main { padding: 14px 12px 20px; } .rv-list { max-height: 360px; } }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   v3 리디자인 레이어 (demo2.html) — demo.html의 구조·동작은 그대로 두고 화면 스타일만 덮어쓴다.
-   · 짙은 네이비 사이드바 + 연한 쿨그레이 캔버스 + 둥근 흰 카드(그림자 위주) + 큰 숫자 KPI
-   · 상태색: 통과 틸 그린 · 불량 레드 · 검토 대기 앰버, 포인트 인디고 블루
+   수납형 왼쪽 메뉴 (데스크톱 901px~) — 평소엔 아이콘만, 마우스를 올리거나 키보드로 이동하면 펼쳐짐.
+   · 펼쳐질 때 본문을 밀지 않고 위에 겹쳐서 보여준다(본문 폭 고정).
+   · 좁은 화면(≤900px)은 기존 하단 탭바 그대로.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@media (min-width: 901px) {
+  .body-wrap { position: relative; }
+  .side { position: absolute; top: 0; bottom: 0; left: 0; z-index: 30; width: 72px; padding: 18px 12px; overflow-x: hidden; white-space: nowrap;
+    transition: width .24s var(--ease) .05s, box-shadow .24s ease .05s; }
+  .main { margin-left: 72px; }
+  .main-inner { max-width: 1120px; }
+  .side:hover, .side:has(:focus-visible) { width: 232px; box-shadow: var(--shadow-float); transition-delay: .06s; }
+  /* 메뉴 라벨: 접힘 → 폭 0 · 투명, 펼침 → 표시 */
+  .nav-item > span:not(.cnt):not(.lk) { max-width: 0; opacity: 0; overflow: hidden; transition: max-width .24s var(--ease) .05s, opacity .18s ease; }
+  .side:hover .nav-item > span:not(.cnt):not(.lk), .side:has(:focus-visible) .nav-item > span:not(.cnt):not(.lk) { max-width: 160px; opacity: 1; transition-delay: .09s; }
+  /* 접힌 상태: 알림 숫자 → 작은 점, 잠금 아이콘 숨김 */
+  .side:not(:hover):not(:has(:focus-visible)) .nav-item .cnt { position: absolute; top: 7px; right: 9px; margin: 0; width: 9px; height: 9px; min-width: 0; padding: 0; font-size: 0; border-radius: 50%; animation: none; box-shadow: 0 0 0 2px var(--bg-card); }
+  .side:not(:hover):not(:has(:focus-visible)) .nav-item .lk { display: none; }
+  /* 접힌 상태: 하단 블록은 아이콘/점만 */
+  .side:not(:hover):not(:has(:focus-visible)) .perm,
+  .side:not(:hover):not(:has(:focus-visible)) .demo-reset,
+  .side:not(:hover):not(:has(:focus-visible)) .sys-card .sc-t,
+  .side:not(:hover):not(:has(:focus-visible)) .prof-n,
+  .side:not(:hover):not(:has(:focus-visible)) .prof .btn { display: none; }
+  .side:not(:hover):not(:has(:focus-visible)) .sys-card { padding: 10px 0; }
+  .side:not(:hover):not(:has(:focus-visible)) .sys-row { font-size: 0; min-height: 17px; justify-content: center; line-height: 1; }
+  .side:not(:hover):not(:has(:focus-visible)) .sys-row .st { font-size: 0; }
+  .side:not(:hover):not(:has(:focus-visible)) .prof { padding: 6px 0; background: none; }
+  .side:not(:hover):not(:has(:focus-visible)) .prof-top { justify-content: center; }
+  .side-foot { overflow: hidden; }
+  .nav-item:hover { transform: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   v4 리디자인 레이어 (demo2.html) — Dribbble "Electronics QA Dashboard" 시안(초록 포인트 · 흰 카드 · 얇은 테두리 ·
+   왼쪽 아이콘 막대 · 불량 상세 화면)을 따라 화면 스타일을 덮어쓴다. 기능·데이터·동작은 demo.html과 같다.
    ═══════════════════════════════════════════════════════════════════════════ */
 :root, html[data-theme="light"] {
-  --bg-app: #f1f4f9; --bg-card: #ffffff; --bg-muted: #f3f6fb; --bg-hover: #e8eef8; --bg-input: #ffffff;
-  --border: #e5eaf2; --border-strong: #cbd5e4;
-  --text-1: #0f1b2d; --text-2: #33425a; --text-3: #5d6b82;
-  --primary: #2f5bea; --primary-hover: #2449c8; --primary-fg: #ffffff;
-  --danger: #d6403f; --danger-hover: #b93231;
-  --good: #0f8a63; --warn: #a45f00; --bad: #d6403f;
-  --b-green-bg: #dcf5ea; --b-green-fg: #0a7653;
-  --b-orange-bg: #fdecc9; --b-orange-fg: #8a5000;
-  --b-red-bg: #fde2e2; --b-red-fg: #b02a2a;
-  --b-gray-bg: #eaeff7; --b-gray-fg: #41506a;
-  --shadow: 0 1px 2px rgba(15, 27, 45, .04), 0 10px 28px -14px rgba(15, 27, 45, .14);
-  --shadow-float: 0 22px 56px -12px rgba(15, 27, 45, .32);
-  --bar-normal: #22b58b; --bar-defect: #ef5b5b; --bar-pending: #f6b042;
-  --role-insp: #2b78d8;
-  --side-bg: linear-gradient(185deg, #12223a 0%, #0b1424 100%);
-  --side-text: rgba(222, 231, 246, .78); --side-line: rgba(255, 255, 255, .08); --side-chip: rgba(255, 255, 255, .07);
-  --radius: 18px;
+  --bg-app: #b9c3de; --bg-card: #ffffff; --bg-muted: #f3f4f6; --bg-hover: #eceef2; --bg-input: #ffffff;
+  --border: #e8eaee; --border-strong: #d3d8e0;
+  --text-1: #111827; --text-2: #374151; --text-3: #6b7280;
+  --primary: #2e8b3d; --primary-hover: #26762f; --primary-fg: #ffffff;
+  --danger: #d92d2d; --danger-hover: #b92424;
+  --good: #1f7a2e; --warn: #8a6100; --bad: #d92d2d;
+  --b-green-bg: #e3f3e5; --b-green-fg: #1f7a2e;
+  --b-orange-bg: #fdf3cd; --b-orange-fg: #8a6100;
+  --b-red-bg: #fde4e4; --b-red-fg: #cc2a2a;
+  --b-gray-bg: #f0f2f5; --b-gray-fg: #4b5563;
+  --shadow: 0 1px 2px rgba(17, 24, 39, .04);
+  --shadow-float: 0 18px 44px -10px rgba(30, 41, 80, .35);
+  --bar-normal: #3aa655; --bar-defect: #e5484d; --bar-pending: #f5b942;
+  --role-insp: #2f6fcf;
+  --frame: #ffffff; --rail-active-bg: #e4f2e5; --rail-active-fg: #1f7a2e;
 }
 html[data-theme="dark"] {
-  --bg-app: #080f1c; --bg-card: #101b2f; --bg-muted: #16233b; --bg-hover: #1c2c49; --bg-input: #0d1829;
-  --border: #1d2d49; --border-strong: #30456b;
-  --text-1: #eef3fb; --text-2: #c6d1e4; --text-3: #94a4bf;
-  --primary: #6c8fff; --primary-hover: #86a3ff; --primary-fg: #07102a;
+  --bg-app: #0c1019; --bg-card: #141a26; --bg-muted: #1b2331; --bg-hover: #222c3e; --bg-input: #0f1520;
+  --border: #232d3f; --border-strong: #35435c;
+  --text-1: #f1f4f9; --text-2: #cdd5e2; --text-3: #94a3ba;
+  --primary: #4cb25c; --primary-hover: #63c473; --primary-fg: #07130a;
   --danger: #ef6b69; --danger-hover: #f58583;
-  --good: #4fd9ae; --warn: #f3b25a; --bad: #ff8583;
-  --b-green-bg: rgba(79, 217, 174, .15); --b-green-fg: #63e0b8;
-  --b-orange-bg: rgba(246, 176, 66, .16); --b-orange-fg: #f6bd6c;
-  --b-red-bg: rgba(255, 120, 118, .16); --b-red-fg: #ff9896;
-  --b-gray-bg: #1c2c49; --b-gray-fg: #b9c6dc;
-  --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 12px 30px -16px rgba(0, 0, 0, .6);
-  --shadow-float: 0 26px 60px rgba(0, 0, 0, .65);
-  --bar-normal: #34c79b; --bar-defect: #ff7a78; --bar-pending: #f6b042;
+  --good: #6fd183; --warn: #f1bf55; --bad: #ff8583;
+  --b-green-bg: rgba(111, 209, 131, .15); --b-green-fg: #7fdb92;
+  --b-orange-bg: rgba(245, 185, 66, .16); --b-orange-fg: #f3c56b;
+  --b-red-bg: rgba(255, 120, 118, .16); --b-red-fg: #ff9a98;
+  --b-gray-bg: #222c3e; --b-gray-fg: #bcc8dc;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .4);
+  --shadow-float: 0 22px 54px rgba(0, 0, 0, .6);
+  --bar-normal: #4cb25c; --bar-defect: #ff7a78; --bar-pending: #f5b942;
   --role-insp: #86b4ff;
-  --side-bg: linear-gradient(185deg, #0d1a2e 0%, #070d19 100%);
+  --frame: #141a26; --rail-active-bg: rgba(111, 209, 131, .16); --rail-active-fg: #7fdb92;
 }
-body { letter-spacing: -.005em; }
 
-/* ── 카드 · 제목 · 배지 · 버튼 · 폼 ───────────────────────────────────────── */
-.card { border-radius: var(--radius); padding: 22px 24px; border-color: transparent; box-shadow: var(--shadow); }
+/* ── 공통 부품 ──────────────────────────────────────────────────────────── */
+.card { border-radius: 14px; box-shadow: none; border: 1px solid var(--border); padding: 20px 22px; }
 .card:hover { border-color: var(--border); }
-.card-title { font-size: 16px; font-weight: 800; letter-spacing: -.015em; margin-bottom: 16px; }
-.page-title { font-size: 28px; font-weight: 800; letter-spacing: -.03em; }
-.page-sub { font-size: 14px; }
-.page-head { margin-bottom: 22px; }
-.pill { padding: 3px 12px; font-weight: 700; font-size: 12.5px; }
-.pill.role-admin { background: linear-gradient(135deg, #2f5bea, #4a76ff); }
-.btn { border-radius: 12px; padding: 10px 18px; font-weight: 700; }
-.btn.primary { background: linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 78%, #7aa0ff)); box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--primary) 70%, transparent); }
-.btn.primary:hover:not(:disabled) { background: var(--primary-hover); }
-.btn.outline { border-color: var(--border-strong); background: var(--bg-card); }
-.btn.sm { border-radius: 10px; }
-.btn.block { border-radius: 14px; }
-.inp, select.inp, textarea.inp { border-radius: 12px; border-color: var(--border-strong); padding: 10px 14px; }
-.field > label { font-weight: 700; }
-.ptype, .srctag { border-radius: 8px; }
-.divider { background: var(--border); margin: 18px 0; }
-.drop { border-radius: 16px; border-color: var(--border-strong); }
-.locked { border-radius: 14px; }
-
-/* ── 표 ─────────────────────────────────────────────────────────────────── */
-.tbl th { background: var(--bg-muted); color: var(--text-3); font-size: 12px; font-weight: 700; letter-spacing: .02em; padding: 11px 12px; border-bottom: 0; }
-.tbl th:first-child { border-radius: 12px 0 0 12px; } .tbl th:last-child { border-radius: 0 12px 12px 0; }
-.tbl td { padding: 14px 12px; border-bottom: 1px solid var(--border); }
+.card-title { font-size: 15px; font-weight: 700; margin-bottom: 14px; letter-spacing: -.01em; }
+.page-title { font-size: 22px; font-weight: 700; letter-spacing: -.02em; }
+.pill { font-size: 11.5px; font-weight: 600; padding: 2px 10px; }
+.pill.lg { font-size: 12.5px; padding: 4px 12px; }
+.pill.role-admin, .pill.role-insp { font-weight: 700; }
+.pill.role-admin { background: var(--primary); }
+.btn { border-radius: 8px; font-weight: 600; padding: 9px 16px; }
+.btn.primary { background: var(--primary); box-shadow: none; }
+.btn.primary:hover:not(:disabled) { background: var(--primary-hover); box-shadow: none; }
+.btn.outline { background: var(--bg-card); border-color: var(--border-strong); }
+.btn.g { background: var(--bg-card); color: var(--primary); border: 1px solid var(--primary); }
+.btn.g:hover:not(:disabled) { background: color-mix(in srgb, var(--primary) 8%, var(--bg-card)); }
+.btn.r { background: var(--bg-card); color: var(--bad); border: 1px solid var(--bad); }
+.btn.r:hover:not(:disabled) { background: color-mix(in srgb, var(--bad) 8%, var(--bg-card)); }
+.btn.sm { border-radius: 8px; }
+.inp, select.inp, textarea.inp { border-radius: 8px; }
+.inp:focus { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent); }
+.tbl th { background: var(--bg-muted); font-size: 12px; font-weight: 600; color: var(--text-3); padding: 10px 14px; border-bottom: 0; }
+.tbl th:first-child { border-radius: 8px 0 0 8px; } .tbl th:last-child { border-radius: 0 8px 8px 0; }
+.tbl td { padding: 13px 14px; font-size: 13px; }
 .tbl tr:last-child td { border-bottom: 0; }
-.tbl tr.click:hover td { background: color-mix(in srgb, var(--primary) 6%, var(--bg-card)); }
-.tbl tr.anom td:first-child { box-shadow: inset 4px 0 0 var(--bar-defect); }
+.tbl tr.click:hover td { background: color-mix(in srgb, var(--primary) 5%, var(--bg-card)); }
+.tbl tr.sel td { background: color-mix(in srgb, var(--primary) 8%, var(--bg-card)); }
+.kpi { border-radius: 14px; box-shadow: none; }
+.kpi:hover { border-color: var(--border-strong); box-shadow: none; transform: none; }
+.rv-item, .qrow, .pcb-card, .steps li, .road div, .more-item, .locked, .drop { border-radius: 12px; }
+.rv-item.sel { border-color: var(--primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 18%, transparent); }
+.modal-card { border-radius: 18px; }
+.role-strip { border-radius: 12px; border-left-width: 4px; }
+.role-strip.admin, .role-strip.insp { border-left-color: var(--primary); }
 
-/* ── KPI 카드: 큰 숫자 + 상태색 원형 포인트 ─────────────────────────────── */
-.kpi-grid { gap: 18px; margin-bottom: 18px; }
-.kpi { position: relative; overflow: hidden; border-radius: var(--radius); border-color: transparent; padding: 20px 22px 18px; box-shadow: var(--shadow); --kpi-c: var(--primary); }
-.kpi:has(.v.good) { --kpi-c: var(--bar-normal); } .kpi:has(.v.bad) { --kpi-c: var(--bar-defect); } .kpi:has(.v.warn) { --kpi-c: var(--bar-pending); }
-.kpi::before { content: ''; position: absolute; right: -34px; top: -34px; width: 124px; height: 124px; border-radius: 50%; background: var(--kpi-c); opacity: .13; transition: transform .5s var(--ease), opacity .3s; }
-.kpi::after { content: ''; position: absolute; left: 22px; top: 0; width: 34px; height: 4px; border-radius: 0 0 4px 4px; background: var(--kpi-c); }
-.kpi:hover::before { transform: scale(1.18); opacity: .2; }
-.kpi:hover { border-color: transparent; }
-.kpi .l { font-size: 13.5px; font-weight: 700; color: var(--text-3); letter-spacing: -.005em; position: relative; }
-.kpi .v { font-size: 40px; font-weight: 800; letter-spacing: -.035em; margin-top: 8px; line-height: 1.1; position: relative; }
-.kpi .s { font-size: 12.5px; margin-top: 6px; position: relative; }
-.split { gap: 18px; } .grid2 { gap: 18px; }
-.card + .card { margin-top: 18px; } .grid2 + .card, .split + .card { margin-top: 18px; }
-.split > .card, .grid2 > .card { margin-top: 0; margin-bottom: 0; }
-
-/* ── 역할 띠 · 시스템 상태 · 차트 보조 ───────────────────────────────────── */
-.role-strip { border: 0; border-radius: var(--radius); padding: 16px 20px; margin-bottom: 18px; color: #fff; background: linear-gradient(120deg, #1d3a8a 0%, #2f5bea 60%, #4f86ff 100%); box-shadow: 0 14px 30px -16px rgba(47, 91, 234, .7); }
-.role-strip.insp { background: linear-gradient(120deg, #0b5a63 0%, #12908a 60%, #2bb8a3 100%); box-shadow: 0 14px 30px -16px rgba(18, 144, 138, .7); }
-.role-strip .rs-i small { color: rgba(255, 255, 255, .78); } .role-strip .rs-i b { color: #fff !important; }
-.role-strip .btn.outline { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .35); color: #fff; }
-.role-strip .btn.outline:hover:not(:disabled) { background: rgba(255, 255, 255, .26); }
-.role-strip .btn.primary { background: #fff; color: #12908a; box-shadow: none; }
-.rv-item, .qrow, .pcb-card, .steps li, .road div, .more-item { border-radius: 14px; }
-.rv-item.sel { box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 20%, transparent); border-color: var(--primary); }
-.photo, .vz { border-radius: 14px; }
-.thumb { border-radius: 10px; width: 68px; height: 50px; }
-.bar-track, .usage, .rank-bar { height: 10px; border-radius: 8px; }
-.bar-fill, .rank-bar i, .usage i { border-radius: 8px; }
-.modal-card { border-radius: 22px; padding: 26px 28px; border-color: transparent; }
-.toast { border-radius: 14px; }
-#tip { border-radius: 10px; }
-.login-card { border-radius: 24px; padding: 30px; }
-
-/* ── 사이드바(항상 네이비) ───────────────────────────────────────────────── */
-.side { background: var(--side-bg); border-right: 0; color: var(--side-text); }
-.nav-item { background: transparent; color: var(--side-text); font-weight: 600; border-radius: 14px; padding: 12px 16px; }
-.nav-item:hover { background: var(--side-chip); color: #fff; }
-.nav-item.active { color: #fff; font-weight: 800; background: linear-gradient(135deg, #2f5bea, #4a76ff); box-shadow: 0 10px 22px -10px rgba(47, 91, 234, .9); }
-.nav-item .cnt { background: #f6b042; color: #3b2600; }
-.nav-item .lk { color: rgba(222, 231, 246, .55); }
-.side-foot { color: var(--side-text); }
-.perm { background: var(--side-chip); color: var(--side-text); border-radius: 14px; }
-.perm b { color: #fff; } .perm .ok { color: #6fe0bd; } .perm .no { color: rgba(222, 231, 246, .5); }
-.sys-card, .prof { background: var(--side-chip); border-radius: 16px; }
-.sys-card:hover { background: rgba(255, 255, 255, .12); }
-.sys-card .sc-t, .prof-n b { color: #fff; }
-.sys-row { color: var(--side-text); } .prof-n small { color: rgba(222, 231, 246, .6); }
-.sys-row .st.ok { color: #6fe0bd; } .sys-row .st i { background: #34d3a3; } .sys-row .st.off { color: #ff9a98; } .sys-row .st.off i { background: #ff7a78; }
-.prof .btn.outline { background: transparent; border-color: rgba(255, 255, 255, .22); color: #fff; }
-.prof .btn.outline:hover:not(:disabled) { background: rgba(255, 255, 255, .12); }
-.avatar { background: linear-gradient(135deg, #2f5bea, #12908a); }
-.demo-reset { color: rgba(222, 231, 246, .55); } .demo-reset:hover { color: #fff; }
-
-/* ── 상단바 · 본문 ──────────────────────────────────────────────────────── */
-.topbar { background: var(--bg-app); border-bottom: 0; }
-.shell[data-role="admin"] .topbar, .shell[data-role="inspector"] .topbar { box-shadow: none; }
-.main-inner { max-width: 1260px; }
-.icon-btn { border-radius: 12px; background: var(--bg-card); box-shadow: var(--shadow); }
-button.pill.api { box-shadow: var(--shadow); }
-
-/* ── 데스크톱(901px~): 사이드바가 전체 높이를 쓰는 2단 셸 ──────────────────── */
-@media (min-width: 901px) {
-  .shell { display: grid; grid-template-columns: 256px minmax(0, 1fr); grid-template-rows: 72px minmax(0, 1fr); }
-  .body-wrap { display: contents; }
-  .side { grid-column: 1; grid-row: 1 / 3; width: auto; padding: 92px 16px 18px; gap: 6px; }
-  .topbar { grid-column: 2; grid-row: 1; height: 72px; padding: 0 32px 0 28px; }
-  .topbar .brand { position: fixed; left: 24px; top: 0; height: 72px; z-index: 5; color: #fff; font-size: 19px; }
-  .topbar .brand img { width: 34px; height: 34px; border-radius: 10px; }
-  .topbar .brand small { display: none; }
-  .main { grid-column: 2; grid-row: 2; padding: 6px 32px 44px; }
+/* ── 바깥 틀: 연보라 배경 위의 흰 둥근 프레임 (데스크톱) ──────────────────── */
+body { background: var(--bg-app); }
+@media (min-width: 1101px) {
+  #app:has(.shell) { padding: 28px; }
+  .shell { border-radius: 34px; overflow: hidden; background: var(--frame); box-shadow: 0 34px 70px -34px rgba(34, 45, 100, .5); }
 }
-/* ── 모바일 하단 탭바도 같은 네이비 톤 ───────────────────────────────────── */
+.main { background: var(--frame); }
+
+/* ── 상단바: 로고 · 알림 · 프로필 ───────────────────────────────────────── */
+.topbar { height: 66px; background: var(--frame); border-bottom: 1px solid var(--border); padding: 0 26px; gap: 14px; }
+.brand { font-size: 16.5px; font-weight: 700; }
+.top-btn { position: relative; flex: none; width: 40px; height: 40px; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-card); color: var(--text-2); display: inline-flex; align-items: center; justify-content: center; }
+.top-btn:hover { background: var(--bg-muted); }
+.top-btn .ic { width: 18px; height: 18px; }
+.top-btn .bdot { position: absolute; top: 9px; right: 10px; width: 8px; height: 8px; border-radius: 50%; background: #e5484d; box-shadow: 0 0 0 2px var(--bg-card); }
+.top-prof { display: flex; align-items: center; gap: 10px; padding: 4px 10px 4px 5px; border: 1px solid var(--border); border-radius: 12px; background: var(--bg-card); }
+.top-prof .avatar { width: 34px; height: 34px; background: var(--primary); }
+.tp-n { display: flex; flex-direction: column; line-height: 1.25; text-align: left; }
+.tp-n b { font-size: 12.5px; color: var(--text-1); } .tp-n small { font-size: 11px; color: var(--text-3); }
+.shell[data-role="admin"] .topbar, .shell[data-role="inspector"] .topbar { box-shadow: none; }
+
+/* ── 왼쪽 아이콘 막대 (수납형: 평소 아이콘만 · 마우스를 올리면 펼침) ──────── */
+.side { background: var(--frame); border-right: 1px solid var(--border); }
+.nav-item { background: transparent; color: var(--text-3); border-radius: 10px; font-weight: 600; }
+.nav-item:hover { background: var(--bg-muted); color: var(--text-1); }
+.nav-item.active { background: var(--rail-active-bg); color: var(--rail-active-fg); box-shadow: none; font-weight: 700; }
+.nav-item .cnt { background: #f5b942; color: #4a3200; }
+.perm, .sys-card, .prof { background: var(--bg-muted); }
+@media (min-width: 901px) {
+  .side:hover, .side:has(:focus-visible) { box-shadow: 14px 0 40px -16px rgba(30, 41, 80, .35); }
+  .side:not(:hover):not(:has(:focus-visible)) .nav-item .cnt { box-shadow: 0 0 0 2px var(--frame); }
+}
 @media (max-width: 900px) {
-  .side { border-top: 0; }
-  .nav-item { border-radius: 12px; }
-  .nav-item.active { background: rgba(255, 255, 255, .14); box-shadow: none !important; }
-  .topbar { background: var(--bg-card); box-shadow: var(--shadow); }
-  .kpi .v { font-size: 32px; }
-  .card { padding: 18px 18px; }
+  .side { border-top: 1px solid var(--border); border-right: 0; }
+  .nav-item { background: none; }
+  .nav-item.active { background: var(--rail-active-bg); }
+  .tp-n { display: none; }
+  .top-prof { padding: 3px; border-radius: 50%; }
+}
+
+/* ── 대시보드: 불량 상세 작업대 ────────────────────────────────────────── */
+.main-inner:has(.db) { max-width: none; }
+.main:has(.db) { padding: 0 0 8px; }
+.db-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 16px 28px; border-bottom: 1px solid var(--border); }
+.db-title { font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+.db-chip { border: 1px solid var(--border); background: var(--bg-muted); border-radius: 8px; padding: 7px 12px; font-size: 12.5px; font-weight: 700; color: var(--text-1); }
+.db-sp { flex: 1; }
+.db-st { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; }
+.db-st i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; display: inline-block; }
+.db-st.bad { color: var(--bad); } .db-st.ok { color: var(--good); } .db-st.wait { color: var(--warn); }
+.db-upd { font-size: 12px; color: var(--text-2); font-weight: 600; }
+.db-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; padding: 16px 28px 24px; align-items: start; }
+.db-col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.db-board { position: relative; background: #f1f2f4; border-radius: 14px; min-height: 440px; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 40px 28px; }
+html[data-theme="dark"] .db-board { background: #0f1520; }
+.db-img { position: relative; width: min(100%, 560px); aspect-ratio: 475 / 350; border-radius: 18px; overflow: hidden; box-shadow: 0 14px 34px -14px rgba(0, 0, 0, .45); background: #0f1512; }
+.db-in { position: absolute; inset: 0; transition: transform .25s var(--ease); transform-origin: 50% 50%; }
+.db-in img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.db-dot { position: absolute; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; border: 0; padding: 0; cursor: pointer; background: #fff; box-shadow: 0 0 0 4px rgba(255, 255, 255, .45), 0 0 16px 7px rgba(255, 255, 255, .6); z-index: 2; }
+.db-dot.c1 { background: #ef5b5b; box-shadow: 0 0 0 4px rgba(239, 91, 91, .35), 0 0 16px 7px rgba(239, 91, 91, .55); }
+.db-dot.c2 { background: #f5c242; box-shadow: 0 0 0 4px rgba(245, 194, 66, .4), 0 0 16px 7px rgba(245, 194, 66, .6); }
+.db-dot.sel { width: 24px; height: 24px; margin: -12px 0 0 -12px; outline: 2px solid #fff; }
+.db-dot:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
+.db-call { position: absolute; z-index: 3; transform: translate(-112%, -165%); background: #fff; color: #d92d2d; font-size: 11px; font-weight: 600; padding: 6px 11px; border-radius: 4px; white-space: nowrap; box-shadow: 0 6px 18px -6px rgba(0, 0, 0, .4); pointer-events: none; }
+.db-call::after { content: ''; position: absolute; left: 100%; top: 100%; width: 22px; height: 1.5px; background: #d92d2d; transform-origin: 0 0; transform: rotate(38deg); }
+.db-list { position: absolute; top: 16px; right: 16px; width: 270px; background: var(--bg-card); border-radius: 10px; box-shadow: 0 10px 28px -12px rgba(30, 41, 80, .4); padding: 10px; z-index: 4; display: flex; flex-direction: column; gap: 2px; }
+.db-list button { display: flex; align-items: center; gap: 8px; text-align: left; font-size: 11.5px; padding: 8px 10px; border-radius: 8px; color: var(--text-1); width: 100%; }
+.db-list button:hover { background: var(--bg-muted); }
+.db-list button.on { background: var(--bg-muted); font-weight: 700; }
+.db-list button i { width: 6px; height: 6px; border-radius: 50%; background: var(--bad); flex: none; }
+.db-list .none { font-size: 12px; color: var(--text-3); padding: 8px 10px; }
+.db-zoom { position: absolute; left: 16px; bottom: 16px; display: flex; flex-direction: column; gap: 8px; z-index: 4; }
+.db-zoom button { width: 38px; height: 38px; border-radius: 8px; background: var(--bg-card); border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; color: var(--text-2); box-shadow: 0 4px 10px -6px rgba(0, 0, 0, .3); }
+.db-zoom button:hover { background: var(--bg-muted); } .db-zoom .ic { width: 18px; height: 18px; }
+.db-tc { padding: 20px 22px 14px; }
+.db-tc .card-title { margin-bottom: 12px; }
+.db-sum { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; }
+.db-more { width: 32px; height: 28px; border: 1px solid var(--border-strong); border-radius: 8px; color: var(--text-2); display: inline-flex; align-items: center; justify-content: center; }
+.db-more:hover { background: var(--bg-muted); }
+.db-side .card-title { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+.db-kv { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.db-kv > div { padding: 12px 14px; font-size: 12.5px; line-height: 1.45; border-bottom: 1px solid var(--border); }
+.db-kv > div:nth-child(odd) { background: var(--bg-muted); }
+.db-kv > div:last-child { border-bottom: 0; }
+.db-kv b { font-weight: 700; } .db-kv .k { color: var(--text-2); font-weight: 500; }
+.db-kv .red { color: var(--bad); font-weight: 700; }
+.db-zimg { margin-top: 8px; height: 150px; border-radius: 8px; background-color: #0f1512; background-repeat: no-repeat; border: 1px solid var(--border); }
+.sev { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; } .sev i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.db-act { display: flex; flex-direction: column; gap: 8px; }
+.db-act .btn { width: 100%; padding: 10px 14px; font-size: 13px; }
+.db-note textarea { width: 100%; min-height: 110px; border: 1px solid var(--border-strong); border-radius: 8px; padding: 10px 12px; font-size: 12.5px; resize: vertical; background: var(--bg-input); color: var(--text-1); outline: none; }
+.db-note textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 18%, transparent); }
+@media (max-width: 1100px) { .db-grid { grid-template-columns: 1fr; } }
+@media (max-width: 700px) {
+  .db-head { padding: 14px 16px; } .db-grid { padding: 14px 16px 20px; }
+  .db-board { flex-direction: column; align-items: stretch; padding: 14px; min-height: 0; gap: 12px; }
+  .db-list { position: static; width: auto; order: 1; } .db-wrap { order: 2; width: 100% !important; } .db-zoom { position: static; order: 3; flex-direction: row; }
+  .db-call { display: none; }
 }
 
 </style>
@@ -780,7 +832,9 @@ const ICONS = {
   chip: '<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>',
   dots: '<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
-  x: '<path d="M6 6l12 12M18 6L6 18"/>'
+  x: '<path d="M6 6l12 12M18 6L6 18"/>',
+  bell: '<path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10.3 20a2 2 0 0 0 3.4 0"/>',
+  minus: '<path d="M5 12h14"/>'
 };
 
 /**
@@ -1156,10 +1210,10 @@ function shell(content) {
       <div class="brand"><img src="./docs/assets/circuiteye_icon_256.png" alt=""><span class="brand-t">CircuitEye</span><small>PCB Inspection</small></div>
       ${apiPill()}
       <div class="top-sp"></div>
-      <span class="small muted role-label">${esc(S.user.company)} · ${esc(S.user.name)}</span>
-      <span class="pill ${adm ? 'role-admin' : 'role-insp'}">${ic(adm ? 'shield' : 'user')}${adm ? '관리자' : '검사원'}</span>
-      <button class="icon-btn" onclick="toggleTheme()" aria-label="테마 전환" title="테마 전환">${ic(S.theme === 'dark' ? 'sun' : 'moon')}</button>
-      <button class="icon-btn" onclick="logout()" aria-label="로그아웃" title="로그아웃">${ic('out')}</button>
+      <button class="top-btn" onclick="go('review')" aria-label="검토 대기 ${st.pending}건" title="검토 대기 ${st.pending}건">${ic('bell')}${st.pending ? '<i class="bdot"></i>' : ''}</button>
+      <button class="top-btn" onclick="toggleTheme()" aria-label="테마 전환" title="테마 전환">${ic(S.theme === 'dark' ? 'sun' : 'moon')}</button>
+      <button class="top-btn" onclick="logout()" aria-label="로그아웃" title="로그아웃">${ic('out')}</button>
+      <div class="top-prof" title="${esc(S.user.company)}"><span class="avatar">${esc(S.user.name.slice(0, 1))}</span><span class="tp-n"><b>${esc(S.user.name)}</b><small>${adm ? '관리자' : '검사원'}</small></span></div>
     </header>
     <div class="body-wrap">
       <nav class="side" aria-label="주 메뉴">
@@ -1204,39 +1258,91 @@ function hourlyChart() {
     <div class="row small muted" style="gap:14px"><span><span class="dot" style="color:var(--bar-normal);display:inline-block"></span> 정상</span><span><span class="dot" style="color:var(--bar-defect);display:inline-block"></span> 불량</span><span><span class="dot" style="color:var(--bar-pending);display:inline-block"></span> 검토 대기</span></div>${chartTable(['시간', '정상', '불량', '검토 대기', '합계'], data.map(x => [x.h + '시', x.n, x.d, x.p, x.n + x.d + x.p]))}`;
 }
 
+/** 대시보드 작업대에서 보여 줄 검사: 선택한 건, 없으면 가장 최근 검토 대기 건(없으면 가장 최근 건). */
+function dbCurrent() {
+  let cur = S.inspections.find(r => r.n === U.dbSel);
+  if (!cur) { cur = S.inspections.filter(r => r.final === null).sort((a, b) => b.n - a.n)[0] || [...S.inspections].sort((a, b) => b.n - a.n)[0]; U.dbSel = cur ? cur.n : null; }
+  return cur;
+}
+/** 이상 의심 위치(이미지 기준 %) 목록. 데이터셋 정답 상자가 있으면 그 중심, 없으면 시연용 위치. */
+function dbPoints(r) {
+  if (!r || r.ai !== 'ANOMALY') return [];
+  const bs = r.boxes && r.boxes.length ? r.boxes : (r.spot ? [{ x: r.spot.x - r.spot.r, y: r.spot.y - r.spot.r, w: r.spot.r * 2, h: r.spot.r * 2 }] : []);
+  return bs.map(q => ({ x: Math.max(4, Math.min(96, q.x + q.w / 2)), y: Math.max(4, Math.min(96, q.y + q.h / 2)), k: q.k ? (KIND_KO[q.k] || q.k) : '의심 영역' }));
+}
+/** 심각도(점 색, 이름) — AI 점수 기준의 시연용 구분. */
+function dbSeverity(r) { return r.ai !== 'ANOMALY' ? ['#3aa655', '정상 범위'] : r.score >= 0.8 ? ['#e5484d', '치명적'] : r.score >= 0.7 ? ['#f08a24', '높음'] : ['#f5b942', '주의']; }
+/** 표에서 다른 검사를 고른다. @param {number} n 검사 번호 */
+function dbPick(n) { U.dbSel = n; U.dbDef = 0; U.dbZ = 1; U.rvMemo = ''; render(); }
+/** 의심 위치 목록에서 하나를 고른다. @param {number} i 위치 순번 */
+function dbDef(i) { U.dbDef = i; render(); }
+/** 이미지 확대·축소(1~2.5배). @param {number} d 증감 */
+function dbZoom(d) { U.dbZ = Math.max(1, Math.min(2.5, +((U.dbZ || 1) + d).toFixed(2))); render(); }
+/** 대시보드에서 최종 판정을 저장하고 다음 검토 대기 건으로 넘어간다. */
+function dbConfirm(n, d) {
+  const next = S.inspections.filter(x => x.final === null && x.n !== n).sort((a, b) => b.n - a.n)[0];
+  U.dbSel = next ? next.n : n; U.dbDef = 0; U.dbZ = 1; submitReview(n, d);
+}
+
 /**
- * 대시보드 화면을 생성한다.
+ * 대시보드 화면을 생성한다 — 선택한 검사의 이미지·의심 위치·상세·조치를 한 화면에 보여 주는 작업대
+ * (Dribbble "Electronics QA Dashboard" 시안 구성: 상단 상태 줄 · 기판 이미지 + 의심 목록 · 상세 사이드 · 결과 표 · 조치 · 메모).
  * @returns {string} 본문 HTML
  */
 function viewDashboard() {
-  const st = getStats();
-  const recent = [...S.inspections].sort((a, b) => b.n - a.n).slice(0, 5);
-  const pend = S.inspections.filter(r => r.final === null).sort((a, b) => b.n - a.n).slice(0, 5);
-  const pc = n => (st.total ? (n / st.total * 100).toFixed(1) : '0.0') + '%';
-  const kpi = (label, v, cls, flt, sub) => `<button class="kpi" onclick="gotoHistory('${flt}')"><div class="l">${label}</div><div class="v ${cls}">${v}</div><div class="s">${sub}</div></button>`;
-  const first = S.inspections.filter(r => r.final === null).sort((a, b) => b.n - a.n)[0];
-  const roleStrip = isAdmin()
-    ? `<div class="role-strip admin"><span class="rs-t">${ic('shield', 'lg')}관리자 현황</span>
-        <span class="rs-i"><small>PatchCore API</small><b style="color:var(--${S.api.online ? 'good' : 'bad'})">${S.api.online ? '온라인' : '오프라인'}</b></span>
-        <span class="rs-i"><small>활성 모델</small><b>${S.model.active}</b></span><span class="rs-i"><small>임계값</small><b>${S.model.threshold.toFixed(2)}</b></span>
-        <span class="rs-i"><small>활성 사용자</small><b>${S.users.filter(u => u.status === '활성').length}명</b></span>
-        <span class="rs-act"><button class="btn sm outline" onclick="go('models')">모델·임계값 관리</button><button class="btn sm outline" onclick="go('settings')">사용자 관리</button></span></div>`
-    : `<div class="role-strip insp"><span class="rs-t">${ic('user', 'lg')}내 작업</span>
-        <span class="rs-i"><small>검토 대기</small><b style="color:var(--warn)">${st.pending}건</b></span><span class="rs-i"><small>오늘 검사</small><b>${st.total}건</b></span>
-        <span class="rs-act">${first ? `<button class="btn sm primary" onclick="openReview(${first.n})">바로 판정하기</button>` : ''}<button class="btn sm outline" onclick="go('inspect')">새 검사 시작</button></span></div>`;
-  return `${pageHead('오늘의 검사 현황', '2026-11-20<span class="sub-hint"> · 카드를 누르면 해당 조건의 검사 이력으로 이동합니다.</span>')}
-    ${roleStrip}
-    <div class="kpi-grid">${kpi('전체 검사', st.total, '', 'all', '오늘 08~19시 · 이력 보기')}${kpi('정상 확정', st.normal, 'good', 'NORMAL', '전체의 ' + pc(st.normal))}${kpi('불량 확정', st.defect, 'bad', 'DEFECT', '전체의 ' + pc(st.defect))}${kpi('검토 대기', st.pending, 'warn', 'PENDING', '전체의 ' + pc(st.pending))}</div>
-    <div class="split eq">
-      <div class="card"><div class="card-title">시간대별 검사 건수</div>${hourlyChart()}<div class="divider"></div><div class="card-title">불량 유형별 분포 <span class="pill" title="현재 검사 이력 중 불량 확정과 검토 대기 건을 이미지 라벨로 집계">확정 + 대기 기준</span><span class="sp"></span><button class="btn sm" onclick="go('stats')">통계 분석</button></div>${defectDist(statsData(7).byType)}</div>
-      <div class="card"><div class="card-title">검토 대기 <span class="pill orange">${st.pending}건</span><span class="sp"></span><button class="btn sm" onclick="go('review')">검토하기</button></div>
-        ${pend.length ? pend.map(r => `<div class="ver-row"><div class="thumb" style="${thumbStyle(r)}"></div><div style="flex:1"><b>${r.id}</b><div class="small muted">${pcbTag(r.pcb)} · 점수 ${r.score.toFixed(2)} · ${hhmm(r.at)}</div></div><button class="btn sm outline" onclick="openReview(${r.n})">판정</button></div>`).join('') : `<div class="empty">검토 대기 건이 없습니다.<br><button class="btn sm outline mt10" onclick="go('inspect')">새 검사 시작</button></div>`}
-        <div class="divider"></div><div class="row between"><span class="muted">AI-검사원 판정 일치율</span><b style="font-size:20px">${st.match}%</b></div>
-        <div class="note mt4">검사원 확정 건 중 AI 최초 판정과 같은 비율 (AI 원본 판정은 보존)</div></div>
+  const st = getStats(), cur = dbCurrent();
+  if (!cur) return `${pageHead('대시보드', '검사 내역이 없습니다.')}<div class="card"><div class="empty">검사 내역이 없습니다.<br><button class="btn sm outline mt10" onclick="go('inspect')">새 검사 시작</button></div></div>`;
+  const pts = dbPoints(cur), sel = Math.min(U.dbDef || 0, Math.max(0, pts.length - 1)), sp = pts[sel], z = U.dbZ || 1;
+  const pos = p => ({ x: 50 + (p.x - 50) * z, y: 50 + (p.y - 50) * z }), vis = p => { const q = pos(p); return q.x >= 0 && q.x <= 100 && q.y >= 0 && q.y <= 100; };
+  const sev = dbSeverity(cur), anom = cur.ai === 'ANOMALY', f = finalState(cur);
+  const rows = [...S.inspections].sort((a, b) => b.n - a.n).slice(0, 10);
+  const dots = pts.map((p, i) => { const q = pos(p); return vis(p) ? `<button class="db-dot ${i === sel ? 'sel' : (i % 2 ? 'c2' : 'c1')}" style="left:${q.x}%;top:${q.y}%" onclick="dbDef(${i})" aria-label="의심 #${i + 1} ${esc(p.k)}"></button>` : ''; }).join('');
+  const call = sp && vis(sp) ? `<div class="db-call" style="left:${pos(sp).x}%;top:${pos(sp).y}%">${esc(sp.k)} – ${cur.score.toFixed(2)}</div>` : '';
+  const zbg = sp ? `background-image:url('${cur.img}');background-size:340%;background-position:${sp.x}% ${sp.y}%;` : `background-image:url('${cur.img}');background-size:cover;background-position:center;`;
+  return `<div class="db">
+    <div class="db-head">
+      <span class="db-title">${esc(cur.pcb)} · Industrial PatchCore ${esc(cur.ver)}</span><span class="db-chip">ID: ${cur.id}</span>
+      <span class="db-sp"></span>
+      <span class="db-st ${anom ? 'bad' : 'ok'}"><i></i>AI 판정: ${anom ? '이상 의심' : '정상'}</span>
+      <span class="db-upd">검사 시각: ${hhmm(cur.at)}</span>
+      <button class="btn outline" onclick="exportCsv(true)">${ic('download')}CSV 내보내기</button>
     </div>
-    <div class="card mt14"><div class="card-title">최근 검사<span class="sp"></span><button class="btn sm" onclick="go('history')">전체 이력</button></div>
-      <div class="tbl-wrap"><table class="tbl"><thead><tr><th>번호</th><th>PCB 종류</th><th>AI 점수</th><th>AI 판정</th><th>최종 판정</th><th>시각</th></tr></thead><tbody>
-      ${recent.map(r => `<tr class="click" onclick="openDetail(${r.n})"><td>${r.n}</td><td>${pcbTag(r.pcb)}</td><td>${r.score.toFixed(2)}</td><td>${aiBadge(r.ai)}</td><td>${finalBadge(r)}</td><td>${hhmm(r.at)}</td></tr>`).join('')}</tbody></table></div></div>`;
+    <div class="db-grid">
+      <div class="db-col">
+        <div class="db-board">
+          <div class="db-wrap" style="position:relative;width:min(100%,560px);aspect-ratio:475/350">
+            <div class="db-img" style="width:100%;height:100%"><div class="db-in" style="transform:scale(${z})"><img src="${cur.img}" alt="${cur.id} 원본 이미지"></div></div>
+            ${dots}${call}
+          </div>
+          <div class="db-list" role="group" aria-label="이상 의심 위치">${pts.length ? pts.map((p, i) => `<button class="${i === sel ? 'on' : ''}" onclick="dbDef(${i})">${i === sel ? '<i></i>' : ''}의심 #${i + 1}: ${esc(p.k)}</button>`).join('') : '<div class="none">이상 의심 영역이 없습니다 (AI 정상)</div>'}</div>
+          <div class="db-zoom"><button onclick="dbZoom(.5)" aria-label="확대">${ic('plus')}</button><button onclick="dbZoom(-.5)" aria-label="축소">${ic('minus')}</button></div>
+        </div>
+        <div class="card db-tc">
+          <div class="card-title">최근 검사 결과<span class="db-sum"><button class="pill" onclick="gotoHistory('all')">전체 ${st.total}</button><button class="pill green" onclick="gotoHistory('NORMAL')">정상 ${st.normal}</button><button class="pill red" onclick="gotoHistory('DEFECT')">불량 ${st.defect}</button><button class="pill orange" onclick="gotoHistory('PENDING')">검토 대기 ${st.pending}</button></span><button class="db-more" onclick="go('history')" title="전체 검사 이력" aria-label="전체 검사 이력">${ic('dots')}</button></div>
+          <div class="tbl-wrap"><table class="tbl"><thead><tr><th>검사 ID</th><th>PCB 종류</th><th>기준 (임계값)</th><th>측정 (AI 점수)</th><th>상태</th></tr></thead><tbody>
+          ${rows.map(r => `<tr class="click ${r.n === cur.n ? 'sel' : ''}" onclick="dbPick(${r.n})"><td><b>${r.id}</b></td><td>${pcbTag(r.pcb)}</td><td>${r.thr.toFixed(2)}</td><td><b>${r.score.toFixed(2)}</b></td><td>${finalBadge(r)}</td></tr>`).join('')}</tbody></table></div>
+        </div>
+      </div>
+      <div class="db-col db-side">
+        <div class="card"><div class="card-title">불량 상세 정보</div>
+          <div class="db-kv">
+            <div><span class="k">유형:</span> <span class="${anom ? 'red' : ''}">${anom ? esc(sp ? sp.k : '이상 의심') : '이상 없음'}</span></div>
+            <div><span class="k">PCB 종류:</span> ${pcbTag(cur.pcb)}</div>
+            <div><span class="k">좌표:</span> ${sp ? `X: ${Math.round(sp.x)}%, Y: ${Math.round(sp.y)}%` : '—'}</div>
+            <div><span class="k">AI 점수:</span> <b>${cur.score.toFixed(2)}</b> <span class="muted">(임계값 ${cur.thr.toFixed(2)})</span></div>
+            <div><span class="k">확대 이미지:</span> ${sp ? `X: ${Math.round(sp.x)}%, Y: ${Math.round(sp.y)}%` : '전체'}<div class="db-zimg" style="${zbg}"></div></div>
+            <div><span class="k">심각도:</span> <span class="sev"><i style="background:${sev[0]}"></i>${sev[1]}</span></div>
+            <div><span class="k">이력:</span> ${mdhm(cur.at)} 검사 · ${finalBadge(cur)}<div class="small muted mt4">출처 ${esc(srcOf(cur).short)}</div></div>
+          </div></div>
+        <div class="card"><div class="card-title">검사원 조치</div><div class="db-act">
+          <button class="btn primary" onclick="dbConfirm(${cur.n},'NORMAL')">${ic('check')}정상 확정</button>
+          <button class="btn r" onclick="dbConfirm(${cur.n},'DEFECT')">${ic('x')}불량 확정</button>
+          <button class="btn g" onclick="openReview(${cur.n})">${ic('scan')}검사 관리에서 상세 검토</button></div>
+          <div class="note">${f === 'PENDING' ? '확정하면 다음 검토 대기 건으로 넘어갑니다.' : '이미 확정된 건입니다. 다시 누르면 최종 판정을 변경하며 AI 최초 판정은 보존됩니다.'}</div></div>
+        <div class="card db-note"><div class="card-title">메모 추가</div>
+          <textarea id="rvMemo" placeholder="판정 사유나 현장 메모를 입력하세요 (예: R12 납땜 재확인)" oninput="U.rvMemo=this.value">${esc(U.rvMemo || cur.memo)}</textarea></div>
+      </div>
+    </div></div>`;
 }
 
 /**
