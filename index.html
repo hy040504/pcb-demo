@@ -28,22 +28,26 @@
   --shadow-float: 0 18px 48px -8px rgba(20, 24, 22, .22);
   --bar-normal: #6fa384; --bar-defect: #c0463e; --bar-pending: #d49a5c;
   --role-insp: #3b7bbf; --ease: cubic-bezier(.22, .8, .3, 1);
+  --bg-board: #f2f4f2; --bg-subtle: #f7f8f7; --primary-soft: rgba(70, 116, 95, .11);
+  --shadow-sm: 0 4px 12px -4px rgba(20, 24, 22, .10);
 }
 html[data-theme="dark"] {
   --bg-app: #0e1210; --bg-card: #161c19; --bg-muted: #1d2521; --bg-hover: #232d28; --bg-input: #121714;
   --border: #26302b; --border-strong: #3a4740;
   --text-1: #f1f4f2; --text-2: #cdd5d0; --text-3: #92a098;
-  --primary: #5b9378; --primary-hover: #6aa388; --primary-fg: #0b100d;
-  --danger: #c46a63; --danger-hover: #d27b74;
-  --good: #7fcf94; --warn: #e5a76c; --bad: #f08a82;
+  --primary: #6fb894; --primary-hover: #82c7a5; --primary-fg: #08110c;
+  --danger: #f08a82; --danger-hover: #f6a09a;
+  --good: #7fcf94; --warn: #f0b878; --bad: #ff9690;
   --b-green-bg: rgba(111, 200, 140, .15); --b-green-fg: #86d69b;
-  --b-orange-bg: rgba(229, 150, 90, .16); --b-orange-fg: #eba66d;
-  --b-red-bg: rgba(240, 120, 110, .16); --b-red-fg: #f29a92;
-  --b-gray-bg: #232d28; --b-gray-fg: #b6c1ba;
+  --b-orange-bg: rgba(240, 184, 120, .17); --b-orange-fg: #f6c68c;
+  --b-red-bg: rgba(255, 150, 144, .17); --b-red-fg: #ffaaa5;
+  --b-gray-bg: #26312b; --b-gray-fg: #c4cfc8;
   --shadow: 0 1px 3px rgba(0, 0, 0, .4);
   --shadow-float: 0 22px 54px rgba(0, 0, 0, .6);
   --bar-normal: #5b9378; --bar-defect: #e0766d; --bar-pending: #d49a5c;
   --role-insp: #86b4e8;
+  --bg-board: #0f1512; --bg-subtle: #19211d; --primary-soft: rgba(111, 184, 148, .17);
+  --shadow-sm: 0 6px 16px -6px rgba(0, 0, 0, .5);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
@@ -513,6 +517,98 @@ circle.arc { transition: opacity .15s, stroke-width .15s; } circle.arc:hover { s
   .nav-item:hover { transform: none; }
   .side.no-tr, .side.no-tr * { transition: none !important; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   다크 모드 가독성 · 알림 색 보정 + 검사 관리 의심 위치 작업대 (demo2.html 기준)
+   ═══════════════════════════════════════════════════════════════════════════ */
+select.inp option { background: var(--bg-card); color: var(--text-1); }
+.avatar { color: var(--primary-fg); }
+html[data-theme="dark"] button.pill.active { background: var(--primary); color: var(--primary-fg); }
+html[data-theme="dark"] .btn.danger { color: #1d0907; }
+html[data-theme="dark"] .toast, html[data-theme="dark"] #tip {
+  background: var(--bg-hover); color: var(--text-1); border: 1px solid var(--border-strong);
+}
+.toast { border-left: 4px solid var(--primary); }
+.toast.warn { border-left-color: var(--warn); }
+html[data-theme="dark"] .toast.ok { border-left-color: var(--good); }
+.nav-item .cnt { background: #f5b942; color: #3d2900; }
+html[data-theme="dark"] .nav-item .cnt { background: #f6c27a; color: #2a1c00; }
+.mk i { color: #fff; background: #d93a3a; }
+
+.rv-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid var(--border); }
+.rv-bar-id { font-size: 18px; font-weight: 800; letter-spacing: -.015em; }
+.rv-bar-sp { flex: 1; }
+.db-st { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; }
+.db-st i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; display: inline-block; }
+.db-st.bad { color: var(--bad); } .db-st.ok { color: var(--good); }
+.db-board {
+  position: relative; background: var(--bg-board); border: 1px solid var(--border); border-radius: 14px;
+  min-height: 340px; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 24px 244px 24px 56px;
+}
+.db-wrap { position: relative; width: min(100%, 500px); aspect-ratio: 475 / 350; }
+.db-img { position: relative; width: 100%; height: 100%; border-radius: 14px; overflow: hidden; box-shadow: 0 12px 30px -12px rgba(0, 0, 0, .42); background: #0f1512; cursor: zoom-in; }
+.db-in { position: absolute; inset: 0; transition: transform .25s var(--ease); transform-origin: 50% 50%; }
+.db-in img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.db-dot {
+  position: absolute; width: 20px; height: 20px; margin: -10px 0 0 -10px; border-radius: 50%; border: 0; padding: 0;
+  cursor: pointer; background: #fff; box-shadow: 0 0 0 4px rgba(255, 255, 255, .45), 0 0 14px 6px rgba(255, 255, 255, .55);
+  z-index: 3; transition: transform .15s var(--ease);
+}
+.db-dot:hover { transform: scale(1.12); }
+.db-dot.c1 { background: #ef5b5b; box-shadow: 0 0 0 4px rgba(239, 91, 91, .35), 0 0 14px 6px rgba(239, 91, 91, .55); }
+.db-dot.c2 { background: #f5c242; box-shadow: 0 0 0 4px rgba(245, 194, 66, .4), 0 0 14px 6px rgba(245, 194, 66, .6); }
+.db-dot.sel { width: 24px; height: 24px; margin: -12px 0 0 -12px; outline: 2.5px solid #fff; }
+.db-dot:focus-visible { outline: 3px solid var(--primary); outline-offset: 3px; }
+.db-call {
+  position: absolute; z-index: 4; transform: translate(-110%, -155%);
+  background: var(--bg-card); color: var(--bad); border: 1px solid color-mix(in srgb, var(--bad) 35%, var(--border));
+  font-size: 11.5px; font-weight: 700; padding: 5px 10px; border-radius: 6px; white-space: nowrap;
+  box-shadow: 0 6px 18px -6px rgba(0, 0, 0, .38); pointer-events: none;
+}
+.db-call::after { content: ''; position: absolute; left: 100%; top: 100%; width: 20px; height: 1.5px; background: var(--bad); transform-origin: 0 0; transform: rotate(38deg); }
+.db-call.flip-x { transform: translate(14%, -155%); }
+.db-call.flip-x::after { left: auto; right: 100%; transform-origin: 100% 0; transform: rotate(-38deg); }
+.db-call.flip-y { transform: translate(-110%, 55%); }
+.db-call.flip-y::after { top: auto; bottom: 100%; transform-origin: 0 100%; transform: rotate(-38deg); }
+.db-call.flip-x.flip-y { transform: translate(14%, 55%); }
+.db-call.flip-x.flip-y::after { left: auto; right: 100%; top: auto; bottom: 100%; transform-origin: 100% 100%; transform: rotate(38deg); }
+.mk-off .db-dot, .mk-off .db-call { display: none; }
+.db-list {
+  position: absolute; top: 14px; right: 14px; width: 224px; max-height: 220px; overflow-y: auto;
+  background: color-mix(in srgb, var(--bg-card) 94%, transparent); backdrop-filter: blur(6px);
+  border: 1px solid var(--border); border-radius: 10px; box-shadow: var(--shadow-sm);
+  padding: 8px; z-index: 5; display: flex; flex-direction: column; gap: 2px;
+}
+.db-list-hd { font-size: 11px; font-weight: 700; color: var(--text-3); padding: 2px 8px 5px; letter-spacing: .01em; }
+.db-list button { display: flex; align-items: center; gap: 8px; text-align: left; font-size: 12px; padding: 7px 9px; border-radius: 7px; color: var(--text-1); width: 100%; }
+.db-list button:hover { background: var(--bg-muted); }
+.db-list button.on { background: var(--primary-soft); color: var(--primary); font-weight: 700; }
+.db-list button i { width: 6px; height: 6px; border-radius: 50%; background: var(--bad); flex: none; }
+.db-list .none { font-size: 12px; color: var(--text-3); padding: 6px 8px; }
+.db-zoom { position: absolute; left: 14px; bottom: 14px; display: flex; flex-direction: column; gap: 6px; z-index: 5; }
+.db-zoom button {
+  width: 34px; height: 34px; border-radius: 8px; background: var(--bg-card); border: 1px solid var(--border);
+  display: inline-flex; align-items: center; justify-content: center; color: var(--text-2); box-shadow: var(--shadow-sm); font-size: 11px; font-weight: 700;
+}
+.db-zoom button:hover:not(:disabled) { background: var(--bg-muted); color: var(--text-1); }
+.db-zoom button:disabled { opacity: .45; cursor: not-allowed; }
+.db-zoom .ic { width: 16px; height: 16px; }
+.rv-canvas-tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.rv-subgrid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 16px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); align-items: start; }
+.rv-sec-t { font-size: 13.5px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 7px; color: var(--text-1); }
+.db-kv { border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.db-kv > div { padding: 9px 13px; font-size: 12.5px; line-height: 1.45; border-bottom: 1px solid var(--border); }
+.db-kv > div:nth-child(odd) { background: var(--bg-subtle); }
+.db-kv > div:last-child { border-bottom: 0; }
+.db-kv b { font-weight: 700; }
+.db-kv .k { color: var(--text-3); font-weight: 600; margin-right: 6px; }
+.db-kv .red { color: var(--bad); font-weight: 700; }
+.db-zimg { margin-top: 8px; height: 126px; border-radius: 8px; background-color: #0f1512; background-repeat: no-repeat; border: 1px solid var(--border); cursor: zoom-in; }
+.rv-act-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.rv-act-btns .btn { padding: 11px 14px; font-size: 14px; }
+.rv-ev { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+@media (max-width: 1160px) { .rv-subgrid { grid-template-columns: 1fr; } .db-board { padding: 24px 20px; } }
+@media (max-width: 900px) { .db-list { position: static; width: auto; max-height: none; order: 2; } .db-board { flex-direction: column; gap: 14px; } .db-zoom { position: static; flex-direction: row; order: 3; } }
 </style>
 </head>
 <body>
@@ -657,6 +753,8 @@ const ICONS = {
   chip: '<rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/>',
   dots: '<circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
+  minus: '<path d="M5 12h14"/>',
+  alert: '<path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/>',
   x: '<path d="M6 6l12 12M18 6L6 18"/>'
 };
 
@@ -834,7 +932,9 @@ function thumbStyle(r) {
  * @param {string} msg 표시할 메시지
  */
 function toast(msg) {
-  const el = document.createElement('div'); el.className = 'toast'; el.textContent = msg;
+  const warn = /오프라인|끊겨|연결할 수|불가|없습니다|부족|제외|초과|차단|사유 미입력|만 전환|만 추가/.test(msg);
+  const el = document.createElement('div'); el.className = 'toast ' + (warn ? 'warn' : 'ok'); el.textContent = msg;
+  el.setAttribute('role', warn ? 'alert' : 'status');
   document.getElementById('toasts').appendChild(el);
   setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 260); }, 2750);
 }
@@ -1638,6 +1738,18 @@ function markerHtml(r, small) {
   }).join('');
 }
 
+/** 검사 관리 의심 위치 작업대 공용 도우미 — 의심 위치 점(이미지 기준 %), 점 선택, 확대/축소 (demo2.html 과 동일) */
+function dbPoints(r) {
+  if (!r || r.ai !== 'ANOMALY') return [];
+  const bs = r.boxes && r.boxes.length ? r.boxes : (r.spot ? [{ x: r.spot.x - r.spot.r, y: r.spot.y - r.spot.r, w: r.spot.r * 2, h: r.spot.r * 2 }] : []);
+  return bs.map(q => ({ x: Math.max(4, Math.min(96, q.x + q.w / 2)), y: Math.max(4, Math.min(96, q.y + q.h / 2)), k: q.k ? (KIND_KO[q.k] || q.k) : '의심 영역' }));
+}
+/** 의심 위치 목록에서 하나를 고른다. @param {number} i 위치 순번 */
+function dbDef(i) { U.dbDef = i; render(); }
+/** 이미지 확대·축소(1~2.5배). @param {number} d 증감 */
+function dbZoom(d) { U.dbZ = Math.max(1, Math.min(2.5, +((U.dbZ || 1) + d).toFixed(2))); render(); }
+/** 이미지 확대 배율을 100%로 되돌린다. */
+function dbZoomReset() { U.dbZ = 1; render(); }
 /** 의심 영역 표시 켜기/끄기 버튼(검사 관리·확대 뷰어). */
 function markBtn() { return `<button class="btn sm outline mk-btn ${U.mkOff ? 'off' : ''}" onclick="toggleMark()" aria-pressed="${!U.mkOff}" title="이미지 위 이상 의심 영역 박스를 켜고 끕니다"><span class="mk-dot"></span>의심 영역 표시 ${U.mkOff ? '꺼짐' : '켜짐'}</button>`; }
 
@@ -1731,29 +1843,82 @@ function viewReview() {
       <div class="photo zoomable" title="클릭하면 크게 볼 수 있습니다(선택한 판단 근거 포함)" onclick="openViewer(${cur.n})"><img src="${cur.img}" alt="AI 판단 근거 원본" style="${U.evMode === 'mask' && cur.ai === 'ANOMALY' ? 'visibility:hidden' : ''}"><div id="evLayer">${evidenceLayer(cur, U.evMode, U.evOpacity)}</div>${U.evMode === 'orig' ? markerHtml(cur) : ''}<span class="zoom-hint">${ic('zoom')}확대</span></div>
       <div class="note">${cur.ai === 'ANOMALY' ? 'AI가 어떤 영역을 근거로 이상으로 판단했는지 보여주는 자료입니다 (시안: 샘플 이미지는 데이터셋 정답 위치, 그 외는 시뮬레이션).' : 'AI 정상 판정 — 표시할 이상 영역이 없습니다.'} 실제 Heatmap · Mask · Overlay는 API 확장 이후 연동됩니다.</div>`
       : `<div class="locked mt16">${ic('lock', 'lg')}<div><b>AI 판단 근거(Heatmap · Mask · Overlay)</b><br>관리자 전용 화면에서 제공됩니다. 검사원은 점수와 원본 이미지로 판정합니다.</div></div>`;
+    const anom = cur.ai === 'ANOMALY';
+    const pts = dbPoints(cur), sel = Math.min(U.dbDef || 0, Math.max(0, pts.length - 1)), sp = pts[sel], z = U.dbZ || 1;
+    const pos = p => ({ x: 50 + (p.x - 50) * z, y: 50 + (p.y - 50) * z });
+    const vis = p => { const q = pos(p); return q.x >= 0 && q.x <= 100 && q.y >= 0 && q.y <= 100; };
+    const dots = pts.map((p, i) => {
+      const q = pos(p);
+      return vis(p) ? `<button class="db-dot ${i === sel ? 'sel' : (i % 2 ? 'c2' : 'c1')}" style="left:${q.x}%;top:${q.y}%" onclick="dbDef(${i})" aria-label="의심 #${i + 1} ${esc(p.k)}"></button>` : '';
+    }).join('');
+    const qsp = sp ? pos(sp) : null;
+    const callCls = qsp ? ((qsp.x < 34 ? ' flip-x' : '') + (qsp.y < 28 ? ' flip-y' : '')) : '';
+    const call = sp && vis(sp) ? `<div class="db-call${callCls}" style="left:${qsp.x}%;top:${qsp.y}%">${esc(sp.k)} · ${cur.score.toFixed(2)}</div>` : '';
+    const zbg = sp ? `background-image:url('${cur.img}');background-size:340%;background-position:${sp.x}% ${sp.y}%;` : `background-image:url('${cur.img}');background-size:cover;background-position:center;`;
     detail = `
-      <div class="row" style="align-items:flex-start;flex-wrap:nowrap;gap:16px">
-        <div style="width:46%;min-width:0"><div class="photo zoomable" role="button" tabindex="0" title="클릭하면 크게 볼 수 있습니다" onclick="openViewer(${cur.n})" onkeydown="if(event.key==='Enter')openViewer(${cur.n})"><img src="${cur.img}" alt="${cur.id} 원본">${markerHtml(cur)}<span class="zoom-hint">${ic('zoom')}확대</span></div>
-          <div class="row mt8"><button class="btn sm" onclick="openViewer(${cur.n})">${ic('zoom')}확대 보기</button><button class="btn sm outline" onclick="downloadImage(${cur.n})">${ic('download')}다운로드</button>${cur.ai === 'ANOMALY' ? markBtn() : ''}</div>
-          ${cur.ai === 'ANOMALY' ? `<div class="small mt6" style="color:#ef4444">빨간 박스: AI가 이상으로 의심한 영역${cur.boxes && cur.boxes.length && cur.boxes[0].k ? ` · 데이터셋 정답 유형(참고): ${KIND_KO[cur.boxes[0].k] || cur.boxes[0].k}${cur.boxes.length > 1 ? ' 외' : ''}` : ' (시연용 위치)'}</div>` : ''}</div>
-        <div style="flex:1;min-width:0"><div style="font-size:20px;font-weight:800">${cur.id}</div>
-          <div class="muted" style="margin:2px 0 4px">PCB 종류 ${pcbTag(cur.pcb)} · Industrial PatchCore ${cur.ver}</div>
-          <div class="small muted" style="margin-bottom:8px">이미지 출처: <b>${esc(srcOf(cur).full)}</b></div>
-          <span class="pill ${cur.ai === 'ANOMALY' ? 'orange' : 'green'}">${cur.ai === 'ANOMALY' ? 'AI 이상 의심' : 'AI 정상'}</span>
-          <div class="mt10">이상 점수: <b>${cur.score.toFixed(2)}</b></div><div>임계값: <b>${cur.thr.toFixed(2)}</b> <span class="muted small">(검사 당시)</span></div>
-          <div class="note">현재 상태: ${finalBadge(cur)}</div></div></div>
-      <div class="divider"></div>
-      <div style="font-weight:700;margin-bottom:8px">검사원 최종 판정</div>
-      <div class="grid2"><button class="btn primary block" style="font-size:15px;padding:12px" onclick="submitReview(${cur.n},'NORMAL')">정상</button><button class="btn danger block" style="font-size:15px;padding:12px" onclick="submitReview(${cur.n},'DEFECT')">불량</button></div>
-      <div class="field mt12"><label>판정 사유 및 검사원 메모</label>
-        <textarea class="inp" id="rvMemo" placeholder="판정 사유를 입력하는 영역 (정상 확정 시 가불량 사유, 불량 확정 시 불량 내용)" oninput="U.rvMemo=this.value">${esc(U.rvMemo || cur.memo)}</textarea></div>
-      <div class="note">${f === 'PENDING' ? '' : '이미 확정된 건입니다. 다시 누르면 최종 판정을 변경하며, AI 최초 판정은 그대로 보존됩니다. '}확정 판정과 사유는 피드백 데이터로 누적되어 추후 자체 모델(Custom PatchCore) 학습에 활용됩니다.</div>
+      <div class="rv-bar">
+        <span class="rv-bar-id">${cur.id}</span>
+        ${pcbTag(cur.pcb)}
+        <span class="small muted">Industrial PatchCore ${cur.ver}</span>
+        <span class="rv-bar-sp"></span>
+        <span class="db-st ${anom ? 'bad' : 'ok'}"><i></i>AI 판정: ${anom ? '이상 의심' : '정상'}</span>
+        ${finalBadge(cur)}
+      </div>
+
+      <div class="db-board">
+        <div class="db-wrap">
+          <div class="db-img zoomable" role="button" tabindex="0" title="클릭하면 전체 화면 확대 뷰어로 봅니다" onclick="openViewer(${cur.n})" onkeydown="if(event.key==='Enter')openViewer(${cur.n})">
+            <div class="db-in" style="transform:scale(${z})"><img src="${cur.img}" alt="${cur.id} 원본 이미지">${markerHtml(cur, true)}</div>
+          </div>
+          ${dots}${call}
+        </div>
+        <div class="db-list" role="group" aria-label="이상 의심 위치 목록">
+          <div class="db-list-hd">의심 위치 목록 ${pts.length ? `(${pts.length})` : ''}</div>
+          ${pts.length ? pts.map((p, i) => `<button class="${i === sel ? 'on' : ''}" onclick="dbDef(${i})">${i === sel ? '<i></i>' : ''}의심 #${i + 1}: ${esc(p.k)}</button>`).join('') : '<div class="none">이상 의심 영역이 없습니다 (AI 정상)</div>'}
+        </div>
+        <div class="db-zoom">
+          <button onclick="dbZoom(.5)" ${z >= 2.5 ? 'disabled' : ''} aria-label="확대" title="확대">${ic('plus')}</button>
+          <button onclick="dbZoom(-.5)" ${z <= 1 ? 'disabled' : ''} aria-label="축소" title="축소">${ic('minus')}</button>
+          ${z > 1 ? `<button onclick="dbZoomReset()" aria-label="원래 크기" title="100% 맞춤">${Math.round(z * 100)}%</button>` : ''}
+        </div>
+      </div>
+
+      <div class="rv-canvas-tools">
+        <button class="btn sm" onclick="openViewer(${cur.n})">${ic('zoom')}확대 보기</button>
+        <button class="btn sm outline" onclick="downloadImage(${cur.n})">${ic('download')}다운로드</button>
+        ${anom ? markBtn() : ''}
+        <span class="small muted" style="margin-left:auto">배율 ${Math.round(z * 100)}% · 출처 ${esc(srcOf(cur).short)}</span>
+      </div>
+      ${anom ? `<div class="small mt6" style="color:var(--bad)">빨간 박스 · 의심 점: AI가 이상으로 의심한 영역${cur.boxes && cur.boxes.length && cur.boxes[0].k ? ` · 데이터셋 정답 유형(참고): ${KIND_KO[cur.boxes[0].k] || cur.boxes[0].k}${cur.boxes.length > 1 ? ` 외 ${cur.boxes.length - 1}곳` : ''}` : ' (시연용 위치)'}</div>` : ''}
+
+      <div class="rv-subgrid">
+        <div>
+          <div class="rv-sec-t">${ic('alert')}의심 위치 상세</div>
+          <div class="db-kv">
+            <div><span class="k">유형</span> <span class="${anom ? 'red' : ''}">${anom ? esc(sp ? sp.k : '이상 의심') : '이상 없음'}</span></div>
+            <div><span class="k">좌표</span> ${sp ? `<b>X: ${Math.round(sp.x)}%, Y: ${Math.round(sp.y)}%</b>` : '—'}</div>
+            <div><span class="k">AI 점수</span> <span class="sc"><b>${cur.score.toFixed(2)}</b><i class="${cur.score >= cur.thr ? 'hi' : ''}"><b style="width:${Math.min(100, Math.round(cur.score * 100))}%"></b></i></span> <span class="small muted">(임계값 ${cur.thr.toFixed(2)} · 검사 당시)</span></div>
+            <div><span class="k">이미지 출처</span> <span class="small">${esc(srcOf(cur).full)}</span></div>
+            <div><span class="k">확대 이미지</span> <span class="small muted">${sp ? `X: ${Math.round(sp.x)}%, Y: ${Math.round(sp.y)}% 중심` : '전체 기판'}</span>
+              <div class="db-zimg" style="${zbg}" role="button" tabindex="0" onclick="openViewer(${cur.n})" onkeydown="if(event.key==='Enter')openViewer(${cur.n})" title="클릭하면 확대 뷰어로 봅니다"></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="rv-sec-t">${ic('check')}검사원 최종 판정</div>
+          <div class="rv-act-btns"><button class="btn primary block" onclick="submitReview(${cur.n},'NORMAL')">정상</button><button class="btn danger block" onclick="submitReview(${cur.n},'DEFECT')">불량</button></div>
+          <div class="field mt12"><label>판정 사유 및 검사원 메모</label>
+            <textarea class="inp" id="rvMemo" placeholder="판정 사유를 입력하는 영역 (정상 확정 시 가불량 사유, 불량 확정 시 불량 내용)" oninput="U.rvMemo=this.value">${esc(U.rvMemo || cur.memo)}</textarea></div>
+          <div class="note">현재 상태: ${finalBadge(cur)}</div>
+          <div class="note">${f === 'PENDING' ? '' : '이미 확정된 건입니다. 다시 누르면 최종 판정을 변경하며, AI 최초 판정은 그대로 보존됩니다. '}확정 판정과 사유는 피드백 데이터로 누적되어 추후 자체 모델(Custom PatchCore) 학습에 활용됩니다.</div>
+        </div>
+      </div>
       ${evidence}`;
   }
   return `${pageHead('검사 관리', '이상 의심 건 확인 · 최종 판정 · 사유 기록', `<span class="pill orange lg">${st.pending}건 대기</span>`)}
     <div class="rv-tools"><div class="rv-search"><input class="inp" id="rvSearch" type="text" autocomplete="off" placeholder="ID · 번호 · 메모 · 출처 검색 (예: INS-000120)" aria-label="검사 검색" value="${esc(U.rvQ)}" oninput="rvSearch(this.value)" onkeydown="if(event.key==='Enter')rvFirst()"><button class="icon-btn x" onclick="rvSearch('', true)" aria-label="검색어 지우기" title="검색어 지우기">${ic('x')}</button></div><div class="rv-chips" id="rvChips">${rvChipsHtml()}</div></div>
     <div class="split rv">
-      <div><div class="small muted rv-count" id="rvCount">${rvCountHtml(hits.length, list.length)}</div><div class="rv-list" id="rvList">${list.map(r => `<button class="rv-item ${r.n === U.rvSel ? 'sel' : ''}" onclick="U.rvSel=${r.n};U.rvMemo='';U.evMode='orig';render()"><div class="thumb" style="${thumbStyle(r)}"></div><div style="flex:1;min-width:0"><div class="rv-h"><span class="t">${r.id}</span>${finalBadge(r)}</div><div class="small muted">${pcbTag(r.pcb)} · 점수 <b>${r.score.toFixed(2)}</b> · ${hhmm(r.at)}</div><div class="mt4"><span class="srctag" title="${esc(srcOf(r).full)}">출처 ${esc(srcOf(r).short)}</span></div></div></button>`).join('') || '<div class="empty">조건에 맞는 검사가 없습니다.<br><button class="btn sm outline mt10" onclick="rvReset()">검색·필터 초기화</button></div>'}</div></div>
+      <div><div class="small muted rv-count" id="rvCount">${rvCountHtml(hits.length, list.length)}</div><div class="rv-list" id="rvList">${list.map(r => `<button class="rv-item ${r.n === U.rvSel ? 'sel' : ''}" onclick="U.rvSel=${r.n};U.rvMemo='';U.evMode='orig';U.dbDef=0;U.dbZ=1;render()"><div class="thumb" style="${thumbStyle(r)}"></div><div style="flex:1;min-width:0"><div class="rv-h"><span class="t">${r.id}</span>${finalBadge(r)}</div><div class="small muted">${pcbTag(r.pcb)} · 점수 <b>${r.score.toFixed(2)}</b> · ${hhmm(r.at)}</div><div class="mt4"><span class="srctag" title="${esc(srcOf(r).full)}">출처 ${esc(srcOf(r).short)}</span></div></div></button>`).join('') || '<div class="empty">조건에 맞는 검사가 없습니다.<br><button class="btn sm outline mt10" onclick="rvReset()">검색·필터 초기화</button></div>'}</div></div>
       <div class="card" id="rvCard">${detail}</div></div>`;
 }
 
@@ -1765,7 +1930,7 @@ function viewReview() {
 function submitReview(n, decision) {
   const r = S.inspections.find(x => x.n === n); if (!r) return;
   const memo = (document.getElementById('rvMemo') || { value: '' }).value.trim();
-  const wasPending = r.final === null; r.final = decision; r.memo = memo; U.rvMemo = '';
+  const wasPending = r.final === null; r.final = decision; r.memo = memo; U.rvMemo = ''; U.dbDef = 0; U.dbZ = 1;
   const rescue = r.ai === 'ANOMALY' && decision === 'NORMAL';
   toast(`${r.id} ${decision === 'NORMAL' ? '정상' : '불량'} 확정${rescue ? ' (가불량 구제)' : ''}${decision === 'DEFECT' && !memo ? ' · 사유 미입력' : ''}`);
   if (wasPending) { const next = S.inspections.filter(x => x.final === null).sort((a, b) => b.n - a.n)[0]; U.rvSel = next ? next.n : r.n; }
