@@ -1000,6 +1000,10 @@ kbd { font: inherit; font-size: 12px; padding: 0 5px; border: 1px solid var(--bo
   .seg-pills button { min-width: 44px; }
   .tbl-toggle summary, details > summary { min-height: 44px; padding-block: 11px; }   /* display를 바꾸면 펼침 화살표와 글자 사이 간격이 사라진다 */
 }
+/* 터치 기기: 입력칸 글자가 16px보다 작으면 iOS Safari가 포커스할 때 화면을 확대한다 */
+@media (pointer: coarse) {
+  .inp, select.inp, textarea.inp { font-size: 16px; }
+}
 </style>
 </head>
 <body>
