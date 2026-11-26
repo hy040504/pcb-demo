@@ -272,7 +272,7 @@ details > summary { cursor: pointer; font-weight: 600; color: var(--text-2); pad
 .hit { fill: transparent; }
 .hr { cursor: pointer; } .hr:hover .bar { filter: brightness(1.1); }
 .tbl-toggle { margin-top: 6px; font-size: 12px; color: var(--text-3); }
-.tbl-toggle summary { cursor: pointer; display: inline-block; padding: 4px 0; }
+.tbl-toggle summary { cursor: pointer; padding: 4px 0; }
 .tbl-toggle table { width: 100%; border-collapse: collapse; margin-top: 4px; }
 .tbl-toggle th, .tbl-toggle td { padding: 4px 8px; border-bottom: 1px solid var(--border); text-align: right; } .tbl-toggle th:first-child, .tbl-toggle td:first-child { text-align: left; }
 .more-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
@@ -359,7 +359,7 @@ details > summary { cursor: pointer; font-weight: 600; color: var(--text-2); pad
 /* UI 개선 패치 — 차트 보조선 · 목록 · 빈 상태 · 단계 안내 */
 .sc { display: inline-flex; align-items: center; gap: 8px; min-width: 96px; }
 .sc i { position: relative; display: inline-block; width: 54px; height: 6px; border-radius: var(--r-tag); background: var(--bg-muted); overflow: hidden; flex: none; }
-.sc i b { position: absolute; left: 0; top: 0; bottom: 0; background: var(--bar-normal); border-radius: var(--r-tag); }
+.sc i b { position: absolute; left: 0; top: 0; bottom: 0; background: var(--text-3); border-radius: var(--r-tag); }   /* 정상은 무채색, 임계값 이상만 빨강(검토 화면 점수 막대와 같다) */
 .sc i.hi b { background: var(--bar-defect); }
 .pager .btn { min-height: 36px; min-width: 56px; }
 .empty .ic { width: 28px; height: 28px; display: block; margin: 0 auto 6px; opacity: .55; }
@@ -424,6 +424,7 @@ code {
   border: 1px solid var(--border); padding: 18px 20px; min-width: 0;
 }
 .card + .card { margin-top: 16px; }
+.split > .card + .card, .grid2 > .card + .card { margin-top: 0; }   /* 나란히 놓인 카드는 위쪽을 맞춘다 */
 .card:hover { border-color: var(--border); }
 .sub-card { color: var(--text-1); }   /* 카드 안 구획은 상자 대신 구분선 */
 .sect { margin-bottom: 20px; }        /* 카드 묶음(PCB 종류 등)은 바깥 카드 없이 제목 + 그리드 */
@@ -811,8 +812,6 @@ button.sys-tile:hover { background: var(--bg-subtle); }
 .hist-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 14px 0 10px; }
 .hist-bar .inp { width: auto; max-width: 100%; }
 .hist-bar .hist-q { flex: 0 1 260px; }
-.hist-n { margin-left: auto; font-size: 14px; color: var(--text-2); }
-.hist-n b { color: var(--text-1); }
 .sc .ai-v { min-width: 30px; }
 
 /* ── 반응형 (태블릿 · 모바일 390px 가로 스크롤 0건 보장) ─────────────────── */
@@ -823,7 +822,7 @@ button.sys-tile:hover { background: var(--bg-subtle); }
   .dash-grid.bal .sys-tile-hd { flex-wrap: wrap; }
   .dash-main { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-areas: "chart chart" "queue dist" "recent recent"; }
 }
-@media (max-width: 1100px) {
+@media (min-width: 701px) and (max-width: 1100px) {   /* 700px 이하는 위의 한 줄 목록 규칙을 쓴다 */
   .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 900px) {
@@ -2689,7 +2688,6 @@ function viewHistory() {
       ${sel('period', '시간대', [['all', '시간대 전체'], ['am', '오전'], ['pm', '오후'], ['eve', '저녁']])}
       ${sel('pcb', 'PCB 종류', [['all', 'PCB 종류 전체'], ...S.pcbs.map(p => [p.id, p.id])])}
       ${U.hf.hour != null ? `<button class="pill active" onclick="U.hf.hour=null;U.hpage=1;render()" title="시간 필터 해제">${U.hf.hour}시대 ${ic('x')}</button>` : ''}
-      <span class="hist-n">조회 <b>${all.length}</b>건</span>
     </div>
     <div class="tbl-wrap"><table class="tbl cards"><thead><tr><th>최종 판정</th><th>검사 ID</th><th>PCB 종류</th><th>AI 판정 · 점수</th><th>검사 시각</th>${adm ? '<th>당시 임계값</th><th>모델</th>' : ''}</tr></thead><tbody>
       ${rows.map(r => `<tr class="click" onclick="openDetail(${r.n})">
@@ -2915,11 +2913,11 @@ function openMore() {
 function trendChart(d) {
   const N = isNarrow(), W = N ? 360 : 540, H = 224, L = N ? 34 : 44, R = 18, T = 20, B = 28, n = d.labels.length;
   const max = Math.max(40, Math.ceil(Math.max(...d.tot, 1) / 40) * 40), X = i => L + (W - L - R) * i / Math.max(1, n - 1), Y = v => T + (H - T - B) * (1 - v / max);
-  const stepX = n <= 8 ? 1 : n <= 16 ? (N ? 4 : 2) : (N ? 7 : 5);
+  const stepX = n <= 8 ? (N ? 2 : 1) : n <= 16 ? (N ? 4 : 2) : (N ? 7 : 5), minGap = Math.max(1, Math.ceil(stepX * .6));   // 마지막 날짜와 겹치는 눈금 글자는 뺀다
   const area = `<polygon fill="var(--primary)" fill-opacity=".08" points="${L},${H - B} ${d.tot.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ')} ${W - R},${H - B}"/>`;
   const line = (arr, c, nm) => `<polyline fill="none" stroke="${c}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" points="${arr.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ')}"/>${arr.map((v, i) => `${(n <= 14 || i % 3 === 0 || i === n - 1) ? `<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="${i === n - 1 ? 4 : 3.2}" fill="${c}" stroke="var(--bg-card)" stroke-width="1.6"/>` : ''}<circle class="hit" cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="12" data-tip="${d.labels[i]} · ${nm} ${v}건"/>${n <= 8 ? `<text class="ct" x="${(X(i) + (i === 0 ? 4 : i === n - 1 ? -4 : 0)).toFixed(1)}" y="${(Y(v) - 9).toFixed(1)}" text-anchor="${i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle'}" fill="var(--text-2)">${v}</text>` : ''}`).join('')}`;
   const grid = [0, .25, .5, .75, 1].map(f => `<line x1="${L}" x2="${W - R}" y1="${Y(max * f)}" y2="${Y(max * f)}" stroke="var(--border)" ${f > 0 ? 'stroke-dasharray="3 4"' : ''}/><text class="ct" x="${L - 7}" y="${Y(max * f) + 4}" text-anchor="end" fill="var(--text-3)">${Math.round(max * f)}</text>`).join('');
-  const xl = d.labels.map((l, i) => (i % stepX === 0 || i === n - 1) ? `<text class="ct" x="${X(i).toFixed(1)}" y="${H - 8}" text-anchor="${i === n - 1 ? 'end' : i === 0 ? 'start' : 'middle'}" font-weight="${i === n - 1 ? 700 : 500}" fill="${i === n - 1 ? 'var(--text-1)' : 'var(--text-3)'}">${l}</text>` : '').join('');
+  const xl = d.labels.map((l, i) => (i === n - 1 || (i % stepX === 0 && n - 1 - i >= minGap)) ? `<text class="ct" x="${X(i).toFixed(1)}" y="${H - 8}" text-anchor="${i === n - 1 ? 'end' : i === 0 ? 'start' : 'middle'}" font-weight="${i === n - 1 ? 700 : 500}" fill="${i === n - 1 ? 'var(--text-1)' : 'var(--text-3)'}">${l}</text>` : '').join('');
   return `<svg data-chart viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="일별 검사 건수 추이">${grid}${area}${xl}${line(d.tot, 'var(--bar-normal)', '전체 검사')}${line(d.bad, 'var(--bar-defect)', '불량·대기')}</svg>
     <div class="chart-legend"><span><i class="lswatch" style="background:var(--bar-normal)"></i>전체 검사</span><span><i class="lswatch" style="background:var(--bar-defect)"></i>불량·대기</span></div>${chartTable(['일자', '전체 검사', '불량·대기'], d.labels.map((l, i) => [l, d.tot[i], d.bad[i]]))}`;
 }
@@ -3122,7 +3120,7 @@ function viewModels() {
       ${S.model.versions.map(x => `<div class="ver-row"><div style="flex:1"><b>${x.v}</b> <span class="muted small">${x.date}</span><div class="small muted">${x.note}</div></div>${x.v === S.model.active ? '<span class="pill green">활성화</span>' : (adm ? `<button class="btn sm outline" onclick="activateVersion('${x.v}')">이 버전으로 전환</button>` : '<span class="pill">대기</span>')}</div>`).join('')}
       ${adm ? '' : '<div class="note">버전 전환 · 임계값 변경 · PCB 등록은 관리자 권한이 필요합니다.</div>'}</div>
     <div class="card"><div class="card-title">후속 확장 예정 (MVP 이후)</div>
-      <div class="road">${['촬영 품질 자동 검사 및 이미지 보정', 'Best Frame 선정', 'Heatmap, Mask, Overlay 제공 (API 연동)', '픽셀 직접 비교 기반 정밀 검사', '자체 Memory Bank 생성 및 관리', 'PCB 종류 자동 인식', '전기적 결함 검사', '대량 배치 고도화 (폴더 감시 · ZIP 업로드 · 백그라운드 큐)'].map(t => `<div><span class="pill">예정</span>${t}</div>`).join('')}</div></div>`;
+      <div class="road">${['촬영 품질 자동 검사 및 이미지 보정', 'Best Frame 선정', 'Heatmap, Mask, Overlay 제공 (API 연동)', '픽셀 직접 비교 기반 정밀 검사', '자체 Memory Bank 생성 및 관리', 'PCB 종류 자동 인식', '전기적 결함 검사', '대량 배치 고도화 (폴더 감시 · ZIP 업로드 · 백그라운드 큐)'].map(t => `<div>${t}</div>`).join('')}</div></div>`;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
