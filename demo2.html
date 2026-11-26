@@ -1009,6 +1009,8 @@ kbd { font: inherit; font-size: 12px; padding: 0 5px; border: 1px solid var(--bo
   .db-wrap { width: calc(100% - 20px); width: calc(100cqw - 20px); }
   /* 낮은 폰(주소창 포함 보이는 높이 550px 안팎)에서도 사진 전체가 판정 바 위에 들어오게 높이를 제한한다. 348px = 사진 위아래의 고정 영역 */
   .db-wrap { width: max(200px, min(100cqw - 20px, (100svh - 352px) * 1.357)); }
+  /* 보이는 높이 580px 이상이면 사진 아래 도구 줄(50px)까지 판정 바 위에 들어오게 한다. 그보다 낮으면 사진 크기를 우선하고 도구 줄은 스크롤로 본다 */
+  @media (min-height: 580px) { .db-wrap { width: max(200px, min(100cqw - 20px, (100svh - 402px) * 1.357)); } }
   .db-call { display: none; }
   .rv-canvas-tools { flex-wrap: nowrap; }
   .rv-canvas-tools .rv-dl, .rv-canvas-tools .seg-pills button:nth-child(2) { display: none; }   /* 한 줄로: 다운로드는 확대 보기 안에 있고, 배율은 −로 되돌린다 */
@@ -1031,11 +1033,12 @@ kbd { font: inherit; font-size: 12px; padding: 0 5px; border: 1px solid var(--bo
     .rv-dock-ai { font-size: 12px; }
     .rv-dock-ai .w { display: none; }
     .db-wrap { width: max(180px, min(100cqw - 20px, (100svh - 388px) * 1.357)); }
+    @media (min-height: 580px) { .db-wrap { width: max(180px, min(100cqw - 20px, (100svh - 438px) * 1.357)); } }
   }
   .rv-dock > .btn { flex: 1; min-width: 0; }
 }
-/* 폰(세로 · 가로): 화면 이름은 탭과 메뉴가 알려 주므로 검토 화면의 제목 줄은 화면 낭독기용으로만 남긴다 */
-@media (max-width: 700px), (max-height: 420px) and (max-width: 1199px) {
+/* 폰(세로 · 가로)과 높이 600px 이하 데스크톱 창: 화면 이름은 탭과 메뉴가 알려 주므로 검토 화면의 제목 줄은 화면 낭독기용으로만 남긴다 */
+@media (max-width: 700px), (max-height: 420px) and (max-width: 1199px), (max-height: 600px) and (min-width: 1200px) {
   .main-inner:has(.rv-work) > .page-head { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 }
 /* 가로로 돌린 폰(보이는 높이 420px 이하): 고정 영역이 화면을 다 차지하지 않게 상단바를 낮추고, 판정 바는 고정하지 않고 본문 끝에 둔다 */
