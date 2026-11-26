@@ -352,8 +352,10 @@ details > summary { cursor: pointer; font-weight: 600; color: var(--text-2); pad
 .mk.sm { border-width: 1.5px; box-shadow: 0 0 0 1px rgba(255,255,255,.7); }
 .mk-off .mk { display: none; }
 .photo:has(.mk):hover img { transform: none; }
-.mk-btn .mk-dot { display: inline-block; width: 10px; height: 10px; border: 2px solid #ef4444; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
-.mk-btn.off { opacity: .6; }
+/* 켜짐·꺼짐은 체크 상자로 보여 준다(버튼 이름은 바뀌지 않는다) */
+.mk-btn .mk-box { flex: none; width: 16px; height: 16px; display: inline-grid; place-items: center; border: 1.5px solid var(--text-3); border-radius: var(--r-tag); }
+.mk-btn[aria-pressed="true"] .mk-box { background: var(--primary); border-color: var(--primary); }
+.mk-btn[aria-pressed="true"] .mk-box::after { content: ''; width: 8px; height: 4px; margin-top: -2px; border: solid var(--primary-fg); border-width: 0 0 2px 2px; transform: rotate(-45deg); }
 /* UI 개선 패치 — 차트 보조선 · 목록 · 빈 상태 · 단계 안내 */
 .sc { display: inline-flex; align-items: center; gap: 8px; min-width: 96px; }
 .sc i { position: relative; display: inline-block; width: 54px; height: 6px; border-radius: var(--r-tag); background: var(--bg-muted); overflow: hidden; flex: none; }
@@ -389,7 +391,8 @@ details > summary { cursor: pointer; font-weight: 600; color: var(--text-2); pad
 .vw-cap { color: var(--text-3); font-size: 12px; text-align: center; margin-top: 8px; }
 @media (max-width: 440px) { .brand-t { display: none; } .topbar { padding: 0 10px; } }
 @media (max-width: 700px) { .qrow { display: grid; grid-template-columns: 84px 1fr auto; grid-template-areas: "t i a" "t r r"; align-items: center; row-gap: 4px; } .qrow .photo { grid-area: t; } .qrow .qinfo { grid-area: i; } .qrow .qact { grid-area: a; } .qrow .qres { grid-area: r; justify-content: flex-start; } }
-@media (max-width: 520px) { .api-name { display: none; } .topbar { gap: 6px; } }
+/* 좁은 화면: 이름을 'AI'로 줄인다(상태값만 남으면 무엇이 온라인인지 알 수 없다) */
+@media (max-width: 520px) { .api-name { display: none; } .api-st b::before { content: 'AI '; font-size: 12px; font-weight: 400; color: var(--text-3); } .topbar { gap: 6px; } }
 
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -480,7 +483,7 @@ button.pill.active, button.pill.on { background: var(--text-1); border-color: va
 .grid2 + .card, .split + .card, .dash-grid + .card, .dash-grid + .dash-grid, .card + .dash-grid, .insp-grid + .card { margin-top: 16px; }
 
 /* ── 바깥 틀 ──────────────────── */
-body { background: var(--bg-app); }
+body { background: var(--bg-app); word-break: keep-all; overflow-wrap: break-word; }   /* 한글은 단어 단위로 줄바꿈 */
 /* 화면 전체를 꽉 채우는 배치(여백·둥근 테두리·그림자 없음) */
 .shell { background: var(--frame); border-radius: 0; border: 0; box-shadow: none; }
 .main { background: var(--frame); padding: 0 0 32px; }
@@ -867,6 +870,8 @@ kbd { font: inherit; font-size: 12px; padding: 0 5px; border: 1px solid var(--bo
 .rv-side { min-height: 0; display: flex; flex-direction: column; border-right: 1px solid var(--border); }
 .rv-count { flex: none; margin: 0; padding: 10px 16px 6px; font-size: 12px; color: var(--text-3); }
 .rv-count b { color: var(--text-1); }
+.rv-count:empty { display: none; }
+.rv-count:empty + .rv-list { padding-top: 8px; }
 .rv-list { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; padding: 0 8px 8px; }
 .rv-item {
   display: flex; align-items: center; gap: 10px; width: 100%; min-height: 62px; padding: 7px 8px; text-align: left;
@@ -880,9 +885,9 @@ kbd { font: inherit; font-size: 12px; padding: 0 5px; border: 1px solid var(--bo
 .rv-h b { font-size: 14px; font-weight: 600; color: var(--text-1); white-space: nowrap; }
 .rv-item .small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.rv-stage { min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 320px; grid-template-rows: minmax(0, 1fr) auto; background: var(--bg-card); }
+.rv-stage { min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 320px; grid-template-rows: minmax(0, 1fr) auto auto; background: var(--bg-card); }
 .rv-empty { grid-column: 1 / -1; align-self: center; }
-.rv-main { min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 14px 20px; }
+.rv-main { grid-area: 1 / 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 14px 20px; }
 .rv-hd { flex: none; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
 .rv-hd .sp { flex: 1; }
 .rv-id { font-size: 17px; font-weight: 600; letter-spacing: -.015em; }
@@ -894,16 +899,14 @@ kbd { font: inherit; font-size: 12px; padding: 0 5px; border: 1px solid var(--bo
 /* 이미지가 칸의 폭과 높이 둘 다 넘지 않게 (비율 475:350 유지) */
 .db-wrap { position: relative; width: min(100cqw - 32px, (100cqh - 32px) * 475 / 350); aspect-ratio: 475 / 350; }
 .db-img { box-shadow: none; border-radius: var(--r-ctl); }
-/* 의심 위치 점: 번지는 빛 대신 흰 테두리 + 얇은 어두운 선으로 사진 위에서 구분 */
-.db-dot { width: 18px; height: 18px; margin: -9px 0 0 -9px; background: #e5484d; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0, 0, 0, .55); }
-.db-dot.c1 { background: #e5484d; box-shadow: 0 0 0 1px rgba(0, 0, 0, .55); }
-.db-dot.c2 { background: #f0ad38; box-shadow: 0 0 0 1px rgba(0, 0, 0, .55); }
-.db-dot.sel { width: 24px; height: 24px; margin: -12px 0 0 -12px; background: #fff; border: 4px solid #e5484d; }
-.db-dot::after { content: ''; position: absolute; inset: -13px; }   /* 점은 작아도 누르는 영역은 44px */
+/* 의심 위치 점: 목록의 #번호와 같은 숫자를 넣는다. 색은 한 가지(위치마다 다른 값이 없어 색으로 나눌 것이 없다) */
+.db-dot { width: 22px; height: 22px; margin: -11px 0 0 -11px; background: #c81e1e; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0, 0, 0, .55); color: #fff; font-size: 12px; font-weight: 700; line-height: 18px; text-align: center; }
+.db-dot.sel { width: 28px; height: 28px; margin: -14px 0 0 -14px; background: #fff; border: 3px solid #c81e1e; color: #c81e1e; line-height: 22px; }
+.db-dot::after { content: ''; position: absolute; inset: -11px; }   /* 점은 작아도 누르는 영역은 44px */
 .db-call { font-size: 12px; border-radius: var(--r-tag); box-shadow: 0 2px 6px rgba(0, 0, 0, .3); }
 .rv-canvas-tools { flex: none; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 0; }
 
-.rv-info { min-height: 0; overflow-y: auto; padding: 14px 20px 20px; border-left: 1px solid var(--border); }
+.rv-info { grid-area: 1 / 2 / 3 / 3; min-height: 0; overflow-y: auto; padding: 14px 20px 20px; border-left: 1px solid var(--border); }
 .rv-ai { display: flex; flex-direction: column; gap: 2px; padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid var(--border); }
 .rv-ai-l { font-size: 12px; color: var(--text-3); }
 .rv-ai-v { font-size: 22px; font-weight: 700; letter-spacing: -.02em; line-height: 1.25; color: var(--text-1); }
@@ -921,9 +924,12 @@ kbd { font: inherit; font-size: 12px; padding: 0 5px; border: 1px solid var(--bo
 .rv-pts button:hover { background: var(--bg-subtle); }
 .rv-pts button.on { background: var(--bg-muted); border-color: var(--border-strong); color: var(--text-1); font-weight: 600; }
 .db-zimg { margin: 0 0 14px; height: 120px; border-radius: var(--r-ctl); }
-.rv-info .field textarea { min-height: 84px; }
-.rv-kv { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 4px 10px; margin: 0; font-size: 12px; color: var(--text-2); }
-.rv-kv dt { color: var(--text-3); }
+.rv-info .field textarea { min-height: 62px; }
+/* 모델·처리 시간·출처: 판정에 쓰는 정보가 아니라서 사진 아래 각주로 둔다(오른쪽 패널이 안쪽 스크롤 없이 한 화면에 들어온다) */
+.rv-kv { grid-area: 2 / 1; display: flex; flex-wrap: wrap; gap: 2px 16px; margin: 0; padding: 0 20px 12px; font-size: 12px; color: var(--text-2); }
+.rv-kv div { display: flex; gap: 6px; min-width: 0; }
+.rv-kv dt { flex: none; color: var(--text-3); }
+.rv-kv dd { margin: 0; }
 .rv-ev { margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--border); }
 .rv-ev > summary { font-size: 14px; font-weight: 600; color: var(--text-1); }
 .rv-ev-no { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
@@ -978,6 +984,9 @@ kbd { font: inherit; font-size: 12px; padding: 0 5px; border: 1px solid var(--bo
   .db-board { padding: 10px 0; }
   .db-wrap { width: calc(100cqw - 20px); }
   .db-call { display: none; }
+  .rv-canvas-tools { flex-wrap: nowrap; }
+  .rv-canvas-tools .rv-dl, .rv-canvas-tools .seg-pills button:nth-child(2) { display: none; }   /* 한 줄로: 다운로드는 확대 보기 안에 있고, 배율은 −로 되돌린다 */
+  .rv-kv { padding: 0 14px 14px; }
   .rv-dock { padding: 8px 14px; gap: 8px; }
   .rv-dock .rv-pager, .rv-dock .sp { display: none; }
   .rv-dock > .btn { flex: 1; min-width: 0; }
@@ -989,7 +998,8 @@ kbd { font: inherit; font-size: 12px; padding: 0 5px; border: 1px solid var(--bo
   .btn.sm, .btn.ghost { padding: 6px 14px; }
   .icon-btn, .top-btn, .db-zoom button { width: 44px; height: 44px; }
   .rv-pts button { min-height: 44px; }
-  .tbl-toggle summary, details > summary { min-height: 44px; display: flex; align-items: center; }
+  .seg-pills button { min-width: 44px; }
+  .tbl-toggle summary, details > summary { min-height: 44px; padding-block: 11px; }   /* display를 바꾸면 펼침 화살표와 글자 사이 간격이 사라진다 */
 }
 </style>
 </head>
@@ -2413,12 +2423,12 @@ function markerHtml(r, small) {
 }
 
 /** 의심 영역 표시 켜기/끄기 버튼(검토·확대 뷰어). */
-function markBtn() { return `<button class="btn sm outline mk-btn ${U.mkOff ? 'off' : ''}" onclick="toggleMark()" aria-pressed="${!U.mkOff}" title="이미지 위 이상 의심 영역 박스를 켜고 끕니다"><span class="mk-dot"></span>의심 영역 표시 ${U.mkOff ? '꺼짐' : '켜짐'}</button>`; }
+function markBtn() { return `<button class="btn sm outline mk-btn" onclick="toggleMark()" aria-pressed="${!U.mkOff}" title="이미지 위 이상 의심 영역 박스를 켜고 끕니다"><span class="mk-box"></span>의심 영역 표시</button>`; }
 
 /** 의심 영역 표시를 켜고 끈다(화면 전체에 적용). */
 function toggleMark() {
   U.mkOff = !U.mkOff; document.body.classList.toggle('mk-off', !!U.mkOff);
-  document.querySelectorAll('.mk-btn').forEach(b => { b.classList.toggle('off', !!U.mkOff); b.setAttribute('aria-pressed', String(!U.mkOff)); b.lastChild.textContent = '의심 영역 표시 ' + (U.mkOff ? '꺼짐' : '켜짐'); });
+  document.querySelectorAll('.mk-btn').forEach(b => b.setAttribute('aria-pressed', String(!U.mkOff)));
 }
 
 /**
@@ -2473,7 +2483,8 @@ function rvStep(d) { const l = rvList().slice(0, 60), nx = l[l.findIndex(r => r.
 /** 목록 위의 결과 건수 문구. @param {number} total 조건에 맞는 전체 건수 @param {number} shown 화면에 보이는 건수(최대 60) */
 function rvCountHtml(total, shown) {
   const q = (U.rvQ || '').trim();
-  return `${q ? `‘${esc(q)}’ 검색 결과 ` : ''}<b>${total}</b>건${total > shown ? ` 중 최근 ${shown}건 표시` : ''}`;
+  if (!q && total <= shown) return '';   // 탭에 적힌 건수와 같은 말이라 생략한다
+  return `${q ?`‘${esc(q)}’ 검색 결과 ` : ''}<b>${total}</b>건${total > shown ? ` 중 최근 ${shown}건 표시` : ''}`;
 }
 
 /**
@@ -2517,11 +2528,11 @@ function viewReview() {
     const sev = dbSeverity(cur);
     const dots = pts.map((p, i) => {
       const q = pos(p);
-      return vis(p) ? `<button class="db-dot ${i === sel ? 'sel' : (i % 2 ? 'c2' : 'c1')}" style="left:${q.x}%;top:${q.y}%" onclick="dbDef(${i})" aria-label="의심 #${i + 1} ${esc(p.k)}"></button>` : '';
+      return vis(p) ? `<button class="db-dot ${i === sel ? 'sel' : ''}" style="left:${q.x}%;top:${q.y}%" onclick="dbDef(${i})" aria-label="의심 #${i + 1} ${esc(p.k)}">${i + 1}</button>` : '';
     }).join('');
     const qsp = sp ? pos(sp) : null;
     const callCls = qsp ? ((qsp.x < 34 ? ' flip-x' : '') + (qsp.y < 28 ? ' flip-y' : '')) : '';
-    const call = sp && vis(sp) ? `<div class="db-call${callCls}" style="left:${qsp.x}%;top:${qsp.y}%">${esc(sp.k)} · ${cur.score.toFixed(2)}</div>` : '';
+    const call = sp && vis(sp) ? `<div class="db-call${callCls}" style="left:${qsp.x}%;top:${qsp.y}%">#${sel + 1} ${esc(sp.k)}</div>` : '';   // 점수는 검사 한 건의 값이라 위치 옆에는 쓰지 않는다
     const zbg = sp ? `background-image:url('${cur.img}');background-size:340%;background-position:${sp.x}% ${sp.y}%;` : '';
 
     const modes = [['orig', '원본'], ['heat', 'Heatmap'], ['mask', 'Mask'], ['overlay', 'Overlay']];
@@ -2558,7 +2569,7 @@ function viewReview() {
             <button onclick="dbZoom(.5)" ${z >= 2.5 ? 'disabled' : ''} aria-label="확대" title="확대">${ic('plus')}</button>
           </div>
           <button class="btn sm outline" onclick="openViewer(${cur.n})">${ic('zoom')}확대 보기</button>
-          <button class="btn sm outline" onclick="downloadImage(${cur.n})">${ic('download')}다운로드</button>
+          <button class="btn sm outline rv-dl" onclick="downloadImage(${cur.n})">${ic('download')}다운로드</button>
           ${anom ? markBtn() : ''}
         </div>
       </div>
@@ -2579,14 +2590,15 @@ function viewReview() {
           <label for="rvMemo">판정 사유 · 메모</label>
           <textarea class="inp" id="rvMemo" placeholder="정상 확정이면 가불량 사유, 불량 확정이면 불량 내용" oninput="U.rvMemo=this.value">${esc(U.rvMemo || cur.memo)}</textarea>
         </div>
-        <dl class="rv-kv">
-          <dt>모델</dt><dd>PatchCore ${esc(cur.ver)}</dd>
-          <dt>처리 시간</dt><dd>${cur.ms}ms</dd>
-          <dt>이미지 출처</dt><dd>${esc(srcOf(cur).full)}</dd>
-        </dl>
         <p class="note">${f === 'PENDING' ? '확정하면 다음 검토 대기 건으로 넘어갑니다.' : '이미 확정된 건입니다. 다시 확정하면 최종 판정이 바뀌고, AI 최초 판정은 그대로 남습니다.'}</p>
         ${evidence}
       </div>
+
+      <dl class="rv-kv">
+        <div><dt>모델</dt><dd>PatchCore ${esc(cur.ver)}</dd></div>
+        <div><dt>처리 시간</dt><dd>${cur.ms}ms</dd></div>
+        <div><dt>이미지 출처</dt><dd>${esc(srcOf(cur).full)}</dd></div>
+      </dl>
 
       <div class="rv-dock">
         ${pager('')}
@@ -2601,7 +2613,7 @@ function viewReview() {
     <div class="rv-work">
       <aside class="rv-side" aria-label="검토 목록">
         <div class="rv-count" id="rvCount">${rvCountHtml(hits.length, list.length)}</div>
-        <div class="rv-list" id="rvList">${list.map(r => `<button class="rv-item ${r.n === U.rvSel ? 'sel' : ''}" ${r.n === U.rvSel ? 'aria-current="true"' : ''} onclick="rvSelect(${r.n})"><span class="thumb" style="${thumbStyle(r)}"></span><span class="rv-item-b"><span class="rv-h"><b>${r.id}</b>${finalBadge(r)}</span><span class="small muted">${esc(r.pcb)} · AI ${r.score.toFixed(2)} · ${hhmm(r.at)}</span></span></button>`).join('') || '<div class="empty">목록이 비어 있습니다.</div>'}</div>
+        <div class="rv-list" id="rvList">${list.map(r => `<button class="rv-item ${r.n === U.rvSel ? 'sel' : ''}" ${r.n === U.rvSel ? 'aria-current="true"' : ''} onclick="rvSelect(${r.n})"><span class="thumb" style="${thumbStyle(r)}"></span><span class="rv-item-b"><span class="rv-h"><b>${r.id}</b>${U.rvFilter === 'pending' ? '' : finalBadge(r)}</span><span class="small muted">${esc(r.pcb)} · AI ${r.score.toFixed(2)} · ${hhmm(r.at)}</span></span></button>`).join('') || '<div class="empty">목록이 비어 있습니다.</div>'}</div>
       </aside>
       <section class="rv-stage" id="rvCard" aria-label="검토 상세">${stage}</section>
     </div>`;
