@@ -956,6 +956,15 @@ kbd { font: inherit; font-size: 12px; padding: 0 5px; border: 1px solid var(--bo
   .rv-ai { padding-bottom: 6px; margin-bottom: 6px; }
   .rv-pts button { min-height: 28px; padding-block: 2px; }
 }
+/* 높이 560px 이하(예: 1280×540) — 정보 패널 안 간격을 한 번 더 줄인다. 메모 칸 높이는 안내 문구 두 줄이 잘리지 않게 그대로 둔다 */
+@media (min-width: 1200px) and (max-height: 560px) {
+  .rv-info { padding: 6px 20px; }
+  .rv-ai { padding-bottom: 4px; margin-bottom: 4px; }
+  .rv-sec-t { margin-bottom: 4px; }
+  .rv-info .rv-pts { margin-bottom: 6px; }
+  .rv-info > .field { margin-bottom: 8px; }
+  .rv-pts button { min-height: 24px; padding-block: 1px; }
+}
 
 /* 판정 바: 화면 아래 고정. 확정 버튼 48px */
 .rv-dock {
@@ -2698,7 +2707,8 @@ function submitReview(n, decision) {
   const wasPending = r.final === null; r.final = decision; r.memo = memo; U.rvMemo = '';
   const rescue = r.ai === 'ANOMALY' && decision === 'NORMAL';
   toast(`${r.id} ${decision === 'NORMAL' ? '정상' : '불량'} 확정${rescue ? ' (가불량 구제)' : ''}${decision === 'DEFECT' && !memo ? ' · 사유 미입력' : ''}`);
-  if (wasPending) { const next = S.inspections.filter(x => x.final === null).sort((a, b) => b.n - a.n)[0]; U.rvSel = next ? next.n : r.n; U.dbDef = 0; U.dbZ = 1; }
+  // 목록 순서(번호 내림차순)에서 방금 건 다음의 대기 건으로 간다. 건너뛴 건으로 되돌아가지 않게 하고, 끝이면 맨 위로 돌아간다
+  if (wasPending) { const pend = S.inspections.filter(x => x.final === null).sort((a, b) => b.n - a.n); const next = pend.find(x => x.n < r.n) || pend[0]; U.rvSel = next ? next.n : r.n; U.dbDef = 0; U.dbZ = 1; }
   render();
 }
 
