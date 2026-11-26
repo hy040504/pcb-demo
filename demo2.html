@@ -943,8 +943,12 @@ kbd { font: inherit; font-size: 12px; padding: 0 5px; border: 1px solid var(--bo
   .db-zimg { height: 84px; }
 }
 @media (min-width: 1200px) and (max-height: 790px) {
-  .db-zimg { height: 64px; }
-  .rv-info .field textarea { height: 44px; min-height: 44px; }   /* 한 줄. 세로로 끌어 늘릴 수 있다 */
+  .rv-info { padding: 8px 20px 10px; }
+  .db-zimg { height: 64px; margin-bottom: 10px; }
+}
+/* 더 낮은 창(노트북 브라우저의 보이는 높이 650px 안팎): 확대 사진과 안내 문구를 접는다. 확대는 사진의 "확대 보기"로 본다 */
+@media (min-width: 1200px) and (max-height: 700px) {
+  .db-zimg, .rv-info > .note.hint, .rv-info > .rv-ev-no { display: none; }
 }
 
 /* 판정 바: 화면 아래 고정. 확정 버튼 48px */
@@ -957,8 +961,8 @@ kbd { font: inherit; font-size: 12px; padding: 0 5px; border: 1px solid var(--bo
 .rv-dock > .btn { min-height: 48px; min-width: 156px; font-size: 17px; font-weight: 600; }
 .rv-pager { display: inline-flex; align-items: center; gap: 6px; }
 .rv-pager .btn { min-width: 44px; min-height: 44px; padding: 0; }
-.rv-pager.top { display: none; }
 .rv-pos { min-width: 58px; text-align: center; font-size: 14px; color: var(--text-2); }
+.rv-pos-x { display: none; }
 .rv-pos b { color: var(--text-1); font-weight: 600; }
 .rv-keys { font-size: 12px; color: var(--text-3); display: inline-flex; align-items: center; gap: 4px; margin-left: 6px; }
 .rv-keys kbd { margin-left: 6px; }
@@ -971,7 +975,7 @@ kbd { font: inherit; font-size: 12px; padding: 0 5px; border: 1px solid var(--bo
   .db-board { flex: none; min-height: 0; container-type: inline-size; padding: 14px 0; }
   .db-wrap { width: min(100cqw - 28px, 560px); }
   .rv-info { flex: none; overflow: visible; border-left: 0; border-top: 1px solid var(--border); }
-  .rv-dock { position: sticky; bottom: 0; margin-top: auto; }
+  .rv-dock { position: sticky; bottom: 0; margin-top: auto; box-shadow: 0 2px 0 var(--bg-card); }   /* 그림자: 배율이 소수인 화면에서 바 아래로 본문이 한 줄 비치는 것을 덮는다 */
   .rv-dock .sp, .rv-keys { display: none; }
   .rv-dock > .btn { flex: 1; min-width: 0; }
   .rv-h { flex-wrap: wrap; gap: 2px 8px; }
@@ -992,21 +996,36 @@ kbd { font: inherit; font-size: 12px; padding: 0 5px; border: 1px solid var(--bo
   .rv-work { display: block; margin: 0 -14px; }
   .rv-side { display: none; }
   .rv-stage { display: block; overflow: visible; }
-  .rv-pager.top { display: flex; justify-content: space-between; padding: 8px 14px 0; }
-  .rv-main { padding: 10px 14px 12px; }
+  .rv-main { padding: 8px 14px 12px; }
   .rv-info { padding: 14px; }
-  .db-board { padding: 10px 0; }
+  .rv-info .rv-ai { display: none; }   /* AI 판정은 아래 판정 바에 항상 보인다(같은 내용을 두 번 보여 주지 않는다) */
+  .db-board { padding: 6px 0; }
   .db-wrap { width: calc(100cqw - 20px); }
+  /* 낮은 폰(주소창 포함 보이는 높이 550px 안팎)에서도 사진 전체가 판정 바 위에 들어오게 높이를 제한한다. 348px = 사진 위아래의 고정 영역 */
+  .db-wrap { width: max(200px, min(100cqw - 20px, (100svh - 352px) * 1.357)); }
   .db-call { display: none; }
   .rv-canvas-tools { flex-wrap: nowrap; }
   .rv-canvas-tools .rv-dl, .rv-canvas-tools .seg-pills button:nth-child(2) { display: none; }   /* 한 줄로: 다운로드는 확대 보기 안에 있고, 배율은 −로 되돌린다 */
   .rv-kv { padding: 0 14px 14px; }
-  .rv-dock { padding: 8px 14px; gap: 8px; flex-wrap: wrap; }
-  .rv-dock .rv-pager, .rv-dock .sp { display: none; }
-  /* 폰은 보이는 높이가 낮아(주소창 포함 약 660px) AI 판정이 사진 아래로 밀린다. 판정 버튼 위에 한 줄로 항상 보여 준다 */
-  .rv-dock-ai { display: block; flex: 1 1 100%; font-size: 14px; line-height: 1.3; color: var(--text-2); }
+  /* 폰의 판정 바: 윗줄은 이전 · AI 판정 한 줄 + 순번 · 다음, 아랫줄은 확정 버튼 두 개. 화면 높이와 상관없이 항상 보인다 */
+  .rv-dock { display: grid; grid-template-columns: 44px minmax(0, 1fr) minmax(0, 1fr) 44px; grid-template-areas: "prev ai ai next" "prev pos pos next" "ok ok bad bad"; gap: 0 8px; padding: 6px 14px; }
+  .rv-dock .sp { display: none; }
+  .rv-dock .rv-pager { display: contents; }
+  .rv-dock .rv-pager .btn:first-child { grid-area: prev; align-self: center; }
+  .rv-dock .rv-pager .btn:last-child { grid-area: next; align-self: center; }
+  .rv-dock .rv-pos { grid-area: pos; min-width: 0; font-size: 12px; line-height: 1.4; color: var(--text-3); }
+  .rv-pos-x { display: inline; }
+  .rv-dock-ai { display: block; grid-area: ai; align-self: end; text-align: center; font-size: 14px; line-height: 1.4; color: var(--text-2); }
   .rv-dock-ai b { color: var(--text-1); }
   .rv-dock-ai b.bad { color: var(--bad); }
+  .rv-dock > .btn.primary { grid-area: ok; margin-top: 8px; }
+  .rv-dock > .btn.danger { grid-area: bad; margin-top: 8px; }
+  /* 폭 340px 이하(구형 소형 폰): AI 줄이 한 줄에 들어오게 줄이고, 제목 줄이 두 줄이 되는 만큼 사진 높이를 더 제한한다 */
+  @media (max-width: 340px) {
+    .rv-dock-ai { font-size: 12px; }
+    .rv-dock-ai .w { display: none; }
+    .db-wrap { width: max(180px, min(100cqw - 20px, (100svh - 388px) * 1.357)); }
+  }
   /* 화면 이름은 탭과 하단 메뉴가 알려 주므로 제목 줄은 화면 낭독기용으로만 남긴다 */
   .main-inner:has(.rv-work) > .page-head { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   .rv-dock > .btn { flex: 1; min-width: 0; }
@@ -1024,6 +1043,13 @@ kbd { font: inherit; font-size: 12px; padding: 0 5px; border: 1px solid var(--bo
 /* 터치 기기: 입력칸 글자가 16px보다 작으면 iOS Safari가 포커스할 때 화면을 확대한다 */
 @media (pointer: coarse) {
   .inp, select.inp, textarea.inp { font-size: 16px; }
+}
+/* 마우스가 없는 기기: 누른 뒤에도 올려놓음(hover) 색이 남는 것을 막는다 */
+@media (hover: none) {
+  .btn:hover:not(:disabled) { background: var(--bg-muted); }
+  .btn.primary:hover:not(:disabled) { background: var(--primary); }
+  .btn.danger:hover:not(:disabled) { background: var(--danger); }
+  .btn.outline:hover:not(:disabled) { background: var(--bg-card); }
 }
 </style>
 </head>
@@ -2540,7 +2566,7 @@ function viewReview() {
   const hits = rvList(), list = hits.slice(0, 60);
   if (!list.find(r => r.n === U.rvSel)) U.rvSel = list.length ? list[0].n : null;
   const cur = S.inspections.find(r => r.n === U.rvSel), idx = cur ? list.findIndex(r => r.n === cur.n) : -1;
-  const pager = cls => `<div class="rv-pager ${cls}"><button class="btn sm outline" onclick="rvStep(-1)" ${idx <= 0 ? 'disabled' : ''} aria-label="이전 건" title="이전 건 (←)">${ic('arrowl')}</button><span class="rv-pos"><b>${idx + 1}</b> / ${list.length}</span><button class="btn sm outline" onclick="rvStep(1)" ${idx < 0 || idx >= list.length - 1 ? 'disabled' : ''} aria-label="다음 건" title="다음 건 (→)">${ic('arrow')}</button></div>`;
+  const pager = extra => `<div class="rv-pager"><button class="btn sm outline" onclick="rvStep(-1)" ${idx <= 0 ? 'disabled' : ''} aria-label="이전 건" title="이전 건 (←)">${ic('arrowl')}</button><span class="rv-pos"><b>${idx + 1}</b> / ${list.length}<span class="rv-pos-x">${extra}</span></span><button class="btn sm outline" onclick="rvStep(1)" ${idx < 0 || idx >= list.length - 1 ? 'disabled' : ''} aria-label="다음 건" title="다음 건 (→)">${ic('arrow')}</button></div>`;
   let stage = U.rvFilter === 'pending' && !(U.rvQ || '').trim()
     ? `<div class="empty ok rv-empty">검토 대기 건이 없습니다.<br><span class="small muted">모든 이상 의심 건의 최종 판정이 끝났습니다.</span><br><button class="btn sm outline mt10" onclick="rvSetFilter('all')">전체 보기</button></div>`
     : `<div class="empty rv-empty">조건에 맞는 검사가 없습니다.<br><button class="btn sm outline mt10" onclick="rvReset()">검색 지우고 전체 보기</button></div>`;
@@ -2571,7 +2597,6 @@ function viewReview() {
       : `<p class="note rv-ev-no">AI 판단 근거(Heatmap · Mask · Overlay)는 관리자 화면에서 제공됩니다.</p>`;
 
     stage = `
-      ${pager('top')}
       <div class="rv-main">
         <div class="rv-hd">
           <h2 class="rv-id">${cur.id}</h2>
@@ -2614,7 +2639,7 @@ function viewReview() {
           <label for="rvMemo">판정 사유 · 메모</label>
           <textarea class="inp" id="rvMemo" placeholder="정상 확정이면 가불량 사유, 불량 확정이면 불량 내용" oninput="U.rvMemo=this.value">${esc(U.rvMemo || cur.memo)}</textarea>
         </div>
-        <p class="note">${f === 'PENDING' ? '확정하면 다음 검토 대기 건으로 넘어갑니다.' : '이미 확정된 건입니다. 다시 확정하면 최종 판정이 바뀌고, AI 최초 판정은 그대로 남습니다.'}</p>
+        <p class="note ${f === 'PENDING' ? 'hint' : ''}">${f === 'PENDING' ? '확정하면 다음 검토 대기 건으로 넘어갑니다.' : '이미 확정된 건입니다. 다시 확정하면 최종 판정이 바뀌고, AI 최초 판정은 그대로 남습니다.'}</p>
         ${evidence}
       </div>
 
@@ -2625,8 +2650,8 @@ function viewReview() {
       </dl>
 
       <div class="rv-dock">
-        <span class="rv-dock-ai">AI <b class="${anom ? 'bad' : ''}">${anom ? '이상 의심' : '정상'}</b> · 점수 <b>${cur.score.toFixed(2)}</b> / 임계값 ${cur.thr.toFixed(2)}</span>
-        ${pager('')}
+        <span class="rv-dock-ai">AI <b class="${anom ? 'bad' : ''}">${anom ? '이상 의심' : '정상'}</b> · <span class="w">점수 </span><b>${cur.score.toFixed(2)}</b> / 임계값 ${cur.thr.toFixed(2)}</span>
+        ${pager(anom ? ` · 심각도 ${sev[1]}` : '')}
         <span class="rv-keys"><kbd>N</kbd> 정상 <kbd>D</kbd> 불량 <kbd>←</kbd><kbd>→</kbd> 이동</span>
         <span class="sp"></span>
         <button class="btn primary" onclick="submitReview(${cur.n},'NORMAL')">${ic('ok')}정상 확정</button>
