@@ -968,6 +968,13 @@ kbd { font: inherit; font-size: 12px; padding: 0 5px; border: 1px solid var(--bo
   .rv-pts button { min-height: 24px; padding-block: 1px; }
   .db-call { display: none; }   /* 사진이 150px 안팎으로 작아져 말풍선이 옆 점을 가린다(선택한 점은 오른쪽 목록에 표시된다) */
 }
+/* 높이 520px 이하(예: 1280×500) — AI 판정 글자와 위치 버튼을 한 단계 더 줄인다 */
+@media (min-width: 1200px) and (max-height: 520px) {
+  .rv-ai { gap: 0; }
+  .rv-ai-v { font-size: 18px; }
+  .rv-meter { margin-top: 4px; }
+  .rv-pts button { min-height: 22px; padding-block: 0; }
+}
 
 /* 판정 바: 화면 아래 고정. 확정 버튼 48px */
 .rv-dock {
