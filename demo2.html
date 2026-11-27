@@ -76,9 +76,9 @@ button { cursor: pointer; border: 0; background: none; line-height: inherit; }
    ═══════════════════════════════════════════════════════════════════════════ */
 .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-card); box-shadow: var(--shadow); padding: 18px 20px; }
 .card + .card { margin-top: 14px; }
-.card-title { font-size: 17px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.card-title { font-size: 17px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
 .card-title .sp { flex: 1; }
-.page-title { font-size: 22px; font-weight: 800; letter-spacing: -.02em; margin-bottom: 4px; }
+.page-title { font-size: 22px; font-weight: 600; letter-spacing: -.02em; margin-bottom: 4px; }
 .page-sub { color: var(--text-3); margin-bottom: 16px; }
 .pill { display: inline-flex; align-items: center; gap: 5px; padding: 2px 11px; border-radius: var(--r-tag); font-size: 12px; font-weight: 600; white-space: nowrap; background: var(--b-gray-bg); color: var(--b-gray-fg); }
 .pill.green { background: var(--b-gray-bg); color: var(--text-1); }   /* 판정이 아닌 상태 태그는 무채색 */
@@ -95,8 +95,8 @@ button.pill:hover:not(.active) { border-color: var(--border-strong); }
 .btn.block { display: flex; }
 .vw-seg button { display: inline-flex; align-items: center; justify-content: center; }
 /* 역할 구분 — 관리자: 진한 그린 배지 · 검사원: 블루 배지 + 헤더 하단 포인트 라인 */
-.pill.role-admin { background: var(--primary); color: var(--primary-fg); font-weight: 700; }
-.pill.role-insp { background: color-mix(in srgb, var(--role-insp) 16%, transparent); color: var(--role-insp); font-weight: 700; }
+.pill.role-admin { background: var(--primary); color: var(--primary-fg); font-weight: 600; }
+.pill.role-insp { background: color-mix(in srgb, var(--role-insp) 16%, transparent); color: var(--role-insp); font-weight: 600; }
 .pill .ic { width: 13px; height: 13px; }
 .grid2 + .card, .split + .card { margin-top: 14px; }
 .split > .card, .grid2 > .card { margin-top: 0; margin-bottom: 0; }
@@ -109,7 +109,7 @@ button.pill:hover:not(.active) { border-color: var(--border-strong); }
 .sys-row .st { font-weight: 600; }
 .sys-row .st.off { color: var(--bad); }
 .sys-row .st.ok { color: var(--good); }
-.avatar { width: 36px; height: 36px; flex: none; border-radius: var(--r-ctl); display: inline-flex; align-items: center; justify-content: center; background: var(--primary); color: var(--primary-fg); font-weight: 700; font-size: 14px; }
+.avatar { width: 36px; height: 36px; flex: none; border-radius: var(--r-ctl); display: inline-flex; align-items: center; justify-content: center; background: var(--primary); color: var(--primary-fg); font-weight: 600; font-size: 14px; }
 .demo-reset { margin-top: 8px; font-size: 12px; color: var(--text-3); text-align: center; width: 100%; padding: 4px; }
 .demo-reset:hover { color: var(--text-1); text-decoration: underline; }
 /* 통계 · 데이터 */
@@ -185,7 +185,7 @@ textarea.inp { min-height: 84px; resize: vertical; line-height: 1.5; }
    ═══════════════════════════════════════════════════════════════════════════ */
 .shell { display: flex; flex-direction: column; height: 100%; }
 .topbar { display: flex; align-items: center; gap: 12px; padding: 0 22px; height: 60px; background: var(--bg-card); border-bottom: 1px solid var(--border); flex: none; }
-.brand { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 800; letter-spacing: -.02em; }
+.brand { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 600; letter-spacing: -.02em; }
 .brand img { width: 28px; height: 28px; border-radius: var(--r-ctl); }
 .brand small { font-weight: 500; color: var(--text-3); font-size: 12px; margin-left: 2px; }
 .top-sp { flex: 1; }
@@ -202,7 +202,7 @@ textarea.inp { min-height: 84px; resize: vertical; line-height: 1.5; }
 .photo .ph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #8a958e; font-size: 14px; text-align: center; padding: 16px; }
 .photo.flash::after { content: ''; position: absolute; inset: 0; background: #fff; animation: flash .45s ease-out forwards; }
 @keyframes flash { from { opacity: .9; } to { opacity: 0; } }
-.score-big { font-size: 38px; font-weight: 800; letter-spacing: -.02em; line-height: 1.1; }
+.score-big { font-size: 38px; font-weight: 600; letter-spacing: -.02em; line-height: 1.1; }
 .thumb { width: 64px; height: 48px; border-radius: var(--r-ctl); border: 1px solid var(--border); background-repeat: no-repeat; flex: none; }
 .rv-search { flex: 1 1 240px; max-width: 360px; position: relative; }
 .rv-search .inp { width: 100%; padding-right: 34px; }
@@ -281,7 +281,7 @@ details > summary { cursor: pointer; font-weight: 600; color: var(--text-2); pad
 .more-item .lk2 { position: absolute; top: 8px; right: 10px; color: var(--text-3); } .more-item .lk2 .ic { width: 14px; height: 14px; }
 /* PCB 종류 표시 · 다중 이미지 검사 · 데이터뱅크 */
 .ptype { font-weight: 500; color: var(--text-2); white-space: nowrap; }   /* PCB 종류는 태그가 아니라 일반 글자 */
-.ptype-lbl { display: inline-flex; align-items: center; gap: 6px; font-weight: 700; color: var(--text-2); }
+.ptype-lbl { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: var(--text-2); }
 .ptype-lbl .ic { width: 16px; height: 16px; }
 .dz { cursor: pointer; transition: border-color .15s, background .15s; }
 .dz.over { border-color: var(--primary); background: color-mix(in srgb, var(--primary) 10%, var(--bg-muted)); }
@@ -348,7 +348,7 @@ details > summary { cursor: pointer; font-weight: 600; color: var(--text-2); pad
 .vz-in .ov { position: absolute; inset: 0; pointer-events: none; }
 /* 이상 의심 영역 표시(박스) — 모든 역할에 공통, 켜기/끄기 가능 */
 .mk { position: absolute; border: 2px solid #ef4444; border-radius: var(--r-tag); box-shadow: 0 0 0 1px rgba(255,255,255,.75); pointer-events: none; z-index: 2; }
-.mk i { position: absolute; left: -2px; bottom: 100%; margin-bottom: 2px; padding: 1px 7px; border-radius: var(--r-tag); background: #ef4444; color: #fff; font: 700 12px/1.5 inherit; font-style: normal; white-space: nowrap; }
+.mk i { position: absolute; left: -2px; bottom: 100%; margin-bottom: 2px; padding: 1px 7px; border-radius: var(--r-tag); background: #c81e1e; color: #fff; font: 600 12px/1.5 inherit; font-style: normal; white-space: nowrap; }
 .mk.sm { border-width: 1.5px; box-shadow: 0 0 0 1px rgba(255,255,255,.7); }
 .mk-off .mk { display: none; }
 .photo:has(.mk):hover img { transform: none; }
@@ -403,6 +403,9 @@ details > summary { cursor: pointer; font-weight: 600; color: var(--text-2); pad
    (색 토큰은 파일 맨 위 한 벌로 합쳤다)
    ═══════════════════════════════════════════════════════════════════════════ */
 
+/* 굵기는 400 · 500 · 600 세 단계만 쓴다. <b> · <strong>의 브라우저 기본 700도 600으로 [T3] */
+b, strong, th { font-weight: 600; }
+
 /* ── 포커스 접근성 · 기본 보정 ──────────────────────────────────────────── */
 button:focus-visible, [tabindex]:focus-visible, a:focus-visible {
   outline: 2px solid var(--primary); outline-offset: 2px;
@@ -436,12 +439,12 @@ code {
 }
 .shell, .main, .modal-card { color: var(--text-1); }
 .card-sub { font-size: 12px; color: var(--text-3); margin: -8px 0 12px; }
-.page-title { font-size: 22px; font-weight: 700; letter-spacing: -.02em; color: var(--text-1); }
+.page-title { font-size: 22px; font-weight: 600; letter-spacing: -.02em; color: var(--text-1); }
 .pill { font-size: 12px; font-weight: 600; padding: 1px 7px; line-height: 1.5; }   /* 이름은 pill이지만 3px 사각 태그 */
 .pill.lg { font-size: 14px; padding: 3px 9px; }
 button.pill { border-radius: var(--r-ctl); border: 1px solid var(--border-strong); background: var(--bg-card); color: var(--text-2); font-size: 14px; font-weight: 500; padding: 5px 11px; min-height: 32px; }
 button.pill.active, button.pill.on { background: var(--text-1); border-color: var(--text-1); color: var(--bg-card); font-weight: 600; }
-.pill.role-admin, .pill.role-insp { font-weight: 700; }
+.pill.role-admin, .pill.role-insp { font-weight: 600; }
 .pill.on, .chip.on { background: var(--primary); color: var(--primary-fg); border-color: var(--primary); }
 .btn { border-radius: var(--r-ctl); font-weight: 600; padding: 8px 15px; font-size: 14px; }
 .btn.primary { background: var(--primary); color: var(--primary-fg); box-shadow: none; }
@@ -496,13 +499,13 @@ body { background: var(--bg-app); word-break: keep-all; overflow-wrap: break-wor
   align-items: center; gap: 12px 16px; background: var(--frame);
 }
 .main-inner > .page-head > div:first-child { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; min-width: 0; }
-.main-inner > .page-head .page-title { font-size: 22px; font-weight: 700; letter-spacing: -.02em; margin: 0; }
+.main-inner > .page-head .page-title { font-size: 22px; font-weight: 600; letter-spacing: -.02em; margin: 0; }
 .main-inner > .page-head .page-sub { font-size: 12px; margin: 0; color: var(--text-3); }
 .main-inner > .page-head .page-act { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 
 /* ── 상단바: 로고 · API 상태 · 알림 · 테마 · 프로필 ──────────────────────── */
 .topbar { height: 64px; background: var(--frame); border-bottom: 1px solid var(--border); padding: 0 24px; gap: 12px; }
-.brand { font-size: 17px; font-weight: 800; letter-spacing: -.02em; }
+.brand { font-size: 17px; font-weight: 600; letter-spacing: -.02em; }
 .top-btn {
   position: relative; flex: none; width: 40px; height: 40px; border: 1px solid var(--border);
   border-radius: var(--r-ctl); background: var(--bg-card); color: var(--text-2);
@@ -519,7 +522,7 @@ body { background: var(--bg-app); word-break: keep-all; overflow-wrap: break-wor
 .nf-id { font-size: 14px; font-weight: 600; color: var(--text-1); } .nf-m { font-size: 12px; color: var(--text-3); }
 .nf-alert { display: flex; flex-direction: column; gap: 2px; margin-top: 12px; padding: 10px 12px; border: 1px solid var(--bad); border-radius: var(--r-ctl); font-size: 14px; } .nf-alert b { color: var(--bad); }
 .nf-empty { padding: 8px 0; }
-.top-btn .bcnt { position: absolute; top: -6px; right: -6px; min-width: 18px; padding: 0 4px; border-radius: var(--r-tag); background: var(--b-orange-bg); color: var(--b-orange-fg); border: 1px solid var(--bg-card); font-size: 12px; font-weight: 700; font-style: normal; line-height: 16px; }
+.top-btn .bcnt { position: absolute; top: -6px; right: -6px; min-width: 18px; padding: 0 4px; border-radius: var(--r-tag); background: var(--b-orange-bg); color: var(--b-orange-fg); border: 1px solid var(--bg-card); font-size: 12px; font-weight: 600; font-style: normal; line-height: 16px; }
 .top-prof { display: flex; align-items: center; gap: 9px; padding: 3px 11px 3px 4px; border: 1px solid var(--border); border-radius: var(--r-ctl); background: var(--bg-card); }
 .top-prof .avatar { width: 32px; height: 32px; font-size: 14px; background: var(--primary); }
 .tp-n { display: flex; flex-direction: column; line-height: 1.25; text-align: left; }
@@ -539,7 +542,7 @@ body { background: var(--bg-app); word-break: keep-all; overflow-wrap: break-wor
 }
 .nav-item:hover { background: var(--bg-muted); color: var(--text-1); }
 .nav-item.active { background: var(--rail-active-bg); color: var(--rail-active-fg); font-weight: 600; }
-.nav-item .cnt { margin-left: auto; font-size: 12px; font-weight: 700; padding: 0 6px; line-height: 1.6; border-radius: var(--r-tag); background: var(--b-orange-bg); color: var(--b-orange-fg); }
+.nav-item .cnt { margin-left: auto; font-size: 12px; font-weight: 600; padding: 0 6px; line-height: 1.6; border-radius: var(--r-tag); background: var(--b-orange-bg); color: var(--b-orange-fg); }
 .nav-item.nav-more { display: none; }
 .side-foot { margin-top: auto; padding-top: 14px; font-size: 12px; color: var(--text-3); }
 .sys-card { background: var(--bg-muted); }
@@ -585,7 +588,7 @@ body { background: var(--bg-app); word-break: keep-all; overflow-wrap: break-wor
   border: 1px solid var(--border-strong); border-radius: var(--r-card);
 }
 .todo-h { font-size: 17px; font-weight: 600; letter-spacing: -.015em; line-height: 1.2; color: var(--text-1); }
-.todo-h b { font-size: 36px; font-weight: 700; letter-spacing: -.03em; color: var(--warn); margin: 0 3px; }
+.todo-h b { font-size: 36px; font-weight: 600; letter-spacing: -.03em; color: var(--warn); margin: 0 3px; }
 .todo-s { font-size: 14px; color: var(--text-2); margin-top: 4px; }
 .todo-act { display: flex; gap: 8px; flex-wrap: wrap; }
 .todo-act .btn { min-height: 44px; padding: 10px 20px; }
@@ -603,7 +606,7 @@ body { background: var(--bg-app); word-break: keep-all; overflow-wrap: break-wor
 .kpi.click:hover { border-color: var(--border-strong); background: var(--bg-subtle); }
 .kpi .l { font-size: 14px; font-weight: 500; color: var(--text-2); }
 .kpi-val { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
-.kpi .v { font-size: 24px; font-weight: 700; letter-spacing: -.02em; line-height: 1.3; color: var(--text-1); }
+.kpi .v { font-size: 24px; font-weight: 600; letter-spacing: -.02em; line-height: 1.3; color: var(--text-1); }
 .kpi .v.good { color: var(--good); }
 .kpi .v.bad { color: var(--bad); }
 .kpi .v.warn { color: var(--warn); }
@@ -621,7 +624,7 @@ body { background: var(--bg-app); word-break: keep-all; overflow-wrap: break-wor
 .store { padding: 18px 20px; margin-bottom: 16px; background: var(--bg-card); border: 1px solid var(--border-strong); border-radius: var(--r-card); }
 .store-hd { display: flex; align-items: baseline; justify-content: space-between; gap: 6px 16px; flex-wrap: wrap; }
 .store-t { font-size: 17px; font-weight: 600; letter-spacing: -.015em; }
-.store-t b { font-size: 36px; font-weight: 700; letter-spacing: -.03em; margin-left: 4px; }
+.store-t b { font-size: 36px; font-weight: 600; letter-spacing: -.03em; margin-left: 4px; }
 .store-t .muted { font-weight: 400; }
 .store-s { font-size: 14px; color: var(--text-2); }
 .store-bar { height: 14px; margin: 12px 0 10px; background: var(--bg-muted); border-radius: 2px; overflow: hidden; }
@@ -633,7 +636,7 @@ body { background: var(--bg-app); word-break: keep-all; overflow-wrap: break-wor
 .store-meta { display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: 14px; color: var(--text-2); }
 .store-meta b { color: var(--text-1); font-weight: 600; }
 .now-line { font-size: 17px; font-weight: 500; letter-spacing: -.015em; margin: 0 0 16px; color: var(--text-1); }
-.now-line b { font-weight: 700; }
+.now-line b { font-weight: 600; }
 
 /* ── 판정 표시: 색은 불량·검토 대기에만 쓴다. 정상은 무채색 글자. 아이콘 + 글자라 색에만 의존하지 않는다 ── */
 .vd { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; line-height: 1.5; padding: 1px 7px 1px 5px; border-radius: var(--r-tag); white-space: nowrap; }
@@ -727,7 +730,7 @@ svg[data-chart] .ct { font-size: calc(12px * var(--k, 1)); }
 .yield-list { display: flex; flex-direction: column; gap: 14px; flex: 1; }
 .yield-item { display: flex; flex-direction: column; gap: 6px; }
 .yield-hd { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
-.yield-pct { font-size: 17px; font-weight: 700; color: var(--good); letter-spacing: -.02em; }
+.yield-pct { font-size: 17px; font-weight: 600; color: var(--good); letter-spacing: -.02em; }
 .yield-pct.warn { color: var(--warn); }
 .yield-bar { height: 10px; border-radius: var(--r-tag); background: var(--bg-muted); overflow: hidden; display: flex; gap: 1px; }
 .yield-bar i { display: block; height: 100%; transform-origin: left center; }
@@ -741,7 +744,7 @@ svg[data-chart] .ct { font-size: calc(12px * var(--k, 1)); }
 }
 .yield-stat { padding: 0; }   /* 카드 안에 또 상자를 만들지 않는다 */
 .yield-stat small { display: block; font-size: 12px; color: var(--text-3); }
-.yield-stat b { display: block; font-size: 17px; font-weight: 700; color: var(--text-1); margin-top: 2px; }
+.yield-stat b { display: block; font-size: 17px; font-weight: 600; color: var(--text-1); margin-top: 2px; }
 
 /* 시스템 상태 패널 */
 .sys-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 24px; align-content: start; }
@@ -754,7 +757,7 @@ button.sys-tile:hover { background: var(--bg-subtle); }
 .sys-grid > .sys-tile:nth-child(-n+2) { border-top: 0; padding-top: 0; }
 .sys-tile-hd { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
 .sys-tile-l { font-size: 12px; font-weight: 500; color: var(--text-3); }
-.sys-tile-v { font-size: 14px; font-weight: 700; color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sys-tile-v { font-size: 14px; font-weight: 600; color: var(--text-1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sys-tile-s { font-size: 12px; color: var(--text-3); }
 .st-dot { font-size: 12px; font-weight: 600; }
 .st-dot.ok { color: var(--good); }
@@ -793,7 +796,7 @@ button.sys-tile:hover { background: var(--bg-subtle); }
 .db-call {
   position: absolute; z-index: 4; transform: translate(-110%, -155%);
   background: var(--bg-card); color: var(--bad); border: 1px solid color-mix(in srgb, var(--bad) 35%, var(--border));
-  font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: var(--r-ctl); white-space: nowrap;
+  font-size: 12px; font-weight: 600; padding: 5px 10px; border-radius: var(--r-ctl); white-space: nowrap;
   box-shadow: 0 6px 18px -6px rgba(0, 0, 0, .38); pointer-events: none;
 }
 .db-call::after {
@@ -813,7 +816,7 @@ button.sys-tile:hover { background: var(--bg-subtle); }
 .db-zoom button {
   width: 34px; height: 34px; border-radius: var(--r-ctl); background: var(--bg-card); border: 1px solid var(--border);
   display: inline-flex; align-items: center; justify-content: center; color: var(--text-2);
-  box-shadow: var(--shadow-sm); font-size: 12px; font-weight: 700;
+  box-shadow: var(--shadow-sm); font-size: 12px; font-weight: 600;
 }
 .db-zoom button:hover:not(:disabled) { background: var(--bg-muted); color: var(--text-1); }
 .db-zoom button:disabled { opacity: .45; cursor: not-allowed; }
@@ -856,7 +859,7 @@ button.sys-tile:hover { background: var(--bg-subtle); }
   .db-call { display: none; }
   .hist-tabs { margin: 0 -14px; padding: 0 6px; }
   .hist-toggle { display: inline-flex; margin-top: 12px; }
-  .hist-toggle b { margin-left: 6px; min-width: 18px; padding: 0 4px; border-radius: 3px; background: var(--primary); color: #fff; font-size: 12px; }
+  .hist-toggle b { margin-left: 6px; min-width: 18px; padding: 0 4px; border-radius: var(--r-tag); background: var(--primary); color: #fff; font-size: 12px; }
   .hist-bar:not(.open) { display: none; }
   .hist-bar .hist-q { flex: 1 1 100%; }
   .hist-bar select.inp { flex: 1 1 0; min-width: 0; }
@@ -920,7 +923,7 @@ kbd { font: inherit; font-size: 12px; padding: 0 5px; border: 1px solid var(--bo
 .db-wrap { position: relative; width: calc(100% - 32px); width: min(100cqw - 32px, (100cqh - 32px) * 475 / 350); aspect-ratio: 475 / 350; }   /* 첫 width는 컨테이너 단위(cqw)를 모르는 구형 브라우저용 */
 .db-img { box-shadow: none; border-radius: var(--r-ctl); }
 /* 의심 위치 점: 목록의 #번호와 같은 숫자를 넣는다. 색은 한 가지(위치마다 다른 값이 없어 색으로 나눌 것이 없다) */
-.db-dot { width: 22px; height: 22px; margin: -11px 0 0 -11px; background: #c81e1e; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0, 0, 0, .55); color: #fff; font-size: 12px; font-weight: 700; line-height: 18px; text-align: center; }
+.db-dot { width: 22px; height: 22px; margin: -11px 0 0 -11px; background: #c81e1e; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0, 0, 0, .55); color: #fff; font-size: 12px; font-weight: 600; line-height: 18px; text-align: center; }
 .db-dot.sel { width: 28px; height: 28px; margin: -14px 0 0 -14px; background: #fff; border: 3px solid #c81e1e; color: #c81e1e; line-height: 22px; }
 .db-dot::after { content: ''; position: absolute; inset: -11px; }   /* 점은 작아도 누르는 영역은 44px */
 .db-call { font-size: 12px; border-radius: var(--r-tag); box-shadow: 0 2px 6px rgba(0, 0, 0, .3); }
@@ -929,7 +932,7 @@ kbd { font: inherit; font-size: 12px; padding: 0 5px; border: 1px solid var(--bo
 .rv-info { grid-area: 1 / 2 / 3 / 3; min-height: 0; overflow-y: auto; padding: 14px 20px 20px; border-left: 1px solid var(--border); }
 .rv-ai { display: flex; flex-direction: column; gap: 2px; padding-bottom: 14px; margin-bottom: 14px; border-bottom: 1px solid var(--border); }
 .rv-ai-l { font-size: 12px; color: var(--text-3); }
-.rv-ai-v { font-size: 22px; font-weight: 700; letter-spacing: -.02em; line-height: 1.25; color: var(--text-1); }
+.rv-ai-v { font-size: 22px; font-weight: 600; letter-spacing: -.02em; line-height: 1.25; color: var(--text-1); }
 .rv-ai-v.bad { color: var(--bad); }
 .rv-ai-s { font-size: 14px; color: var(--text-2); }
 .rv-ai-s b { color: var(--text-1); }
@@ -1103,7 +1106,12 @@ kbd { font: inherit; font-size: 12px; padding: 0 5px; border: 1px solid var(--bo
   .rv-pts button { min-height: 44px; }
   .seg-pills button { min-width: 44px; }
   .tbl-toggle summary, details > summary { min-height: 44px; padding-block: 11px; }   /* display를 바꾸면 펼침 화살표와 글자 사이 간격이 사라진다 */
+  input[type=range] { height: 44px; }   /* 근거 투명도 슬라이더 [B3] */
 }
+/* 표 카드로 바뀌지 않는 태블릿 폭: 누르는 표 행 44px(43px이던 것) [B3] */
+@media (min-width: 701px) and (max-width: 1199px) { .tbl tr.click > td { height: 44px; } }
+/* 280px 폭: 상단바 항목이 화면 밖으로 밀리지 않게 간격만 줄인다 [R2] */
+@media (max-width: 340px) { .topbar { gap: 2px; padding: 0 6px; } }
 /* 터치 기기: 입력칸 글자가 16px보다 작으면 iOS Safari가 포커스할 때 화면을 확대한다 */
 @media (pointer: coarse) {
   .inp, select.inp, textarea.inp { font-size: 16px; }
@@ -1674,7 +1682,7 @@ function hourlyChart() {
     });
     const tot = x.n + x.d + x.p, showX = !N || i % 2 === 0;
     return `<g class="hr" role="button" aria-label="${x.h}시 ${tot}건, 누르면 이력으로 이동" data-tip="${x.h}시 · 정상 ${x.n} · 불량 ${x.d} · 대기 ${x.p} (합계 ${tot}) — 클릭: 이력 보기" onclick="gotoHour(${x.h})">` + out
-      + (showX ? `<text class="ct" x="${X + bw / 2}" y="${H - 8}" text-anchor="middle" fill="${x.h === curH ? 'var(--text-1)' : 'var(--text-3)'}" font-weight="${x.h === curH ? 700 : 500}">${x.h}시</text>` : '')
+      + (showX ? `<text class="ct" x="${X + bw / 2}" y="${H - 8}" text-anchor="middle" fill="${x.h === curH ? 'var(--text-1)' : 'var(--text-3)'}" font-weight="${x.h === curH ? 600 : 500}">${x.h}시</text>` : '')
       + (!N || tot ? `<text class="bar-l ct" x="${X + bw / 2}" y="${y - 5}" text-anchor="middle" fill="var(--text-2)">${tot || ''}</text>` : '')
       + `<rect class="hit" x="${X - gap / 2}" y="0" width="${bw + gap}" height="${H - 18}"/></g>`;
   }).join('');
@@ -1844,8 +1852,8 @@ function dashTrendChart(d, highlightToday = true) {
     const by = Yb(d.bad[i]), lblY = Math.abs((y - 6) - by) < 14 ? Math.max(12, Math.min(y, by) - 10) : y - 6;
     return `<g class="hr" data-tip="${tip}">`
       + `<rect class="bar" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="${fill}"/>`
-      + (n <= 8 ? `<text class="bar-l ct" x="${CX(i).toFixed(1)}" y="${lblY.toFixed(1)}" text-anchor="middle" font-weight="${isToday ? 700 : 500}" fill="${isToday ? 'var(--text-1)' : 'var(--text-3)'}">${v}</text>` : '')
-      + (showX ? `<text class="ct" x="${CX(i).toFixed(1)}" y="${H - 8}" text-anchor="middle" font-weight="${isToday ? 700 : 500}" fill="${isToday ? 'var(--text-1)' : 'var(--text-3)'}">${d.labels[i]}</text>` : '')
+      + (n <= 8 ? `<text class="bar-l ct" x="${CX(i).toFixed(1)}" y="${lblY.toFixed(1)}" text-anchor="middle" font-weight="${isToday ? 600 : 500}" fill="${isToday ? 'var(--text-1)' : 'var(--text-3)'}">${v}</text>` : '')
+      + (showX ? `<text class="ct" x="${CX(i).toFixed(1)}" y="${H - 8}" text-anchor="middle" font-weight="${isToday ? 600 : 500}" fill="${isToday ? 'var(--text-1)' : 'var(--text-3)'}">${d.labels[i]}</text>` : '')
       + `<rect class="hit" x="${(L + slot * i).toFixed(1)}" y="${T}" width="${slot.toFixed(1)}" height="${plotH}"/></g>`;
   }).join('');
 
@@ -1975,7 +1983,7 @@ function viewDashboard() {
       <div class="card a-recent">
         <div class="card-title">최근 검사 결과<span class="sp"></span><button class="btn ghost" onclick="go('history')">전체 이력 ›</button></div>
         <div class="tbl-wrap"><table class="tbl cards"><thead><tr><th>최종 판정</th><th>검사 ID</th><th>PCB 종류</th><th>AI 점수</th><th>시각</th></tr></thead><tbody>
-          ${recent.map(r => `<tr class="click" onclick="openReview(${r.n})" title="누르면 검토 화면에서 이 건을 엽니다">
+          ${recent.map(r => `<tr tabindex="0" class="click" onclick="openReview(${r.n})" title="누르면 검토 화면에서 이 건을 엽니다">
             <td class="c-tag">${finalBadge(r)}</td>
             <td class="c-main">${r.id}</td>
             <td>${pcbTag(r.pcb)}</td>
@@ -2180,7 +2188,7 @@ function viewInspect() {
       : `<span class="small muted">대기</span>`;
     const act = x.st === 'done' ? `${r.ai === 'ANOMALY' ? `<button class="btn sm outline" onclick="openReview(${r.n})">검토</button>` : ''}`
       : `<button class="icon-btn" ${U.running ? 'disabled' : ''} onclick="queueRemove(${x.uid})" aria-label="목록에서 빼기" title="목록에서 빼기">${ic('x')}</button>`;
-    return `<div class="qrow ${x.st}" data-st="${x.st}"><div class="photo ${x.st === 'run' ? 'scanning' : ''}" onclick="${x.st === 'done' ? `openViewer(${r.n})` : `openQueueImg(${x.uid})`}" title="누르면 크게 볼 수 있습니다"><img src="${x.src}" alt="${esc(x.name)}">${x.st === 'done' ? markerHtml(r, true) : ''}</div>
+    return `<div class="qrow ${x.st}" data-st="${x.st}"><div class="photo ${x.st === 'run' ? 'scanning' : ''}" role="button" tabindex="0" onclick="${x.st === 'done' ? `openViewer(${r.n})` : `openQueueImg(${x.uid})`}" title="누르면 크게 볼 수 있습니다"><img src="${x.src}" alt="${esc(x.name)}">${x.st === 'done' ? markerHtml(r, true) : ''}</div>
       <div class="qinfo"><b class="qname" title="${esc(x.path ? fsDisplay(x.path) : x.name)}">${esc(x.name)}</b><div class="small muted">${x.path ? `서버 저장소 · ${fmtBytes(x.size)}` : x.sample ? '샘플 이미지' : fmtBytes(x.size)}${x.st === 'done' ? ` · ${r.id} · ${r.ms}ms` : ''}</div>${x.st === 'done' && r.ai === 'ANOMALY' ? `<div class="small" style="color:var(--bad)">의심 영역 ${(r.boxes && r.boxes.length) || 1}곳 — 썸네일의 빨간 박스</div>` : ''}</div>
       <div class="qres">${state}</div><div class="qact">${act}</div></div>`;
   };
@@ -2395,12 +2403,12 @@ function fmBodyHtml() {
   const info = e => { if (e.k !== 'd') return null; const im = fsImages(e.x, e.p); return { total: im.length, n: im.filter(v => m.sel.has(v.p)).length }; };
   const dim = e => e.k === 'o';
   if (m.view === 'grid') return `<div class="fm-grid">${ents.map((e, i) => { const f = e.k === 'd' ? info(e) : null, on = e.k === 'f' ? m.sel.has(e.p) : f && f.total && f.n === f.total;
-    return `<div class="fm-card ${on ? 'sel' : ''} ${dim(e) ? 'dim' : ''}" onclick="fmClick(${i},event)">${dim(e) ? '' : `<input type="checkbox" ${on ? 'checked' : ''} onclick="event.stopPropagation()" onchange="fmToggle(${i},event.shiftKey)" aria-label="${esc(e.x.n)} 선택">`}
+    return `<div class="fm-card ${on ? 'sel' : ''} ${dim(e) ? 'dim' : ''}" tabindex="0" onclick="fmClick(${i},event)">${dim(e) ? '' : `<input type="checkbox" ${on ? 'checked' : ''} onclick="event.stopPropagation()" onchange="fmToggle(${i},event.shiftKey)" aria-label="${esc(e.x.n)} 선택">`}
       <div class="th">${e.k === 'f' ? `<img loading="lazy" src="${esc(sampleSrc(e.x.f))}" alt="">` : ic(e.k === 'd' ? 'folder' : 'db')}</div>
       <div class="fm-nm" title="${esc(e.x.n)}">${esc(e.x.n)}</div><div class="small muted">${e.k === 'd' ? `이미지 ${f.total}장${f.n ? ` · ${f.n} 선택` : ''}` : e.k === 'f' ? fmtBytes(e.x.sz) : '이미지 아님'}</div></div>`; }).join('')}</div>`;
   return `<div class="fm-row hd"><span></span><span></span><span>이름</span><span class="fm-dt">수정한 날짜</span><span>크기</span></div>` + ents.map((e, i) => {
     const f = e.k === 'd' ? info(e) : null, on = e.k === 'f' ? m.sel.has(e.p) : f && f.total && f.n === f.total;
-    return `<div class="fm-row ${on ? 'sel' : ''} ${dim(e) ? 'dim' : ''}" onclick="fmClick(${i},event)">${dim(e) ? '<span></span>' : `<input type="checkbox" ${on ? 'checked' : ''} onclick="event.stopPropagation()" onchange="fmToggle(${i},event.shiftKey)" aria-label="${esc(e.x.n)} 선택">`}
+    return `<div class="fm-row ${on ? 'sel' : ''} ${dim(e) ? 'dim' : ''}" tabindex="0" onclick="fmClick(${i},event)">${dim(e) ? '<span></span>' : `<input type="checkbox" ${on ? 'checked' : ''} onclick="event.stopPropagation()" onchange="fmToggle(${i},event.shiftKey)" aria-label="${esc(e.x.n)} 선택">`}
       <span class="bk-ico">${e.k === 'f' ? `<img loading="lazy" src="${esc(sampleSrc(e.x.f))}" alt="">` : ic(e.k === 'd' ? 'folder' : 'db')}</span><span class="fm-nm" title="${esc(e.x.n)}">${esc(e.x.n)}${e.k === 'o' ? ' <span class="small muted">· 이미지 아님</span>' : ''}</span>
       <span class="small muted fm-dt">${e.k === 'd' ? '' : esc(e.x.t || '')}</span><span class="small muted">${e.k === 'd' ? `${f.total}장${f.n ? ` (${f.n} 선택)` : ''}` : fmtBytes(e.x.sz)}</span></div>`; }).join('');
 }
@@ -2502,7 +2510,7 @@ function bankCardHtml(adm) {
   if (!S.pcbs.some(p => p.id === U.bankPcb)) U.bankPcb = S.pcbs[0].id;
   const cur = U.bankPcb, files = S.banks[cur] || [], imgs = files.filter(f => f.kind === 'image').length, banks = files.length - imgs;
   const sum = S.pcbs.map(p => { const a = S.banks[p.id] || [], im = a.filter(f => f.kind === 'image').length;
-    return `<tr class="click ${p.id === cur ? 'sel' : ''}" data-pcb="${esc(p.id)}" onclick="setBankPcb(this.dataset.pcb)"><td class="c-main">${pcbTag(p.id)}</td><td class="c-full">공개 Memory Bank ${S.model.active} <span class="muted small">(Industrial PatchCore)</span></td><td data-l="정상 이미지">${im}장</td><td data-l="뱅크 파일">${a.length - im}개</td><td class="c-tag">${a.length ? '<span class="pill orange">자체 데이터 있음 · 학습 연결 예정</span>' : '<span class="pill">공개 뱅크 사용 중</span>'}</td></tr>`; }).join('');
+    return `<tr tabindex="0" class="click ${p.id === cur ? 'sel' : ''}" data-pcb="${esc(p.id)}" onclick="setBankPcb(this.dataset.pcb)"><td class="c-main">${pcbTag(p.id)}</td><td class="c-full">공개 Memory Bank ${S.model.active} <span class="muted small">(Industrial PatchCore)</span></td><td data-l="정상 이미지">${im}장</td><td data-l="뱅크 파일">${a.length - im}개</td><td class="c-tag">${a.length ? '<span class="pill orange">자체 데이터 있음 · 학습 연결 예정</span>' : '<span class="pill">공개 뱅크 사용 중</span>'}</td></tr>`; }).join('');
   const kindPill = f => f.kind === 'image' ? '<span class="pill green">정상 이미지</span>' : '<span class="pill">Memory Bank 파일</span>';
   const upload = adm ? `<div class="drop dz" role="button" tabindex="0" onclick="document.getElementById('bankInput').click()" onkeydown="if(event.key==='Enter')document.getElementById('bankInput').click()" ondragover="dzOver(event)" ondragleave="dzLeave(event)" ondrop="dzDrop(event,'bank')">${ic('upload', 'lg')}<div class="mt6"><b>${esc(cur)} 데이터뱅크 파일을 끌어다 놓거나 클릭해서 선택</b></div><div class="small dz-note">정상 PCB 사진(PNG · JPG …) 또는 Memory Bank 파일(.zip · .npy · .pt · .pth · .ckpt · .faiss · .pkl · .bin · .json) · 여러 개 동시 선택 가능</div></div>`
     : `<div class="mode-note">${ic('lock', 'lg')}<span><b>조회 전용</b> — 데이터뱅크 업로드·삭제는 관리자만 할 수 있습니다.</span></div>`;
@@ -2669,7 +2677,7 @@ function viewReview() {
         <summary>AI 판단 근거 <span class="muted small">관리자 전용</span></summary>
         <div class="row mb10 mt8"><div class="seg-pills" role="group" aria-label="근거 보기 방식">${modes.map(([k, l]) => `<button class="${U.evMode === k ? 'on' : ''}" aria-pressed="${U.evMode === k}" onclick="U.evMode='${k}';render()">${l}</button>`).join('')}</div></div>
         <label class="small muted" style="display:flex;align-items:center;gap:8px;margin-bottom:8px">투명도 <input type="range" min="20" max="100" value="${U.evOpacity}" style="flex:1" oninput="U.evOpacity=+this.value;document.getElementById('evLayer').innerHTML=evidenceLayer(S.inspections.find(r=>r.n===U.rvSel),U.evMode,U.evOpacity)"></label>
-        <div class="photo zoomable" title="누르면 크게 볼 수 있습니다(선택한 판단 근거 포함)" onclick="openViewer(${cur.n})"><img src="${cur.img}" alt="AI 판단 근거 원본" style="${U.evMode === 'mask' && anom ? 'visibility:hidden' : ''}"><div id="evLayer">${evidenceLayer(cur, U.evMode, U.evOpacity)}</div>${U.evMode === 'orig' ? markerHtml(cur) : ''}</div>
+        <div class="photo zoomable" role="button" tabindex="0" title="누르면 크게 볼 수 있습니다(선택한 판단 근거 포함)" onclick="openViewer(${cur.n})"><img src="${cur.img}" alt="AI 판단 근거 원본" style="${U.evMode === 'mask' && anom ? 'visibility:hidden' : ''}"><div id="evLayer">${evidenceLayer(cur, U.evMode, U.evOpacity)}</div>${U.evMode === 'orig' ? markerHtml(cur) : ''}</div>
         <p class="note">${anom ? 'AI가 어떤 영역을 근거로 이상으로 판단했는지 보여주는 자료입니다 (시안: 샘플 이미지는 데이터셋 정답 위치, 그 외는 시뮬레이션).' : 'AI 정상 판정 — 표시할 이상 영역이 없습니다.'} 실제 Heatmap · Mask · Overlay는 API 확장 이후 연동됩니다.</p>
       </details>`
       : `<p class="note rv-ev-no">AI 판단 근거(Heatmap · Mask · Overlay)는 관리자 화면에서 제공됩니다.</p>`;
@@ -2822,7 +2830,7 @@ function viewHistory() {
       ${U.hf.hour != null ? `<button class="pill active" onclick="U.hf.hour=null;U.hpage=1;render()" title="시간 필터 해제">${U.hf.hour}시대 ${ic('x')}</button>` : ''}
     </div>
     <div class="tbl-wrap"><table class="tbl cards"><thead><tr><th>최종 판정</th><th>검사 ID</th><th>PCB 종류</th><th>AI 판정 · 점수</th><th>검사 시각</th>${adm ? '<th class="c-hide">당시 임계값</th><th class="c-hide">모델</th>' : ''}</tr></thead><tbody>
-      ${rows.map(r => `<tr class="click" onclick="openDetail(${r.n})">
+      ${rows.map(r => `<tr tabindex="0" class="click" onclick="openDetail(${r.n})">
         <td class="c-tag">${finalBadge(r)}</td>
         <td class="c-main">${r.id}</td>
         <td>${pcbTag(r.pcb)}</td>
@@ -2840,7 +2848,7 @@ function viewHistory() {
 function openDetail(n) {
   const r = S.inspections.find(x => x.n === n); if (!r) return;
   openModal(`<div class="row between"><b style="font-size: 17px">${r.id}</b><button class="icon-btn" onclick="closeModal()" aria-label="닫기">${ic('x')}</button></div>
-    <div class="photo zoomable" style="margin:12px 0" title="클릭하면 크게 볼 수 있습니다" onclick="openViewer(${r.n})"><img src="${r.img}" alt="${r.id}">${markerHtml(r)}<span class="zoom-hint">${ic('zoom')}확대</span></div>
+    <div class="photo zoomable" role="button" tabindex="0" style="margin:12px 0" title="클릭하면 크게 볼 수 있습니다" onclick="openViewer(${r.n})"><img src="${r.img}" alt="${r.id}">${markerHtml(r)}<span class="zoom-hint">${ic('zoom')}확대</span></div>
     <dl class="kv"><dt>PCB 종류 / 모델</dt><dd>${pcbTag(r.pcb)} · Industrial PatchCore ${r.ver}</dd><dt>이미지 출처</dt><dd>${esc(srcOf(r).full)}</dd><dt>검사 시각</dt><dd>${mdhm(r.at)} · 처리 ${r.ms}ms</dd>
       <dt>AI 점수</dt><dd>${r.score.toFixed(2)} (당시 임계값 ${r.thr.toFixed(2)})</dd><dt>AI 판정</dt><dd>${aiBadge(r.ai)}</dd><dt>최종 판정</dt><dd>${finalBadge(r)}</dd><dt>판정 사유</dt><dd>${esc(r.memo) || '<span class="muted">—</span>'}</dd></dl>
     <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn outline" onclick="downloadImage(${r.n})">${ic('download')}이미지 다운로드</button><button class="btn primary" onclick="openReview(${r.n})">검토에서 열기</button></div>`);
@@ -3049,7 +3057,7 @@ function trendChart(d) {
   const area = `<polygon fill="var(--primary)" fill-opacity=".08" points="${L},${H - B} ${d.tot.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ')} ${W - R},${H - B}"/>`;
   const line = (arr, c, nm) => `<polyline fill="none" stroke="${c}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" points="${arr.map((v, i) => `${X(i).toFixed(1)},${Y(v).toFixed(1)}`).join(' ')}"/>${arr.map((v, i) => `${(n <= 14 || i % 3 === 0 || i === n - 1) ? `<circle cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="${i === n - 1 ? 4 : 3.2}" fill="${c}" stroke="var(--bg-card)" stroke-width="1.6"/>` : ''}<circle class="hit" cx="${X(i).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="12" data-tip="${d.labels[i]} · ${nm} ${v}건"/>${n <= 8 ? `<text class="ct" x="${(X(i) + (i === 0 ? 4 : i === n - 1 ? -4 : 0)).toFixed(1)}" y="${(Y(v) - 9).toFixed(1)}" text-anchor="${i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle'}" fill="var(--text-2)">${v}</text>` : ''}`).join('')}`;
   const grid = [0, .25, .5, .75, 1].map(f => `<line x1="${L}" x2="${W - R}" y1="${Y(max * f)}" y2="${Y(max * f)}" stroke="var(--border)" ${f > 0 ? 'stroke-dasharray="3 4"' : ''}/><text class="ct" x="${L - 7}" y="${Y(max * f) + 4}" text-anchor="end" fill="var(--text-3)">${Math.round(max * f)}</text>`).join('');
-  const xl = d.labels.map((l, i) => (i === n - 1 || (i % stepX === 0 && n - 1 - i >= minGap)) ? `<text class="ct" x="${X(i).toFixed(1)}" y="${H - 8}" text-anchor="${i === n - 1 ? 'end' : i === 0 ? 'start' : 'middle'}" font-weight="${i === n - 1 ? 700 : 500}" fill="${i === n - 1 ? 'var(--text-1)' : 'var(--text-3)'}">${l}</text>` : '').join('');
+  const xl = d.labels.map((l, i) => (i === n - 1 || (i % stepX === 0 && n - 1 - i >= minGap)) ? `<text class="ct" x="${X(i).toFixed(1)}" y="${H - 8}" text-anchor="${i === n - 1 ? 'end' : i === 0 ? 'start' : 'middle'}" font-weight="${i === n - 1 ? 600 : 500}" fill="${i === n - 1 ? 'var(--text-1)' : 'var(--text-3)'}">${l}</text>` : '').join('');
   return `<svg data-chart viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="일별 검사 건수 추이">${grid}${area}${xl}${line(d.tot, 'var(--bar-normal)', '전체 검사')}${line(d.bad, 'var(--bar-defect)', '불량·대기')}</svg>
     <div class="chart-legend"><span><i class="lswatch" style="background:var(--bar-normal)"></i>전체 검사</span><span><i class="lswatch" style="background:var(--bar-defect)"></i>불량·대기</span></div>${chartTable(['일자', '전체 검사', '불량·대기'], d.labels.map((l, i) => [l, d.tot[i], d.bad[i]]))}`;
 }
@@ -3441,6 +3449,9 @@ initBoot();
   document.addEventListener('pointerup', end); document.addEventListener('pointercancel', end);
   document.addEventListener('dragstart', e => { if (e.target.tagName === 'IMG') e.preventDefault(); });
 })();
+
+/** 표 행 · 사진 · 파일 항목처럼 버튼이 아닌 누르는 요소를 키보드 Enter/Space로도 누를 수 있게 한다 [접근성] */
+document.addEventListener('keydown', e => { const t = e.target; if ((e.key === 'Enter' || e.key === ' ') && t.matches && t.matches('tr.click[tabindex], .photo[tabindex], .fm-card[tabindex], .fm-row[tabindex]')) { e.preventDefault(); t.click(); } });
 </script>
 </body>
 </html>
