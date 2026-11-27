@@ -510,6 +510,15 @@ body { background: var(--bg-app); word-break: keep-all; overflow-wrap: break-wor
 }
 .top-btn:hover { background: var(--bg-muted); border-color: var(--border-strong); color: var(--text-1); }
 .top-btn .ic { width: 18px; height: 18px; }
+.modal-card.notif { max-width: 420px; }
+.nf-t { font-size: 14px; font-weight: 600; margin: 14px 0 6px; } .nf-t b { color: var(--b-orange-fg); }
+.nf-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--border); }
+.nf-list li { border-bottom: 1px solid var(--border); }
+.nf-list button { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; min-height: 52px; padding: 8px 4px; text-align: left; }
+.nf-list button:hover { background: var(--bg-subtle); }
+.nf-id { font-size: 14px; font-weight: 600; color: var(--text-1); } .nf-m { font-size: 12px; color: var(--text-3); }
+.nf-alert { display: flex; flex-direction: column; gap: 2px; margin-top: 12px; padding: 10px 12px; border: 1px solid var(--bad); border-radius: var(--r-ctl); font-size: 14px; } .nf-alert b { color: var(--bad); }
+.nf-empty { padding: 8px 0; }
 .top-btn .bcnt { position: absolute; top: -6px; right: -6px; min-width: 18px; padding: 0 4px; border-radius: var(--r-tag); background: var(--b-orange-bg); color: var(--b-orange-fg); border: 1px solid var(--bg-card); font-size: 12px; font-weight: 700; font-style: normal; line-height: 16px; }
 .top-prof { display: flex; align-items: center; gap: 9px; padding: 3px 11px 3px 4px; border: 1px solid var(--border); border-radius: var(--r-ctl); background: var(--bg-card); }
 .top-prof .avatar { width: 32px; height: 32px; font-size: 14px; background: var(--primary); }
@@ -1488,6 +1497,19 @@ function openModal(html) {
   m.onclick = e => { if (e.target === m) closeModal(); };
 }
 
+/** 상단바 알림 창: 검토 대기 건(최근 5건)과 AI 서버 상태를 보여 준다. 건을 누르면 그 건의 검토 화면으로 간다. */
+function openNotif() {
+  const pend = S.inspections.filter(x => x.final === null).sort((a, b) => b.n - a.n), top = pend.slice(0, 5);
+  const off = !S.api.online;
+  openModal(`<div class="row between"><b style="font-size: 17px">알림</b><button class="icon-btn" onclick="closeModal()" aria-label="닫기">${ic('x')}</button></div>
+    ${off ? `<div class="nf-alert" role="alert"><b>AI 서버 오프라인</b><span>검사를 새로 시작할 수 없습니다. 이미 저장된 건의 검토는 계속할 수 있습니다.</span></div>` : ''}
+    <h3 class="nf-t">검토 대기 <b>${pend.length}</b>건</h3>
+    ${top.length ? `<ul class="nf-list">${top.map(r => `<li><button onclick="closeModal();openReview(${r.n})"><span class="nf-id">${r.id}</span><span class="nf-m">${r.pcb} · AI ${r.score.toFixed(2)} · ${mdhm(r.at)}</span></button></li>`).join('')}</ul>${pend.length > top.length ? `<p class="small muted">외 ${pend.length - top.length}건</p>` : ''}`
+      : '<p class="muted nf-empty">검토할 건이 없습니다.</p>'}
+    <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn primary" onclick="closeModal();go('review')">검토 화면으로</button></div>`);
+  document.querySelector('#modal .modal-card').classList.add('notif');
+}
+
 /** 닫기 페이드 타이머 (닫는 중에 새 모달이 열리면 취소해 내용이 지워지지 않게 한다). */
 let modalTimer = 0;
 /** 모달을 닫는다 (0.15초 페이드 후 제거). */
@@ -1609,7 +1631,7 @@ function shell(content) {
       <div class="brand"><img src="./docs/assets/circuiteye_icon_256.png" alt=""><span class="brand-t">CircuitEye</span><small>PCB Inspection</small></div>
       ${apiPill()}
       <div class="top-sp"></div>
-      <button class="top-btn" onclick="go('review')" aria-label="검토 대기 ${st.pending}건" title="검토 대기 ${st.pending}건">${ic('bell')}${st.pending ? `<i class="bcnt">${st.pending}</i>` : ''}</button>
+      <button class="top-btn" onclick="openNotif()" aria-haspopup="dialog" aria-label="알림, 검토 대기 ${st.pending}건" title="알림">${ic('bell')}${st.pending ? `<i class="bcnt">${st.pending}</i>` : ''}</button>
       <button class="top-btn" onclick="toggleTheme()" aria-label="테마 전환" title="테마 전환">${ic(S.theme === 'dark' ? 'sun' : 'moon')}</button>
       <button class="top-btn" onclick="logout()" aria-label="로그아웃" title="로그아웃">${ic('out')}</button>
       <div class="top-prof" title="${esc(S.user.company)}"><span class="avatar">${esc(S.user.name.slice(0, 1))}</span><span class="tp-n"><b>${esc(S.user.name)}</b><small>${adm ? '관리자' : '검사원'}</small></span></div>
