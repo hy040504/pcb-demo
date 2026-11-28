@@ -211,6 +211,7 @@ textarea.inp { min-height: 84px; resize: vertical; line-height: 1.5; }
 .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--r-md); background: var(--bg-muted); color: var(--text-2); font-weight: 400; text-align: left; position: relative; }
 .nav-item:hover { background: var(--bg-hover); }
 .nav-item.active { color: var(--text-1); font-weight: 700; background: var(--bg-hover); }   /* 왼쪽 색 줄 없이 배경 · 굵기로 표시 [H3] */
+.nav-item.active > .ic { color: var(--primary); }   /* 접힌 메뉴는 라벨이 숨어 굵기가 안 보이므로 아이콘 색으로도 표시 */
 .nav-item .cnt { margin-left: auto; font-size: 12px; font-weight: 700; padding: 0 7px; border-radius: var(--r-pill); background: var(--b-orange-bg); color: var(--b-orange-fg); }
 .side-foot { margin-top: auto; padding-top: 14px; font-size: 13px; color: var(--text-3); }
 .main { flex: 1; overflow-y: auto; padding: 24px 28px 40px; }
@@ -412,7 +413,7 @@ circle.arc { transition: opacity .15s, stroke-width .15s; } circle.arc:hover { s
 .vz-in .ov { position: absolute; inset: 0; pointer-events: none; }
 /* 이상 의심 영역 표시(박스) — 모든 역할에 공통, 켜기/끄기 가능 */
 .mk { position: absolute; border: 2px solid #ef4444; border-radius: var(--r-sm); box-shadow: 0 0 0 1px rgba(255,255,255,.75); pointer-events: none; z-index: 2; }
-.mk i { position: absolute; left: -2px; bottom: 100%; margin-bottom: 2px; padding: 1px 7px; border-radius: var(--r-sm); background: #ef4444; color: #fff; font: 700 12px/1.5 inherit; font-style: normal; white-space: nowrap; }
+.mk i { position: absolute; left: -2px; bottom: 100%; margin-bottom: 2px; padding: 1px 7px; border-radius: var(--r-sm); background: #ef4444; color: #fff; font-size: 12px; font-weight: 700; line-height: 1.5; font-style: normal; white-space: nowrap; }
 .mk.sm { border-width: 1.5px; box-shadow: 0 0 0 1px rgba(255,255,255,.7); }
 .mk-off .mk { display: none; }
 .photo:has(.mk):hover img { transform: none; }
@@ -626,15 +627,23 @@ html[data-theme="dark"] .nav-item .cnt { background: #f6c27a; color: #2a1c00; }
 
 /* ── 디자인 점검 보정 (DESIGN_AUDIT.md) ─────────────────────────────────── */
 /* 키보드 포커스 표시를 한 모양으로 [B4] */
-button:focus-visible, [tabindex]:focus-visible, a:focus-visible, tr.click:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-/* 의심 위치 점은 작아도 누르는 영역은 44px [B3] */
+button:focus-visible, [tabindex]:focus-visible, a:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+/* 표 행: 바깥 테두리는 표 스크롤 상자에 양옆이 잘리고 WebKit은 <tr>에 그리지 않아 칸 안쪽 선으로 [B4] */
+tr.click:focus-visible { outline: none; }
+tr.click:focus-visible > td { box-shadow: inset 0 2px var(--primary), inset 0 -2px var(--primary); }
+tr.click:focus-visible > td:first-child { box-shadow: inset 2px 0 var(--primary), inset 0 2px var(--primary), inset 0 -2px var(--primary); }
+tr.click:focus-visible > td:last-child { box-shadow: inset -2px 0 var(--primary), inset 0 2px var(--primary), inset 0 -2px var(--primary); }
+/* 요약 막대 조각: 막대가 overflow hidden이라 안쪽 테두리로, 초록·빨강 조각 위에서도 보이게 본문색 */
+.sum-bar button:focus-visible { outline-color: var(--text-1); outline-offset: -2px; }
+/* 의심 위치 점은 작아도 누르는 영역은 44px [B3] (가까운 점끼리 겹치면 누른 곳에 가장 가까운 점이 눌린다 — dotNearest) */
 .db-dot::after { content: ''; position: absolute; inset: -12px; border-radius: 50%; }
 /* 터치 화면(태블릿·모바일·터치 기기): 누르는 요소는 44px 이상 [B3] */
 @media (max-width: 1199px), (pointer: coarse) {
   .btn, .btn.sm, button.pill, .inp, select.inp, .pager .btn, .db-list button, .sum-legend button { min-height: 44px; }
   .icon-btn, .db-zoom button { width: 44px; height: 44px; }
-  details > summary { min-height: 44px; padding-block: 11px; }
+  .tbl-toggle summary, details > summary { min-height: 44px; padding-block: 11px; }
   input[type=range] { height: 44px; }
+  .rv-search .inp { padding-right: 52px; }   /* 44px 지우기 버튼이 입력 글자를 가리지 않게 */
 }
 /* 280px 폭: 상단바 항목이 화면 밖으로 밀리지 않게 간격만 줄인다 [R2] */
 @media (max-width: 340px) { .topbar { gap: 2px; padding: 0 6px; } .topbar .pill { padding-inline: 8px; } }
@@ -1169,7 +1178,7 @@ function shell(content) {
     </header>
     <div class="body-wrap">
       <nav class="side" aria-label="주 메뉴">
-        ${MENUS.map(m => `<button class="nav-item ${U.route === m.id ? 'active' : ''} ${m.sec ? 'sec' : ''}" onclick="go('${m.id}')">${ic(m.icon, 'lg')}<span><span class="lbl-f">${m.label}</span><span class="lbl-s">${m.short}</span></span>${m.id === 'review' && st.pending ? `<span class="cnt">${st.pending}</span>` : ''}${m.adminEdit && !adm ? `<span class="lk" title="조회 전용">${ic('lock')}</span>` : ''}</button>`).join('')}
+        ${MENUS.map(m => `<button class="nav-item ${U.route === m.id ? 'active' : ''} ${m.sec ? 'sec' : ''}" ${U.route === m.id ? 'aria-current="page"' : ''} onclick="go('${m.id}')">${ic(m.icon, 'lg')}<span><span class="lbl-f">${m.label}</span><span class="lbl-s">${m.short}</span></span>${m.id === 'review' && st.pending ? `<span class="cnt">${st.pending}</span>` : ''}${m.adminEdit && !adm ? `<span class="lk" title="조회 전용">${ic('lock')}</span>` : ''}</button>`).join('')}
         <button class="nav-item nav-more ${MENUS.some(m => m.sec && m.id === U.route) ? 'active' : ''}" onclick="openMore()" aria-label="더보기">${ic('dots', 'lg')}<span><span class="lbl-f">더보기</span><span class="lbl-s">더보기</span></span></button>
         <div class="side-foot">${perm}
           <div class="sys-card" role="button" tabindex="0" onclick="openApiStatus()" onkeydown="if(event.key==='Enter')openApiStatus()" title="누르면 서버 상태 상세"><span class="sc-t">시스템 상태</span>
@@ -1598,7 +1607,7 @@ function fmInner() {
       <div class="row mt6"><input class="inp" style="max-width:260px" id="fmQ" placeholder="이 폴더에서 파일 이름 검색" value="${esc(m.q)}" oninput="fmSearch(this.value)" aria-label="이 폴더에서 파일 이름 검색"><span class="small muted">서버 OS: <b>${esc(os)}</b> · ${os === 'Windows' ? '경로는 대소문자를 구분하지 않음' : '경로는 대소문자를 구분'}</span></div></div>
     <div class="fm-main"><div class="fm-side"><div class="lbl">빠른 이동</div>${sc('/', '저장소 전체')}${sc('/입고', '입고 (촬영 사진)')}${sc('/보관', '보관 (검사 완료)')}
         <div class="lbl">내 컴퓨터</div><button onclick="fmLocal()">${ic('upload')}내 컴퓨터에서 파일 선택</button></div>
-      <div class="fm-body" id="fmBody">${fmBodyHtml()}</div></div>
+      <div class="fm-body" id="fmBody" role="listbox" aria-multiselectable="true" aria-label="폴더 내용">${fmBodyHtml()}</div></div>
     <div class="fm-foot" id="fmFoot">${fmFootHtml()}</div>`;
 }
 
@@ -1614,12 +1623,12 @@ function fmBodyHtml() {
   const info = e => { if (e.k !== 'd') return null; const im = fsImages(e.x, e.p); return { total: im.length, n: im.filter(v => m.sel.has(v.p)).length }; };
   const dim = e => e.k === 'o';
   if (m.view === 'grid') return `<div class="fm-grid">${ents.map((e, i) => { const f = e.k === 'd' ? info(e) : null, on = e.k === 'f' ? m.sel.has(e.p) : f && f.total && f.n === f.total;
-    return `<div class="fm-card ${on ? 'sel' : ''} ${dim(e) ? 'dim' : ''}" tabindex="0" onclick="fmClick(${i},event)">${dim(e) ? '' : `<input type="checkbox" ${on ? 'checked' : ''} onclick="event.stopPropagation()" onchange="fmToggle(${i},event.shiftKey)" aria-label="${esc(e.x.n)} 선택">`}
+    return `<div class="fm-card ${on ? 'sel' : ''} ${dim(e) ? 'dim' : ''}" role="option" ${dim(e) ? 'aria-disabled="true"' : `tabindex="0" aria-selected="${!!on}"`} onclick="fmClick(${i},event)">${dim(e) ? '' : `<input type="checkbox" tabindex="-1" ${on ? 'checked' : ''} onclick="event.stopPropagation()" onchange="fmToggle(${i},event.shiftKey)" aria-label="${esc(e.x.n)} 선택">`}
       <div class="th">${e.k === 'f' ? `<img loading="lazy" src="${esc(sampleSrc(e.x.f))}" alt="">` : ic(e.k === 'd' ? 'folder' : 'db')}</div>
       <div class="fm-nm" title="${esc(e.x.n)}">${esc(e.x.n)}</div><div class="small muted">${e.k === 'd' ? `이미지 ${f.total}장${f.n ? ` · ${f.n} 선택` : ''}` : e.k === 'f' ? fmtBytes(e.x.sz) : '이미지 아님'}</div></div>`; }).join('')}</div>`;
-  return `<div class="fm-row hd"><span></span><span></span><span>이름</span><span class="fm-dt">수정한 날짜</span><span>크기</span></div>` + ents.map((e, i) => {
+  return `<div class="fm-row hd" aria-hidden="true"><span></span><span></span><span>이름</span><span class="fm-dt">수정한 날짜</span><span>크기</span></div>` + ents.map((e, i) => {
     const f = e.k === 'd' ? info(e) : null, on = e.k === 'f' ? m.sel.has(e.p) : f && f.total && f.n === f.total;
-    return `<div class="fm-row ${on ? 'sel' : ''} ${dim(e) ? 'dim' : ''}" tabindex="0" onclick="fmClick(${i},event)">${dim(e) ? '<span></span>' : `<input type="checkbox" ${on ? 'checked' : ''} onclick="event.stopPropagation()" onchange="fmToggle(${i},event.shiftKey)" aria-label="${esc(e.x.n)} 선택">`}
+    return `<div class="fm-row ${on ? 'sel' : ''} ${dim(e) ? 'dim' : ''}" role="option" ${dim(e) ? 'aria-disabled="true"' : `tabindex="0" aria-selected="${!!on}"`} onclick="fmClick(${i},event)">${dim(e) ? '<span></span>' : `<input type="checkbox" tabindex="-1" ${on ? 'checked' : ''} onclick="event.stopPropagation()" onchange="fmToggle(${i},event.shiftKey)" aria-label="${esc(e.x.n)} 선택">`}
       <span class="bk-ico">${e.k === 'f' ? `<img loading="lazy" src="${esc(sampleSrc(e.x.f))}" alt="">` : ic(e.k === 'd' ? 'folder' : 'db')}</span><span class="fm-nm" title="${esc(e.x.n)}">${esc(e.x.n)}${e.k === 'o' ? ' <span class="small muted">· 이미지 아님</span>' : ''}</span>
       <span class="small muted fm-dt">${e.k === 'd' ? '' : esc(e.x.t || '')}</span><span class="small muted">${e.k === 'd' ? `${f.total}장${f.n ? ` (${f.n} 선택)` : ''}` : fmtBytes(e.x.sz)}</span></div>`; }).join('');
 }
@@ -2219,14 +2228,16 @@ function openMore() {
   document.addEventListener('scroll', hide, true); window.addEventListener('blur', hide);
 })();
 
+/** 추이 차트 좌표 폭: 좁은 화면은 실제 폭에 가깝게 잡아 12px 글자가 겹치지 않게 한다. 40px 단위라 창 크기 변화마다 다시 그리지 않는다. */
+function trendW() { return Math.min(520, Math.max(240, Math.floor((innerWidth - 70) / 40) * 40)); }
 /** 일별 불량·대기 추이 막대 차트(SVG): 막대 = 불량·대기 건수, 아래 줄 = 그날 전체 대비 비율. */
 function trendChart(d) {
-  // 좁은 화면은 좌표 폭을 실제 폭에 가깝게 잡아 12px 글자가 겹치지 않게 한다. shortcut: 그린 뒤 창 폭이 크게 바뀌면 다음 render()에서야 다시 맞춰진다
-  const W = Math.min(520, Math.max(240, innerWidth - 70)), H = 230, L = 30, R = 8, T = 24, B = 46, n = d.labels.length, step = (W - L - R) / n, bw = Math.min(34, step * .6), roomy = step >= 44;
+  const W = trendW(), H = 230, L = 30, R = 8, T = 24, B = 46, n = d.labels.length, step = (W - L - R) / n, bw = Math.min(34, step * .6), roomy = step >= 44;
   const max = Math.max(4, Math.ceil(Math.max(...d.bad) / 4) * 4), X = i => L + step * i + step / 2, Y = v => T + (H - T - B) * (1 - v / max), pct = i => (d.bad[i] / d.tot[i] * 100).toFixed(1);
   const grid = [0, .5, 1].map(f => `<line x1="${L}" x2="${W - R}" y1="${Y(max * f)}" y2="${Y(max * f)}" stroke="var(--border)"/><text class="ct" x="${L - 6}" y="${Y(max * f) + 4}" text-anchor="end" font-size="10.5" fill="var(--text-3)">${Math.round(max * f)}</text>`).join("");
   const bars = d.labels.map((l, i) => {
-    const show = (n <= 8 && roomy) || i % 2 === 0 || i === n - 1, tip = `${l} · 불량·대기 ${d.bad[i]}건 / 전체 ${d.tot[i]}건 (${pct(i)}%)`;
+    // 촘촘하면 마지막 날부터 몇 칸씩 걸러 표시 — 마지막 날짜는 늘 보이고, 날짜 라벨(약 32 + 간격 6)끼리 겹치지 않는다
+    const show = (n - 1 - i) % Math.max(1, Math.ceil(38 / step)) === 0, tip = `${l} · 불량·대기 ${d.bad[i]}건 / 전체 ${d.tot[i]}건 (${pct(i)}%)`;
     return `<rect class="pt" style="animation-delay:${0.1 + i * 0.06}s" data-tip="${tip}" x="${X(i) - bw / 2}" y="${Y(d.bad[i])}" width="${bw}" height="${Y(0) - Y(d.bad[i])}" rx="3" fill="var(--bar-defect)"/>
       ${n <= 8 ? `<text class="ct" x="${X(i)}" y="${Y(d.bad[i]) - 6}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--text-1)">${d.bad[i]}</text>` : ""}
       ${show ? `<text class="ct" x="${X(i)}" y="${H - 24}" text-anchor="middle" font-size="10.5" fill="var(--text-3)">${l}</text>` : ""}
@@ -2488,11 +2499,13 @@ function render() {
   playEnter(app); fitChartText();
 }
 
-/** 차트 글자를 SVG 배율과 상관없이 화면에서 12px로 맞춘다(좁으면 작아지고 넓으면 커지던 문제). */
-function fitChartText() {
-  document.querySelectorAll('svg[data-chart]').forEach(s => { const w = s.getBoundingClientRect().width; if (w) s.style.setProperty('--k', (s.viewBox.baseVal.width / w).toFixed(3)); });
-}
-window.addEventListener('resize', fitChartText);
+/** 차트 글자를 SVG 배율과 상관없이 화면에서 12px로 맞춘다(좁으면 작아지고 넓으면 커지던 문제).
+ *  창 크기뿐 아니라 왼쪽 메뉴가 접히고 펼쳐져 본문 폭이 바뀔 때도 다시 재도록 차트 자체의 크기 변화를 감시한다. */
+const chartRO = new ResizeObserver(es => es.forEach(({ target: s }) => { const w = s.getBoundingClientRect().width; if (w) s.style.setProperty('--k', (s.viewBox.baseVal.width / w).toFixed(3)); }));
+function fitChartText() { chartRO.disconnect(); document.querySelectorAll('svg[data-chart]').forEach(s => chartRO.observe(s)); }
+// 폰을 가로로 돌리는 등 추이 차트의 좌표 폭 구간이 바뀌면 다시 그린다(그대로 늘리면 차트가 지나치게 길어진다)
+let lastTrendW = trendW();
+window.addEventListener('resize', () => { const w = trendW(); if (w !== lastTrendW) { lastTrendW = w; if (S.user && document.querySelector('svg[data-chart]')) render(); } });
 
 /* 왼쪽 메뉴 펼침 상태(.open): 마우스가 메뉴 위에 있거나 키보드 포커스가 메뉴에 있을 때.
    마우스 위치(railPtr)를 직접 기억해 render()가 메뉴를 다시 그려도(:hover 판정이 늦거나 포커스가 사라져도) 펼침을 유지한다. */
@@ -2605,7 +2618,22 @@ initBoot();
 })();
 
 /** 표 행 · 사진 · 파일 항목처럼 버튼이 아닌 누르는 요소를 키보드 Enter/Space로도 누를 수 있게 한다 [접근성] */
-document.addEventListener('keydown', e => { const t = e.target; if ((e.key === 'Enter' || e.key === ' ') && t.matches && t.matches('tr.click[tabindex], .photo[tabindex], .fm-card[tabindex], .fm-row[tabindex]')) { e.preventDefault(); t.click(); } });
+document.addEventListener('keydown', e => { const t = e.target; if ((e.key === 'Enter' || e.key === ' ') && t.matches && t.matches('tr.click[tabindex], .photo[tabindex], .fm-card[tabindex], .fm-row[tabindex]')) { e.preventDefault(); kbdClick(t); } });
+/* dotNearest: 의심 위치 점의 44px 누름 영역이 겹치면 나중에 그린 점이 눌리므로, 누른 위치에 가장 가까운 점으로 바꿔 누른다(키보드 · 코드 클릭은 그대로). */
+document.addEventListener('click', e => {
+  const d = e.target.closest && e.target.closest('.db-dot'); if (!d || !e.isTrusted || !e.detail) return;
+  const dist = b => { const r = b.getBoundingClientRect(); return Math.hypot(e.clientX - r.left - r.width / 2, e.clientY - r.top - r.height / 2); };
+  const near = [...d.parentElement.querySelectorAll('.db-dot')].filter(b => b.offsetWidth).reduce((a, b) => dist(b) < dist(a) ? b : a, d);
+  if (near !== d) { e.stopPropagation(); near.click(); }
+}, true);
+/** 키보드로 누른 뒤 화면을 다시 그려 그 요소가 사라지면 같은 동작의 새 요소로, 창이 새로 열리면 그 창의 첫 버튼으로 포커스를 옮긴다. */
+function kbdClick(t) {
+  const m = document.getElementById('modal'), was = !m.classList.contains('hidden'), k = t.getAttribute('onclick'), pcb = t.dataset.pcb;
+  t.click();
+  const open = !m.classList.contains('hidden'); if (t.isConnected && open === was) return;
+  const same = t.isConnected ? null : [...(open ? m : document).querySelectorAll('[tabindex][onclick]')].find(x => x.getAttribute('onclick') === k && x.dataset.pcb === pcb);
+  const to = same || (open && m.querySelector('button, [tabindex]')); if (to) to.focus();
+}
 </script>
 </body>
 </html>
