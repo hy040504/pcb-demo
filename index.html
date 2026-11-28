@@ -28,7 +28,7 @@
   --b-gray-bg: #f1f2f1; --b-gray-fg: #4b534d;
   --shadow: 0 1px 2px rgba(20, 24, 22, .05);
   --shadow-float: 0 18px 48px -8px rgba(20, 24, 22, .22);
-  --bar-normal: #6fa384; --bar-defect: #c0463e; --bar-pending: #d49a5c;
+  --bar-normal: #6fa384; --bar-defect: #c0463e;
   --bar-defect-soft: #d47a72;   /* 추이 차트의 지난 날 막대: 흰 카드 위 3.1:1(그래픽 3:1 기준), 오늘 막대 5.0:1과 구분 [C1 C6] */
   --role-insp: #3b7bbf; --ease: cubic-bezier(.22, .8, .3, 1);
   --bg-board: #f2f4f2; --bg-subtle: #f7f8f7; --primary-soft: rgba(70, 116, 95, .11);
@@ -47,7 +47,7 @@ html[data-theme="dark"] {
   --b-gray-bg: #26312b; --b-gray-fg: #c4cfc8;
   --shadow: 0 1px 3px rgba(0, 0, 0, .4);
   --shadow-float: 0 22px 54px rgba(0, 0, 0, .6);
-  --bar-normal: #5b9378; --bar-defect: #e0766d; --bar-pending: #d49a5c;
+  --bar-normal: #5b9378; --bar-defect: #e0766d;
   --bar-defect-soft: #a8564f;   /* 다크 카드 위 3.4:1, 오늘 막대 5.7:1 */
   --role-insp: #86b4e8;
   --bg-board: #0f1512; --bg-subtle: #19211d; --primary-soft: rgba(111, 184, 148, .17);
@@ -128,11 +128,6 @@ button.pill:hover:not(.active) { border-color: var(--border-strong); }
 .demo-reset { margin-top: 8px; font-size: 12px; color: var(--text-3); text-align: center; width: 100%; padding: 4px; }
 .demo-reset:hover { color: var(--text-1); text-decoration: underline; }
 /* 통계 분석 · 데이터 관리 */
-.donut-wrap { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; justify-content: center; }
-.legend-row { display: flex; align-items: center; gap: 8px; font-size: 13px; line-height: 2; }
-.legend-row i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none; }
-.rank-row { display: grid; grid-template-columns: 22px 92px 1fr 70px; align-items: center; gap: 8px; padding: 8px 0; font-size: 14px; }
-.rank-bar { height: 9px; background: var(--bg-muted); border-radius: var(--r-md); overflow: hidden; } .rank-bar i { display: block; height: 100%; border-radius: var(--r-md); }
 .drop { border: 2px dashed var(--border); border-radius: var(--r-lg); padding: 24px; text-align: center; color: var(--text-3); background: var(--bg-muted); }
 .seg-row { display: flex; gap: 8px; flex-wrap: wrap; }
 /* 서버(PatchCore API) 온라인/오프라인 표시 */
@@ -173,7 +168,6 @@ textarea.inp { min-height: 84px; resize: vertical; line-height: 1.5; }
 .bar-track { height: 10px; border-radius: var(--r-md); background: var(--bg-muted); position: relative; overflow: visible; }
 .bar-fill { height: 100%; border-radius: var(--r-md); background: #c9994f; }
 .bar-fill.ok { background: var(--bar-normal); }
-.bar-thr { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--text-1); border-radius: 1px; }
 .divider { height: 1px; background: var(--border); margin: 16px 0; }
 .note { color: var(--text-3); font-size: 13px; margin-top: 8px; }
 .empty { text-align: center; color: var(--text-3); padding: 28px 8px; }
@@ -223,16 +217,12 @@ textarea.inp { min-height: 84px; resize: vertical; line-height: 1.5; }
 .kpi:hover { border-color: var(--border-strong); }
 .kpi .l { color: var(--text-3); font-size: 14px; }
 .kpi .v { font-size: 32px; font-weight: 700; letter-spacing: -.02em; margin-top: 4px; }
-.kpi .v.good { color: var(--good); } .kpi .v.bad { color: var(--bad); } .kpi .v.warn { color: var(--warn); }
+.kpi .v.bad { color: var(--bad); } .kpi .v.warn { color: var(--warn); }
 .split { display: grid; grid-template-columns: 1.15fr 1fr; gap: 16px; align-items: start; }
 .split.eq { align-items: stretch; }
 .photo { position: relative; width: 100%; aspect-ratio: 475 / 350; border-radius: var(--r-lg); overflow: hidden; background: #0f1512; border: 1px solid var(--border); }
 .photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .photo .ov { position: absolute; inset: 0; pointer-events: none; }
-.photo .ph { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #8a958e; font-size: 13px; text-align: center; padding: 16px; }
-.photo.flash::after { content: ''; position: absolute; inset: 0; background: #fff; animation: flash .45s ease-out forwards; }
-@keyframes flash { from { opacity: .9; } to { opacity: 0; } }
-.score-big { font-size: 40px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; }
 .thumb { width: 64px; height: 48px; border-radius: var(--r-md); border: 1px solid var(--border); background-repeat: no-repeat; flex: none; }
 .split.rv { grid-template-columns: minmax(260px, .62fr) 1.6fr; }
 .rv-list { display: flex; flex-direction: column; gap: 8px; max-height: 640px; overflow-y: auto; padding-right: 2px; }
@@ -251,7 +241,6 @@ textarea.inp { min-height: 84px; resize: vertical; line-height: 1.5; }
 .rv-chips .on b { color: var(--text-1); }
 .rv-sep { flex: none; width: 1px; height: 18px; background: var(--border-strong); margin: 0 8px; }
 .rv-count { margin: 0 0 8px; }
-.srctag { display: inline-block; padding: 0 8px; border-radius: var(--r-md); font-size: 12px; font-weight: 600; line-height: 1.7; background: var(--bg-muted); border: 1px solid var(--border); color: var(--text-2); white-space: nowrap; }
 .rv-item { display: flex; gap: 12px; align-items: center; padding: 8px; border: 1px solid var(--border); border-radius: var(--r-lg); text-align: left; width: 100%; background: var(--bg-card); }
 .rv-item:hover { background: var(--bg-muted); }
 .rv-item.sel { border-color: var(--primary); box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 22%, transparent); }
@@ -283,21 +272,16 @@ details > summary { cursor: pointer; font-weight: 600; color: var(--text-2); pad
 @keyframes rise-s { from { opacity: 0; transform: translateY(6px); } }
 @keyframes fadein { from { opacity: 0; } }
 @keyframes pop { from { opacity: 0; transform: translateY(10px) scale(.95); } }
-@keyframes growy { from { transform: scaleY(0); } }
 @keyframes growx { from { transform: scaleX(0); } }
-@keyframes draw { to { stroke-dashoffset: 0; } }
 @keyframes navIn { from { transform: translateX(-8px); background: var(--bg-muted); } }
 @keyframes scanline { from { top: 0; } to { top: calc(100% - 3px); } }
-@keyframes shimmer { to { background-position: -200% 0; } }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes toast-out { to { opacity: 0; transform: translateY(8px); } }
 .rise { animation: rise .6s var(--ease) backwards; animation-delay: var(--d, 0ms); }
 .rise-s { animation: rise-s .45s var(--ease) backwards; animation-delay: var(--d, 0ms); }
 .fade-s { animation: fadein .5s ease backwards; animation-delay: var(--d, 0ms); }
-.enter .bar { transform-box: fill-box; transform-origin: 50% 100%; animation: growy .8s var(--ease) backwards; }
-.enter .bar-l, .enter .pt { animation: fadein .5s ease backwards; animation-delay: .6s; }
-.enter .draw { stroke-dasharray: var(--len, 1000); stroke-dashoffset: var(--len, 1000); animation: draw 1.1s var(--ease) .15s forwards; }
-.enter .rank-bar i, .enter .usage i, .enter .bar-fill, .fresh .bar-fill { transform-origin: left center; animation: growx 1s var(--ease) .25s backwards; }
+.enter .pt { animation: fadein .5s ease backwards; animation-delay: .6s; }
+.enter .usage i, .enter .bar-fill { transform-origin: left center; animation: growx 1s var(--ease) .25s backwards; }
 .side.anim .nav-item.active { animation: navIn .5s var(--ease); }
 /* 호버 · 눌림 */
 .btn { transition: background .15s, transform .12s var(--ease), box-shadow .2s, border-color .15s; }
@@ -319,9 +303,6 @@ details[open] > *:not(summary) { animation: fadein .35s ease; }
 /* 검사 진행 중 */
 .photo.scanning::after { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: linear-gradient(90deg, transparent, #fff 20%, #fff 80%, transparent); box-shadow: 0 0 6px rgba(255, 255, 255, .8); animation: scanline 1.1s ease-in-out infinite alternate; }
 .spin { width: 14px; height: 14px; border-radius: 50%; border: 2px solid currentColor; border-right-color: transparent; display: inline-block; animation: spin .7s linear infinite; flex: none; }
-.skel { height: 14px; border-radius: var(--r-md); margin-top: 12px; background: linear-gradient(90deg, var(--bg-muted) 25%, var(--bg-hover) 50%, var(--bg-muted) 75%); background-size: 200% 100%; animation: shimmer 1.3s linear infinite; }
-.skel.w60 { width: 60%; } .skel.w80 { width: 80%; }
-.fresh > * { animation: pop .5s var(--ease) backwards; } .fresh > :nth-child(2) { animation-delay: .06s; } .fresh > :nth-child(n+3) { animation-delay: .12s; }
 /* 모달 · 토스트 · 테마 전환 */
 #modal { animation: fadein .2s ease; } .modal-card { animation: pop .3s var(--ease); }
 #modal.closing { opacity: 0; pointer-events: none; transition: opacity .15s; } #modal.closing .modal-card { transform: scale(.97); transition: transform .15s; }
@@ -335,12 +316,9 @@ details[open] > *:not(summary) { animation: fadein .35s ease; }
 .page-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
 .page-head .page-sub { margin-bottom: 0; }
 .page-act { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.mt4 { margin-top: 4px; } .mb4 { margin-bottom: 4px; } .mt6 { margin-top: 8px; } .mb6 { margin-bottom: 8px; } .mt8 { margin-top: 8px; } .mb8 { margin-bottom: 8px; } .mt10 { margin-top: 8px; } .mb10 { margin-bottom: 8px; } .mt12 { margin-top: 12px; } .mb12 { margin-bottom: 12px; } .mt14 { margin-top: 16px; } .mb14 { margin-bottom: 16px; } .mt16 { margin-top: 16px; } .mb16 { margin-bottom: 16px; }
+.mt4 { margin-top: 4px; } .mt6 { margin-top: 8px; } .mb6 { margin-bottom: 8px; } .mt8 { margin-top: 8px; } .mb8 { margin-bottom: 8px; } .mt10 { margin-top: 8px; } .mb10 { margin-bottom: 8px; } .mt12 { margin-top: 12px; } .mb12 { margin-bottom: 12px; } .mt14 { margin-top: 16px; } .mb14 { margin-bottom: 16px; } .mt16 { margin-top: 16px; }
 #tip { position: fixed; z-index: 300; pointer-events: none; background: var(--text-1); color: var(--bg-card); padding: 8px 8px; border-radius: var(--r-md); font-size: 12px; line-height: 1.45; box-shadow: var(--shadow-float); opacity: 0; transform: translateY(4px); transition: opacity .12s, transform .12s; white-space: nowrap; }
 #tip.on { opacity: 1; transform: none; }
-.hit { fill: transparent; }
-.hr { cursor: pointer; } .hr:hover .bar { filter: brightness(1.1); }
-circle.arc { transition: opacity .15s, stroke-width .15s; } circle.arc:hover { stroke-width: 28; }
 .tbl-toggle { margin-top: 8px; font-size: 13px; color: var(--text-3); }
 .tbl-toggle summary { cursor: pointer; display: inline-block; padding: 4px 0; }
 .tbl-toggle table { width: 100%; border-collapse: collapse; margin-top: 4px; }
@@ -458,11 +436,6 @@ circle.arc { transition: opacity .15s, stroke-width .15s; } circle.arc:hover { s
 .sc i b { position: absolute; left: 0; top: 0; bottom: 0; background: var(--bar-normal); border-radius: var(--r-sm); }
 .sc i.hi b { background: var(--bar-defect); }
 .pager .btn { min-height: 36px; min-width: 56px; }
-.steps { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 8px; }
-.steps li { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--r-md); color: var(--text-2); }
-.steps li .n { width: 22px; height: 22px; border-radius: 50%; background: var(--bg-muted); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex: none; }
-.steps li.ok .n { background: var(--primary); color: var(--primary-fg); }
-.steps li.ok { border-color: color-mix(in srgb, var(--primary) 40%, var(--border)); }
 .empty .ic { width: 28px; height: 28px; display: block; margin: 0 auto 8px; opacity: .55; }
 .pcb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
 .pcb-card { border: 1px solid var(--border); border-radius: var(--r-lg); padding: 8px; display: flex; flex-direction: column; gap: 8px; background: var(--bg-card); text-align: left; }
@@ -506,8 +479,8 @@ circle.arc { transition: opacity .15s, stroke-width .15s; } circle.arc:hover { s
 .vw-dev.phone iframe { border-radius: 28px; }
 .vw-cap { color: var(--text-3); font-size: 13px; text-align: center; margin-top: 8px; }
 @media (max-width: 440px) { .brand-t { display: none; } .topbar { padding: 0 8px; } }
-@media (max-width: 700px) { .qrow { display: grid; grid-template-columns: 84px 1fr auto; grid-template-areas: "t i a" "t r r"; align-items: center; row-gap: 4px; } .qrow .photo { grid-area: t; } .qrow .qinfo { grid-area: i; } .qrow .qact { grid-area: a; } .qrow .qres { grid-area: r; justify-content: flex-start; } .lbl-s { display: inline; } .lbl-f { display: none; } .sub-hint { display: none; } .nav-item.sec { display: none; } .nav-more { display: flex; } }
-@media (max-width: 520px) { .api-name { display: none; } .rank-row { grid-template-columns: 18px 72px 1fr 58px; } .topbar { gap: 8px; } .main { padding: 16px 12px 20px; } .rv-list { max-height: 360px; } }
+@media (max-width: 700px) { .qrow { display: grid; grid-template-columns: 84px 1fr auto; grid-template-areas: "t i a" "t r r"; align-items: center; row-gap: 4px; } .qrow .photo { grid-area: t; } .qrow .qinfo { grid-area: i; } .qrow .qact { grid-area: a; } .qrow .qres { grid-area: r; justify-content: flex-start; } .lbl-s { display: inline; } .lbl-f { display: none; } .nav-item.sec { display: none; } .nav-more { display: flex; } }
+@media (max-width: 520px) { .api-name { display: none; } .topbar { gap: 8px; } .main { padding: 16px 12px 20px; } .rv-list { max-height: 360px; } }
 
 /* 차트 글자: SVG가 폭에 맞춰 늘거나 줄어도 화면에서는 항상 12px (fitChartText가 --k 배율을 넣는다) */
 svg[data-chart] .ct { font-size: calc(12px * var(--k, 1)); }
@@ -632,7 +605,6 @@ html[data-theme="dark"] .nav-item .cnt { background: #f6c27a; color: #2a1c00; }
 .db-zimg { margin-top: 8px; height: 126px; border-radius: var(--r-md); background-color: #0f1512; background-repeat: no-repeat; border: 1px solid var(--border); cursor: zoom-in; }
 .rv-act-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .rv-act-btns .btn { padding: 12px 16px; font-size: 14px; }
-.rv-ev { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
 @media (max-width: 1160px) { .rv-subgrid { grid-template-columns: 1fr; } .db-board { padding: 24px 20px; } }
 @media (max-width: 900px) { .db-list { position: static; width: auto; max-height: none; order: 2; } .db-board { flex-direction: column; gap: 16px; } .db-zoom { position: static; flex-direction: row; order: 3; } }
 
@@ -920,7 +892,7 @@ function createInitialState(keep = {}) {
 let S = createInitialState();
 /** 화면별 임시 UI 상태 (필터 · 선택 · 페이지 등 — 데모 초기화 대상 아님) */
 const U = {
-  anim: true, fresh: false,   // 진입 모션 / 검사 결과 갱신 모션 1회성 플래그 (playEnter가 소비)
+  anim: true,   // 진입 모션 1회성 플래그 (playEnter가 소비)
   route: 'dashboard', pcb: 'PCB1', running: false, queue: [], qSeq: 0, bankPcb: 'PCB1',
   rvFilter: 'all', rvQ: '', rvSel: null, rvMemo: '', evMode: 'orig', evOpacity: 70,
   hf: { period: 'all', pcb: 'all', result: 'all', q: '' }, hpage: 1
@@ -1029,43 +1001,25 @@ function countUp(el, dur = 900) {
 }
 
 /**
- * 도넛 차트 호를 중심에서 펼치듯 그린다 (stroke-dasharray 보간).
- * @param {SVGCircleElement[]} arcs data-len / data-off / data-c 속성을 가진 호
- */
-function sweepDonut(arcs) {
-  const t0 = performance.now(), dur = 1100;
-  (function step(now) {
-    const k = easeOut(Math.min(1, (now - t0) / dur));
-    arcs.forEach(a => { const len = +a.dataset.len * k, C = +a.dataset.c; a.setAttribute('stroke-dasharray', `${len} ${C - len}`); a.setAttribute('stroke-dashoffset', -(+a.dataset.off) * k); });
-    if (k < 1) requestAnimationFrame(step);
-  })(t0);
-}
-
-/**
  * 렌더 직후 진입 모션을 재생한다.
  * - U.anim: 메뉴 이동·로그인 같은 "화면 진입" → 카드 순차 등장, 차트 그리기, 숫자 세기, 탭 강조
- * - U.fresh: 검사 결과 갱신 → 결과 숫자만 세어 올림 (다른 영역은 건드리지 않음)
  * 단순 상태 갱신(필터·토글 등)은 재생하지 않아 깜박임을 막는다.
  * @param {HTMLElement} app #app 루트
  */
 function playEnter(app) {
-  const full = U.anim, fresh = U.fresh; U.anim = false; U.fresh = false;
-  if (REDUCED || (!full && !fresh)) return;
-  if (fresh) app.querySelectorAll('.fresh .score-big').forEach(el => countUp(el, 800));
-  if (!full) return;
+  const full = U.anim; U.anim = false;
+  if (REDUCED || !full) return;
   const side = app.querySelector('.side'); if (side) side.classList.add('anim');
   const inner = app.querySelector('.main-inner');
   if (inner) {
     inner.classList.add('enter');
     inner.querySelectorAll(':scope > :not(.kpi-grid):not(.split):not(.grid2), :scope > .kpi-grid > *, :scope > .split > *, :scope > .grid2 > *')
       .forEach((el, i) => { el.style.setProperty('--d', Math.min(i, 10) * 70 + 'ms'); el.classList.add('rise'); });
-    inner.querySelectorAll('.tbl tbody tr, .ver-row, .rv-item, .rank-row, .legend-row, .road > div').forEach(el => {
+    inner.querySelectorAll('.tbl tbody tr, .ver-row, .rv-item, .road > div').forEach(el => {
       const i = Array.prototype.indexOf.call(el.parentElement.children, el);
       el.style.setProperty('--d', 260 + Math.min(i, 10) * 40 + 'ms'); el.classList.add(el.tagName === 'TR' ? 'fade-s' : 'rise-s');
     });
-    inner.querySelectorAll('.draw').forEach(p => p.style.setProperty('--len', Math.ceil(p.getTotalLength ? p.getTotalLength() : 1000)));
-    sweepDonut([...inner.querySelectorAll('circle[data-len]')]);
-    inner.querySelectorAll('.kpi .v, .sum-lead .v, .score-big').forEach(el => countUp(el));
+    inner.querySelectorAll('.kpi .v, .sum-lead .v').forEach(el => countUp(el));
   } else { const card = app.querySelector('.login-card'); if (card) card.classList.add('rise'); }
 }
 
@@ -1228,26 +1182,6 @@ function shell(content) {
 /* ═══════════════════════════════════════════════════════════════════════════
    5. [메뉴 1] 대시보드 — 검사 현황 · 정상/불량 통계 · 검토 대기 현황
    ═══════════════════════════════════════════════════════════════════════════ */
-/**
- * 시간대별 검사 건수 누적 막대 차트(SVG)를 생성한다.
- * @returns {string} SVG 마크업
- */
-function hourlyChart() {
-  const hours = Array.from({ length: 12 }, (_, i) => 8 + i);
-  const data = hours.map(h => { const rs = S.inspections.filter(r => new Date(r.at).getHours() === h); return { h, n: rs.filter(r => r.final === 'NORMAL').length, d: rs.filter(r => r.final === 'DEFECT').length, p: rs.filter(r => r.final === null).length }; });
-  const max = Math.max(1, ...data.map(x => x.n + x.d + x.p)), W = 480, H = 170, bw = 26, gap = (W - 20 - bw * 12) / 11;
-  const curH = Math.max(...data.filter(x => x.n + x.d + x.p > 0).map(x => x.h)); // 가장 최근 검사가 있는 시간대(현재)
-  const grid = [0.5, 1].map(f => `<line x1="6" x2="${W - 6}" y1="${H - 22 - f * (H - 40)}" y2="${H - 22 - f * (H - 40)}" stroke="var(--border)" stroke-dasharray="3 4"/>`).join('');
-  const bars = data.map((x, i) => {
-    const X = 10 + i * (bw + gap); let y = H - 22; let out = '';
-    [['n', 'var(--bar-normal)'], ['d', 'var(--bar-defect)'], ['p', 'var(--bar-pending)']].forEach(([k, c]) => {
-      const h = x[k] / max * (H - 40); if (h > 0) { y -= h; out += `<rect class="bar" style="animation-delay:${i * 50}ms" x="${X}" y="${y}" width="${bw}" height="${h}" rx="2" fill="${c}"/>`; }
-    });
-    return `<g class="hr" role="button" aria-label="${x.h}시 ${x.n + x.d + x.p}건, 누르면 검사 이력으로 이동" data-tip="${x.h}시 · 정상 ${x.n} · 불량 ${x.d} · 대기 ${x.p} (합계 ${x.n + x.d + x.p}) — 클릭: 이력 보기" onclick="gotoHour(${x.h})">` + out + `<text class="ct" x="${X + bw / 2}" y="${H - 6}" text-anchor="middle" font-size="10" fill="${x.h === curH ? 'var(--primary)' : 'var(--text-3)'}" font-weight="${x.h === curH ? 700 : 400}">${x.h}</text><text class="bar-l ct" x="${X + bw / 2}" y="${y - 4}" text-anchor="middle" font-size="10" fill="var(--text-2)">${x.n + x.d + x.p}</text><rect class="hit" x="${X - gap / 2}" y="0" width="${bw + gap}" height="${H - 16}"/></g>`;
-  }).join('');
-  return `<svg data-chart viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="시간대별 검사 건수">${grid}${bars}</svg>
-    <div class="row small muted" style="gap:16px"><span><span class="dot" style="color:var(--bar-normal);display:inline-block"></span> 정상</span><span><span class="dot" style="color:var(--bar-defect);display:inline-block"></span> 불량</span><span><span class="dot" style="color:var(--bar-pending);display:inline-block"></span> 검토 대기</span></div>${chartTable(['시간', '정상', '불량', '검토 대기', '합계'], data.map(x => [x.h + '시', x.n, x.d, x.p, x.n + x.d + x.p]))}`;
-}
 
 /**
  * 대시보드 화면을 생성한다.
@@ -1430,7 +1364,7 @@ async function runBatch() {
   for (const q of U.queue) if (q.st === 'run') q.st = 'wait';
   U.running = false;
   if (aborted) { if (S.user) render(); return; }   // 로그아웃·데모 초기화로 중단: 새 상태에는 아무것도 저장하지 않는다
-  U.fresh = true; render();
+  render();
   toast(stopped ? `서버 연결이 끊겨 ${ok}장까지 검사하고 중단했습니다` : `${ok}장 검사 완료 · 정상 ${ok - anom} · 이상 의심 ${anom}${anom ? ' — 검토 대기로 등록' : ''}`);
 }
 
@@ -2020,7 +1954,6 @@ function filteredHistory() {
     if (f.period === 'am' && h >= 12) return false;
     if (f.period === 'pm' && (h < 12 || h >= 18)) return false;
     if (f.period === 'eve' && h < 18) return false;
-    if (f.hour != null && h !== f.hour) return false;
     if (f.pcb !== 'all' && r.pcb !== f.pcb) return false;
     if (f.result !== 'all' && finalState(r) !== f.result) return false;
     if (f.q && !(r.id.toLowerCase().includes(f.q.toLowerCase()) || String(r.n) === f.q.trim())) return false;
@@ -2042,7 +1975,7 @@ function viewHistory() {
       ${sel('pcb', [['all', 'PCB 종류: 전체'], ...S.pcbs.map(p => [p.id, 'PCB 종류: ' + p.id])])}
       ${sel('result', [['all', '결과: 전체'], ['NORMAL', '결과: 정상'], ['DEFECT', '결과: 불량'], ['PENDING', '결과: 검토 대기']])}
       <input class="inp" style="width:170px" placeholder="검사 ID · 번호 검색" value="${esc(U.hf.q)}" onchange="U.hf.q=this.value;U.hpage=1;render()">
-      ${U.hf.hour != null ? `<button class="pill" onclick="U.hf.hour=null;U.hpage=1;render()" title="시간 필터 해제">${U.hf.hour}시대 ✕</button>` : ''}<span class="muted small">${all.length}건</span><button class="btn sm outline" style="margin-left:auto" onclick="exportCsv()">${ic('download')}CSV 다운로드</button></div>
+      <span class="muted small">${all.length}건</span><button class="btn sm outline" style="margin-left:auto" onclick="exportCsv()">${ic('download')}CSV 다운로드</button></div>
       <div class="tbl-wrap"><table class="tbl cards"><thead><tr><th>번호</th><th>PCB 종류</th><th>AI 점수</th><th>AI 판정</th><th>최종 판정</th><th>검사 시각</th>${isAdmin() ? '<th>당시 임계값</th><th>모델</th>' : ''}</tr></thead><tbody>
       ${rows.map(r => `<tr tabindex="0" class="click ${r.ai === 'ANOMALY' ? 'anom' : ''}" onclick="openDetail(${r.n})"><td class="c-main" data-l="번호">${r.n}</td><td>${pcbTag(r.pcb)}</td><td data-l="AI 점수"><span class="sc">${r.score.toFixed(2)}<i class="${r.score >= r.thr ? 'hi' : ''}"><b style="width:${Math.round(r.score * 100)}%"></b></i></span></td><td data-l="AI">${aiBadge(r.ai)}</td><td class="c-tag">${finalBadge(r)}</td><td>${mdhm(r.at)}</td>${isAdmin() ? `<td class="c-hide">${r.thr.toFixed(2)}</td><td class="c-hide">${r.ver}</td>` : ''}</tr>`).join('') || `<tr><td colspan="${isAdmin() ? 8 : 6}" class="empty">${ic('history')}조건에 맞는 검사가 없습니다.<br><button class="btn sm outline mt10" onclick="U.hf={period:'all',pcb:'all',result:'all',q:''};U.hpage=1;render()">필터 초기화</button></td></tr>`}</tbody></table></div>
       <div class="pager"><button class="btn sm" ${U.hpage <= 1 ? 'disabled' : ''} onclick="U.hpage--;render()">이전</button><span class="small muted">${U.hpage} / ${pages}</span><button class="btn sm" ${U.hpage >= pages ? 'disabled' : ''} onclick="U.hpage++;render()">다음</button></div>
@@ -2082,28 +2015,15 @@ function exportCsv(all) {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   8-2. [메뉴 5] 통계 분석 — 기간별 추이 · 불량 유형 분포 · TOP 5 (시연용 합성 이력 포함)
+   8-2. [메뉴 5] 통계 분석 — 기간별 추이 (시연용 합성 이력 포함)
    ═══════════════════════════════════════════════════════════════════════════ */
-/** 불량 유형 분류 체계 — 샘플 이미지의 데이터셋 정답 라벨(PKU-Market-PCB)을 쓴다. 실제 API는 유형을 반환하지 않으므로 서비스에서는 검사원 분류 입력(후속 확장)이 이 값을 대신한다. */
-const DEFECT_TYPES = [
-  { id: 'open', c: '#8e5bb5' }, { id: 'short', c: '#3aa38a' }, { id: 'mousebite', c: '#b5651d' }, { id: 'spur', c: '#7a8a99' },
-  { id: 'copper', c: '#c76f9a' }, { id: 'missing_hole', c: '#2f8f9d' }, { id: '', c: '#9aa3a0' }
-].map(t => ({ ...t, k: t.id ? KIND_KO[t.id] : '미분류' }));
 /** 최근 6일 합성 이력 [검사 건수, 불량 건수] (시연용 고정값) + 오늘은 실제 집계 */
 const PAST_DAYS = [[104, 9], [118, 11], [97, 8], [126, 12], [112, 10], [109, 9]];
 
 /**
- * 검사 레코드의 불량 유형 id를 돌려준다(이미지의 정답 라벨). 라벨이 없는 업로드 이미지는 '' (미분류).
- * @param {object} r 검사 레코드
- * @returns {string} 유형 id
- */
-function defectTypeOf(r) { return (r.boxes && r.boxes[0] && r.boxes[0].k) || ''; }
-
-/**
  * 통계 분석용 집계를 만든다 (기간 7/14일 중 선택, 일별 추이의 과거 일자는 시연용 합성).
- * 불량 유형 분포는 합성 없이 현재 검사 이력(불량 확정 + 검토 대기)의 실제 이미지 라벨로 집계한다.
  * @param {number} days 기간(일)
- * @returns {object} 일별 · 유형별 집계
+ * @returns {object} 일별 집계
  */
 function statsData(days) {
   const st = getStats();
@@ -2112,9 +2032,7 @@ function statsData(days) {
   const base = new Date('2026-11-20T00:00:00+09:00');
   const all = [...past, [st.total, st.defect + st.pending]];
   all.forEach(([t, d], i) => { const dt = new Date(base.getTime() - (all.length - 1 - i) * 86400000); labels.push(`${dt.getMonth() + 1}/${dt.getDate()}`); tot.push(t); bad.push(d); });
-  const bads = S.inspections.filter(r => r.final !== 'NORMAL');   // 불량 확정 + 검토 대기
-  const byType = DEFECT_TYPES.map(t => ({ ...t, n: bads.filter(r => defectTypeOf(r) === t.id).length })).filter(t => t.n > 0).sort((x, y) => y.n - x.n);
-  return { labels, tot, bad, byType, typeTotal: bads.length, sum: tot.reduce((a, b) => a + b, 0), badSum: bad.reduce((a, b) => a + b, 0) };
+  return { labels, tot, bad, sum: tot.reduce((a, b) => a + b, 0), badSum: bad.reduce((a, b) => a + b, 0) };
 }
 
 /** 통계 기간 선택(7일/14일)을 바꾼다. */
@@ -2140,9 +2058,6 @@ function pageHead(title, sub, act) {
 function chartTable(head, rows) {
   return `<details class="tbl-toggle"><summary>표로 보기</summary><table><thead><tr>${head.map(x => `<th>${x}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></details>`;
 }
-
-/** 대시보드 시간대 막대 클릭: 해당 시간대의 검사 이력으로 이동한다. @param {number} hr 시(0~23) */
-function gotoHour(hr) { U.hf = { period: 'all', pcb: 'all', result: 'all', q: '', hour: hr }; go('history'); }
 
 /**
  * 다운로드 파일명을 만든다(검사 ID + 이미지 형식 확장자).
@@ -2232,9 +2147,6 @@ document.addEventListener('keydown', e => {
   if (e.key === '+' || e.key === '=') vzZoom(1.25); else if (e.key === '-') vzZoom(1 / 1.25); else if (e.key === '0') vzReset();
 });
 
-/** 도넛 범례에 마우스를 올리면 해당 유형의 호만 강조한다. @param {string} [k] 유형명(없으면 해제) */
-function hiArc(k) { document.querySelectorAll('circle.arc').forEach(c => { c.style.opacity = !k || c.dataset.k === k ? '' : '.3'; }); }
-
 /** 모바일(700px 이하) 하단 탭의 '더보기': 통계·데이터·모델·설정 시트를 연다. */
 function openMore() {
   const adm = isAdmin();
@@ -2278,24 +2190,6 @@ function trendChart(d) {
   }).join("");
   return `<svg data-chart viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="일별 불량·대기 건수와 전체 대비 비율">${grid}${bars}</svg>
     <div class="small muted">막대 = 불량·대기 건수(진한 막대 = 오늘, 연한 막대 = 시연용 지난 날) · ${roomy ? '날짜 아래 % = 그날 전체 검사 대비 비율' : '그날 전체 대비 비율은 아래 "표로 보기"에 있습니다'}</div>${chartTable(['일자', '전체 검사', '불량·대기', '비율'], d.labels.map((l, i) => [l, d.tot[i], d.bad[i], pct(i) + '%']))}`;
-}
-
-/** 불량 유형 도넛 차트(SVG). */
-function donutChart(byType) {
-  const total = byType.reduce((a, t) => a + t.n, 0) || 1, R = 62, C = 2 * Math.PI * R; let off = 0;
-  const arcs = byType.map(t => { const len = C * t.n / total, s = `<circle class="arc" data-k="${t.k}" data-tip="${t.k} · ${t.n}건 (${(t.n / total * 100).toFixed(1)}%)" data-len="${len}" data-off="${off}" data-c="${C}" r="${R}" cx="80" cy="80" fill="none" stroke="${t.c}" stroke-width="24" stroke-dasharray="${len} ${C - len}" stroke-dashoffset="${-off}" transform="rotate(-90 80 80)"/>`; off += len; return s; }).join('');
-  return `<svg viewBox="0 0 160 160" width="170" role="img" aria-label="불량 유형별 분포">${arcs}<text x="80" y="76" text-anchor="middle" font-size="12" fill="var(--text-3)">불량 건수</text><text x="80" y="98" text-anchor="middle" font-size="20" font-weight="700" fill="var(--text-1)">${total}</text></svg>`;
-}
-
-/**
- * 불량 유형별 분포(도넛 + 범례)를 생성한다. 통계 분석(SC-07)과 대시보드(SC-01)가 같은 마크업을 공유해 숫자·색이 어긋나지 않게 한다.
- * @param {{k: string, c: string, n: number}[]} byType 유형명 · 색 · 건수 (statsData().byType)
- * @returns {string} 도넛 SVG + 범례 HTML
- */
-function defectDist(byType) {
-  if (!byType.length) return `<div class="empty">불량 확정·검토 대기 건이 없습니다.</div>`;
-  const tot = byType.reduce((a, t) => a + t.n, 0) || 1;
-  return `<div class="donut-wrap">${donutChart(byType)}<div>${byType.map(t => `<div class="legend-row" data-k="${t.k}" onmouseenter="hiArc(this.dataset.k)" onmouseleave="hiArc()"><i style="background:${t.c}"></i>${t.k} <b>${t.n}</b> <span class="muted">${(t.n / tot * 100).toFixed(1)}%</span></div>`).join('')}</div></div>`;
 }
 
 /**
