@@ -660,6 +660,7 @@ tr.click:focus-visible > td:last-child { box-shadow: inset -2px 0 var(--primary)
 <div id="modal" class="hidden"></div>
 <div id="toasts"></div>
 <span id="hintDetail" hidden>Enter 키로 상세 보기</span><span id="hintSelect" hidden>Enter 키로 선택</span>
+<div id="srLive" class="sr" aria-live="polite" style="top:0;left:0"></div><div id="srAlert" class="sr" role="alert" style="top:0;left:0"></div>
 <input type="file" id="fileInput" accept="image/*" multiple class="hidden">
 <input type="file" id="bankInput" accept="image/*,.zip,.npy,.pt,.pth,.ckpt,.faiss,.pkl,.bin,.json" multiple class="hidden">
 
@@ -977,8 +978,9 @@ function thumbStyle(r) {
 function toast(msg) {
   const warn = /오프라인|끊겨|연결할 수|불가|없습니다|부족|제외|초과|차단|사유 미입력|만 전환|만 추가/.test(msg);
   const el = document.createElement('div'); el.className = 'toast ' + (warn ? 'warn' : 'ok'); el.textContent = msg;
-  el.setAttribute('role', warn ? 'alert' : 'status');
   document.getElementById('toasts').appendChild(el);
+  // 새로 붙인 요소의 role="status"는 화면 낭독기가 읽지 않아, 처음부터 있는 숨은 알림 영역에 같은 글을 넣어 읽힌다(경고는 role="alert" 영역).
+  const live = document.getElementById(warn ? 'srAlert' : 'srLive'); live.textContent = ''; setTimeout(() => { live.textContent = msg; }, 60);
   setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 260); }, 2750);
 }
 
@@ -1174,7 +1176,7 @@ function shell(content) {
       <div class="brand"><img src="./docs/assets/circuiteye_icon_256.png" alt=""><span class="brand-t">CircuitEye</span><small>PCB Inspection</small></div>
       ${apiPill()}
       <div class="top-sp"></div>
-      <span class="small muted role-label">${esc(S.user.company)} · ${esc(S.user.name)}</span>
+      <span class="small muted role-label">${esc(S.user.company)} · ${esc(S.user.name)}</span><span class="sr">, </span>
       <span class="pill ${adm ? 'role-admin' : 'role-insp'}">${ic(adm ? 'shield' : 'user')}${adm ? '관리자' : '검사원'}</span>
       <button class="icon-btn" onclick="toggleTheme()" aria-label="테마 전환" title="테마 전환">${ic(S.theme === 'dark' ? 'sun' : 'moon')}</button>
       <button class="icon-btn" onclick="logout()" aria-label="로그아웃" title="로그아웃">${ic('out')}</button>
@@ -1219,13 +1221,13 @@ function viewDashboard() {
     : '';   // 검사원: '검토 시작 · 새 검사'는 아래 검토 대기 블록에 있다
   return `${pageHead('오늘의 검사 현황', '2026-11-20')}
     ${roleStrip}
-    <div class="sum"><div class="sum-lead"><span class="l">검토 대기</span><span class="v">${st.pending}</span><span class="s">전체의 ${pc(st.pending)} · <button class="rs-link" onclick="gotoHistory('PENDING')">이력에서 보기</button></span>
+    <div class="sum"><div class="sum-lead"><span class="l">검토 대기</span><span class="sr">, </span><span class="v">${st.pending}</span><span class="sr">건, </span><span class="s">전체의 ${pc(st.pending)} · <button class="rs-link" onclick="gotoHistory('PENDING')">이력에서 보기</button></span>
         <div class="sum-cta">${first ? `<button class="btn primary" onclick="openReview(${first.n})">검토 시작</button><button class="btn outline" onclick="go('inspect')">새 검사</button>` : `<button class="btn primary" onclick="go('inspect')">새 검사 시작</button>`}</div></div>
       <div class="sum-rest"><div class="sum-head">오늘 <b>${st.total}</b>건 검사 · 08~19시</div>
         <div class="sum-bar" role="img" aria-label="정상 ${st.normal}건, 불량 ${st.defect}건, 검토 대기 ${st.pending}건"><button style="flex:${st.normal};background:var(--good)" onclick="gotoHistory('NORMAL')" aria-label="정상 이력"></button><button style="flex:${st.defect};background:var(--bad)" onclick="gotoHistory('DEFECT')" aria-label="불량 이력"></button><button style="flex:${st.pending};background:var(--warn)" onclick="gotoHistory('PENDING')" aria-label="검토 대기 이력"></button></div>
         <div class="sum-legend"><button onclick="gotoHistory('NORMAL')"><i style="background:var(--good)"></i>정상 확정 <b>${st.normal}</b> ${pc(st.normal)}</button><button onclick="gotoHistory('DEFECT')"><i style="background:var(--bad)"></i>불량 확정 <b>${st.defect}</b> ${pc(st.defect)}</button><button onclick="gotoHistory('all')">전체 이력 보기</button></div></div></div>
     <div class="split eq">
-      <div class="card"><div class="card-title">일별 검사 추이 <span class="muted small">최근 7일</span><span class="sp"></span><button class="btn sm" onclick="go('stats')">통계 분석</button></div>${trendChart(statsData(7))}
+      <div class="card"><div class="card-title">일별 검사 추이 <span class="sr">, </span><span class="muted small">최근 7일</span><span class="sp"></span><button class="btn sm" onclick="go('stats')">통계 분석</button></div>${trendChart(statsData(7))}
         <div class="divider"></div><div class="row between"><span class="muted">AI-검사원 판정 일치율</span><b style="font-size:20px">${st.match}%</b></div>
         <div class="note mt4">검사원 확정 건 중 AI 최초 판정과 같은 비율 (AI 원본 판정은 보존)</div></div>
       <div class="card"><div class="card-title">검토 대기 <span class="sp"></span><button class="btn sm" onclick="go('review')">검토하기</button></div>

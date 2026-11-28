@@ -590,6 +590,7 @@ body { background: var(--bg-app); word-break: keep-all; overflow-wrap: break-wor
   background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-card);
   padding: 16px 16px; text-align: left; width: 100%; min-width: 0;
   display: flex; flex-direction: column; align-items: stretch; gap: 2px; transition: border-color .15s, background .15s;
+  position: relative;   /* 안의 .sr 글자가 스크롤 영역 밖으로 나가 페이지를 늘리지 않게 */
 }
 .kpi.click { cursor: pointer; }
 .kpi.click:hover { border-color: var(--border-strong); background: var(--bg-subtle); }
@@ -640,7 +641,7 @@ body { background: var(--bg-app); word-break: keep-all; overflow-wrap: break-wor
 
 /* ── 불량 유형 분포: 가로 막대 목록 (도넛 + 범례 중복 대신) ───────────────────────────── */
 .dist { display: flex; flex-direction: column; gap: 8px; }
-.dist-row { display: grid; grid-template-columns: 84px minmax(0, 1fr) 44px 40px; align-items: center; gap: 8px; font-size: 14px; }
+.dist-row { display: grid; grid-template-columns: 84px minmax(0, 1fr) 44px 40px; align-items: center; gap: 8px; font-size: 14px; position: relative; }   /* relative: .sr 글자가 페이지를 늘리지 않게 */
 .dist-k { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dist-bar { height: 10px; background: var(--bg-muted); border-radius: 2px; overflow: hidden; }
 .dist-bar i { display: block; height: 100%; background: var(--text-3); border-radius: 2px; }
@@ -1115,6 +1116,7 @@ kbd { font: inherit; font-size: 12px; padding: 0 4px; border: 1px solid var(--bo
 <div id="modal" class="hidden"></div>
 <div id="toasts"></div>
 <span id="hintDetail" hidden>Enter 키로 상세 보기</span><span id="hintSelect" hidden>Enter 키로 선택</span>
+<div id="srLive" class="sr" aria-live="polite" style="top:0;left:0"></div>
 <input type="file" id="fileInput" accept="image/*" multiple class="hidden">
 <input type="file" id="bankInput" accept="image/*,.zip,.npy,.pt,.pth,.ckpt,.faiss,.pkl,.bin,.json" multiple class="hidden">
 
@@ -1441,6 +1443,8 @@ function thumbStyle(r) {
 function toast(msg) {
   const el = document.createElement('div'); el.className = 'toast'; el.textContent = msg;
   document.getElementById('toasts').appendChild(el);
+  // 화면 낭독기용: 처음부터 있는 숨은 알림 영역(aria-live)에 같은 글을 넣어 읽힌다(새로 붙인 요소만으로는 읽히지 않음).
+  const live = document.getElementById('srLive'); live.textContent = ''; setTimeout(() => { live.textContent = msg; }, 60);
   setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 260); }, 2750);
 }
 
@@ -1786,10 +1790,13 @@ function dashPeriodData(period) {
  * @param {boolean} [lowerIsGood] true면 감소가 긍정(불량률·대기·점수)
  */
 function deltaPill(val, unit, lowerIsGood = false) {
-  if (Math.abs(val) < 0.005) return `<span class="delta flat">━ 0${unit}</span>`;
+  // 앞뒤 .sr 구분 글자: 화면 낭독기가 값 · 증감 · 비교 문구를 붙여 읽지 않게("120건, 증가 10.1%, 전일 대비")
+  // 보이는 글자는 한 덩어리 그대로(aria-hidden), 화면 낭독기에는 "증가 10.1%"처럼 기호 대신 말로 읽힌다.
+  const pill = (cls, shown, said) => `<span class="sr">, </span><span class="delta ${cls}"><span aria-hidden="true">${shown}</span><span class="sr">${said}</span></span><span class="sr">, </span>`;
+  if (Math.abs(val) < 0.005) return pill('flat', `━ 0${unit}`, `변화 없음`);
   const up = val > 0, good = lowerIsGood ? !up : up;
   const num = unit === '' ? Math.abs(val).toFixed(2) : Number.isInteger(val) ? Math.abs(val) : Math.abs(val).toFixed(1);
-  return `<span class="delta ${good ? 'good' : 'bad'}">${up ? '▲' : '▼'} ${num}${unit}</span>`;
+  return pill(good ? 'good' : 'bad', `${up ? '▲' : '▼'} ${num}${unit}`, `${up ? '증가' : '감소'} ${num}${unit}`);
 }
 
 /**
@@ -1924,17 +1931,17 @@ function viewDashboard() {
 
     <div class="kpi-grid ${adm ? 'k3' : 'k2'}">
       <button class="kpi click" onclick="gotoHistory('all')" title="전체 이력 보기">
-        <span class="l">${d.kpiCountLabel}</span>
+        <span class="l">${d.kpiCountLabel}</span><span class="sr">, </span>
         <span class="kpi-val"><span class="v">${d.kpiCount.toLocaleString()}건</span>${deltaPill(d.countPct, '%', false)}</span>
         <span class="kpi-foot">${d.cmpLabel} · 오늘 정상 ${st.normal}건</span>
       </button>
       <button class="kpi click" onclick="gotoHistory('DEFECT')" title="불량 확정 이력 보기">
-        <span class="l">불량률${period === 'today' ? '' : ` (${period === '7d' ? '7일' : '30일'})`}</span>
+        <span class="l">불량률${period === 'today' ? '' : ` (${period === '7d' ? '7일' : '30일'})`}</span><span class="sr">, </span>
         <span class="kpi-val"><span class="v ${d.kpiDefectRate >= 8 ? 'bad' : ''}">${d.kpiDefectRate.toFixed(1)}%</span>${deltaPill(d.rateDiff, '%p', true)}</span>
         <span class="kpi-foot">${d.cmpLabel} · 확정 불량 ${d.kpiDefects}건</span>
       </button>
       ${adm ? `<div class="kpi">
-        <span class="l">평균 AI 점수</span>
+        <span class="l">평균 AI 점수</span><span class="sr">, </span>
         <span class="kpi-val"><span class="v">${d.avgScore.toFixed(2)}</span>${deltaPill(d.scoreDiff, '', true)}</span>
         <span class="kpi-foot">평균 처리 ${d.avgMs}ms · AI-검사원 일치율 ${st.match}%</span>
       </div>` : ''}
@@ -3045,7 +3052,7 @@ function trendChart(d) {
 function defectDist(byType) {
   if (!byType.length) return `<div class="empty ok">불량 확정·검토 대기 건이 없습니다.</div>`;
   const tot = byType.reduce((a, t) => a + t.n, 0) || 1, top = byType[0].n || 1;
-  return `<div class="dist">${byType.map(t => `<div class="dist-row"><span class="dist-k">${t.k}</span><span class="dist-bar"><i style="width:${(t.n / top * 100).toFixed(0)}%"></i></span><b>${t.n}건</b><span class="muted">${(t.n / tot * 100).toFixed(0)}%</span></div>`).join('')}</div>`;
+  return `<div class="dist">${byType.map(t => `<div class="dist-row"><span class="dist-k">${t.k}</span><span class="dist-bar"><i style="width:${(t.n / top * 100).toFixed(0)}%"></i></span><span class="sr">, </span><b>${t.n}건</b><span class="sr">, </span><span class="muted">${(t.n / tot * 100).toFixed(0)}%</span><span class="sr">. </span></div>`).join('')}</div>`;
 }
 
 /**
@@ -3067,12 +3074,12 @@ function viewStats() {
     `)}
     <div class="kpi-grid">
       <div class="kpi lead">
-        <span class="l">불량·대기 비율 (${days}일)</span>
+        <span class="l">불량·대기 비율 (${days}일)</span><span class="sr">, </span>
         <span class="kpi-val"><span class="v">${rate.toFixed(1)}%</span>${deltaPill(diff, '%p', true)}<span class="kpi-foot">직전 ${days}일 대비</span></span>
         <span class="kpi-foot">불량 확정 + 검토 대기 ${d.badSum}건 / 검사 ${d.sum.toLocaleString()}건</span>
       </div>
-      <div class="kpi"><span class="l">기간 검사 건수</span><span class="kpi-val"><span class="v">${d.sum.toLocaleString()}건</span></span><span class="kpi-foot">${days}일 합계</span></div>
-      <div class="kpi"><span class="l">AI-검사원 일치율</span><span class="kpi-val"><span class="v">${st.match}%</span></span><span class="kpi-foot">최종 확정 건 기준</span></div>
+      <div class="kpi"><span class="l">기간 검사 건수</span><span class="sr">, </span><span class="kpi-val"><span class="v">${d.sum.toLocaleString()}건</span></span><span class="sr">, </span><span class="kpi-foot">${days}일 합계</span></div>
+      <div class="kpi"><span class="l">AI-검사원 일치율</span><span class="sr">, </span><span class="kpi-val"><span class="v">${st.match}%</span></span><span class="sr">, </span><span class="kpi-foot">최종 확정 건 기준</span></div>
     </div>
     <div class="dash-grid">
       <div class="card"><div class="card-title">일별 검사 추이 <span class="muted small">${days}일</span></div>${trendChart(d)}</div>
