@@ -1393,6 +1393,7 @@ function aiBadge(ai) { return ai === 'ANOMALY' ? '<span class="ai-v anom">이상
 /**
  * 최종 판정 배지(정상/불량/대기)를 반환한다.
  * @param {object} r 검사 레코드
+ * @param {string} [cls] 배지에 덧붙일 클래스(예: 'lg' — 검토 화면 제목 줄의 큰 배지)
  * @returns {string} 배지 HTML
  */
 function finalBadge(r, cls = '') {
