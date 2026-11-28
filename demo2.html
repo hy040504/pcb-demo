@@ -68,6 +68,7 @@ button { cursor: pointer; border: 0; background: none; line-height: inherit; }
 .hidden { display: none !important; }
 /* 화면에는 안 보이고 화면 낭독기만 읽는 글자 (숫자 · 상태가 붙어 읽히지 않게 구분 문구를 넣을 때) */
 .sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.chart-legend > span { position: relative; }   /* 안의 .sr 글자가 스크롤 영역 밖으로 나가 페이지를 늘리지 않게 */
 
 /* ═══════════════════════════════════════════════════════════════════════════
    2. 공통 컴포넌트 — 카드 · 배지 · 버튼 · 폼 · 표
@@ -1846,7 +1847,7 @@ function dashTrendChart(d, highlightToday = true) {
 
   return `<svg data-chart viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="일별 검사 건수 및 불량 추이">${grid}${bars}<polyline fill="none" stroke="var(--bar-defect)" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" points="${pts}" pointer-events="none"/>${dots}</svg>
     <div class="chart-legend">
-      <span><i class="swatch" style="background:var(--primary)"></i>검사 건수 (왼쪽 축)</span>
+      <span><i class="swatch" style="background:var(--primary)"></i>검사 건수 (왼쪽 축)<span class="sr">, </span></span>
       <span><i class="lswatch" style="background:var(--bar-defect)"></i>불량·대기 건수 (오른쪽 축)</span>
     </div>
     <p class="chart-note">진한 막대는 오늘(실제), 옅은 막대는 과거 일자(시연용 합성)입니다.</p>
