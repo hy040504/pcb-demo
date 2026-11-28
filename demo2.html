@@ -66,6 +66,8 @@ button { cursor: pointer; border: 0; background: none; line-height: inherit; }
 .ic { width: 16px; height: 16px; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; fill: none; flex: none; }
 .ic.lg { width: 20px; height: 20px; }
 .hidden { display: none !important; }
+/* 화면에는 안 보이고 화면 낭독기만 읽는 글자 (숫자 · 상태가 붙어 읽히지 않게 구분 문구를 넣을 때) */
+.sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 /* ═══════════════════════════════════════════════════════════════════════════
    2. 공통 컴포넌트 — 카드 · 배지 · 버튼 · 폼 · 표
@@ -706,6 +708,7 @@ svg[data-chart] .ct { font-size: calc(12px * var(--k, 1)); }
 .pq-item {
   display: flex; align-items: center; gap: 12px; padding: 8px 4px; width: 100%; min-height: 58px; text-align: left;
   border-bottom: 1px solid var(--border); transition: background .15s;
+  position: relative;   /* 안의 .sr 글자가 스크롤 목록 밖으로 나가 페이지를 늘리지 않게 */
 }
 .pq-item:last-child { border-bottom: 0; }
 .pq-item:hover { background: var(--bg-subtle); }
@@ -876,6 +879,7 @@ kbd { font: inherit; font-size: 12px; padding: 0 4px; border: 1px solid var(--bo
 .rv-item {
   display: flex; align-items: center; gap: 8px; width: 100%; min-height: 62px; padding: 8px 8px; text-align: left;
   border: 1px solid transparent; border-radius: var(--r-ctl); background: transparent; transition: background .15s, border-color .15s;
+  position: relative;   /* 안의 .sr 글자가 스크롤 목록 밖으로 나가 페이지를 늘리지 않게 */
 }
 .rv-item:hover { background: var(--bg-subtle); }
 .rv-item.sel { background: var(--bg-muted); border-color: var(--border-strong); }
@@ -1110,6 +1114,7 @@ kbd { font: inherit; font-size: 12px; padding: 0 4px; border: 1px solid var(--bo
 <div id="app"></div>
 <div id="modal" class="hidden"></div>
 <div id="toasts"></div>
+<span id="hintDetail" hidden>Enter 키로 상세 보기</span><span id="hintSelect" hidden>Enter 키로 선택</span>
 <input type="file" id="fileInput" accept="image/*" multiple class="hidden">
 <input type="file" id="bankInput" accept="image/*,.zip,.npy,.pt,.pth,.ckpt,.faiss,.pkl,.bin,.json" multiple class="hidden">
 
@@ -1457,12 +1462,18 @@ function playEnter(app) {
 }
 
 /**
- * 모달을 연다.
- * @param {string} html 모달 카드 내부 HTML
+ * 모달을 연다. 창 이름은 첫 굵은 제목에서 가져오고, 뒤 화면은 inert로 막아 Tab · 화면 낭독기가 창 밖으로 나가지 않게 하며,
+ * 포커스를 창의 첫 버튼(닫기)으로 옮긴다. 이미 열린 창의 내용을 바꿀 때는 처음 연 요소를 그대로 기억한다.
+ * @param {string} html 모달 카드 내부 HTML (첫 <b>가 창 제목)
  */
 function openModal(html) {
   clearTimeout(modalTimer);
-  const m = document.getElementById('modal'); m.classList.remove('closing'); m.innerHTML = `<div class="modal-card" role="dialog" aria-modal="true">${html}</div>`; m.classList.remove('hidden');
+  const m = document.getElementById('modal'), a = document.activeElement;
+  if (m.classList.contains('hidden') || m.classList.contains('closing')) modalOpener = a && a !== document.body && !m.contains(a) ? { el: a, k: a.getAttribute('onclick'), pcb: a.dataset && a.dataset.pcb } : null;
+  m.classList.remove('closing'); m.innerHTML = `<div class="modal-card" role="dialog" aria-modal="true">${html}</div>`; m.classList.remove('hidden');
+  const card = m.firstElementChild, t = card.querySelector('b'); if (t) card.setAttribute('aria-label', t.textContent.trim());
+  document.getElementById('app').inert = true;
+  const f = card.querySelector('button:not([disabled]), [href], input, select, textarea, [tabindex]'); if (f) f.focus();
   m.onclick = e => { if (e.target === m) closeModal(); };
 }
 
@@ -1481,9 +1492,19 @@ function openNotif() {
 
 /** 닫기 페이드 타이머 (닫는 중에 새 모달이 열리면 취소해 내용이 지워지지 않게 한다). */
 let modalTimer = 0;
-/** 모달을 닫는다 (0.15초 페이드 후 제거). */
+/** 모달을 연 요소 { el, k: onclick, pcb } — 닫을 때 포커스를 돌려준다. */
+let modalOpener = null;
+/** 모달을 닫고(0.15초 페이드 후 제거) 포커스를 연 요소로 돌려준다. 그 사이 화면이 다시 그려졌으면 같은 동작의 새 요소를 찾는다. */
 function closeModal() {
   const m = document.getElementById('modal'); if (m.classList.contains('hidden')) return;
+  document.getElementById('app').inert = false;
+  const o = modalOpener; modalOpener = null;
+  // 닫은 직후 render()로 화면이 다시 그려지는 경우가 있어, 이번 동작이 끝난 뒤 찾는다. 그 사이 새 창이 열렸으면 그 창이 포커스를 가진다.
+  if (o) setTimeout(() => {
+    if (!m.classList.contains('hidden') && !m.classList.contains('closing')) return;
+    const to = o.el.isConnected ? o.el : o.k && [...document.querySelectorAll('[onclick]')].find(x => x.getAttribute('onclick') === o.k && x.dataset.pcb === o.pcb);
+    if (to) to.focus();
+  }, 0);
   if (REDUCED) { m.classList.add('hidden'); m.innerHTML = ''; return; }
   m.classList.add('closing'); clearTimeout(modalTimer);
   modalTimer = setTimeout(() => { m.classList.add('hidden'); m.classList.remove('closing'); m.innerHTML = ''; }, 150);
@@ -1607,10 +1628,10 @@ function shell(content) {
     </header>
     <div class="body-wrap">
       <nav class="side" aria-label="주 메뉴">
-        ${MENUS.map(m => `<button class="nav-item ${U.route === m.id ? 'active' : ''} ${m.sec ? 'sec' : ''}" ${U.route === m.id ? 'aria-current="page"' : ''} onclick="go('${m.id}')">${ic(m.icon, 'lg')}<span>${m.label}</span>${m.id === 'review' && st.pending ? `<span class="cnt">${st.pending}</span>` : ''}${m.adminEdit && !adm ? `<span class="lk" title="조회 전용">${ic('lock')}</span>` : ''}</button>`).join('')}
+        ${MENUS.map(m => `<button class="nav-item ${U.route === m.id ? 'active' : ''} ${m.sec ? 'sec' : ''}" ${U.route === m.id ? 'aria-current="page"' : ''} onclick="go('${m.id}')">${ic(m.icon, 'lg')}<span>${m.label}</span>${m.id === 'review' && st.pending ? `<span class="sr">, 검토 대기 </span><span class="cnt">${st.pending}</span><span class="sr">건</span>` : ''}${m.adminEdit && !adm ? `<span class="lk" title="조회 전용">${ic('lock')}</span>` : ''}</button>`).join('')}
         <button class="nav-item nav-more ${MENUS.some(m => m.sec && m.id === U.route) ? 'active' : ''}" onclick="openMore()">${ic('dots', 'lg')}<span>더보기</span></button>
         <div class="side-foot">
-          <div class="sys-card" role="button" tabindex="0" onclick="openApiStatus()" onkeydown="if(event.key==='Enter')openApiStatus()" title="누르면 서버 상태 상세">
+          <div class="sys-card" role="button" tabindex="0" onclick="openApiStatus()" onkeydown="if(event.key==='Enter')openApiStatus()" title="누르면 서버 상태 상세" aria-label="시스템 상태: ${sysBad.length ? `이상 ${sysBad.length}건 — ${sysBad.map(([k, v]) => `${k} ${v}`).join(', ')}` : '모두 정상'}">
             <span class="sys-row"><b>시스템 상태</b><span class="st ${sysBad.length ? 'off' : 'ok'}">${sysBad.length ? `이상 ${sysBad.length}건` : '모두 정상'}</span></span>${sysBad.map(([k, v]) => `
             <span class="sys-row">${k} <span class="st off">${v}</span></span>`).join('')}</div>
           <button class="demo-reset" onclick="resetDemo()">데모 데이터 초기화</button></div>
@@ -1952,8 +1973,8 @@ function viewDashboard() {
             const pts = dbPoints(r), sev = dbSeverity(r), kind = pts.length ? pts[0].k : '이상 의심';
             return `<button class="pq-item" onclick="openReview(${r.n})">
               <span class="thumb" style="${thumbStyle(r)}"></span>
-              <span class="pq-info"><b>${r.id}</b><span class="pq-sub">${esc(kind)}${pts.length > 1 ? ` 외 ${pts.length - 1}곳` : ''} · ${esc(r.pcb)} · ${hhmm(r.at)}</span></span>
-              <span class="pq-score" title="AI 점수 (${sev[1]})">${r.score.toFixed(2)}</span>
+              <span class="pq-info"><b>${r.id}</b><span class="sr">, </span><span class="pq-sub">${esc(kind)}${pts.length > 1 ? ` 외 ${pts.length - 1}곳` : ''} · ${esc(r.pcb)} · ${hhmm(r.at)}</span></span>
+              <span class="sr">, AI 점수 </span><span class="pq-score" title="AI 점수 (${sev[1]})">${r.score.toFixed(2)}</span>
             </button>`;
           }).join('') : `<div class="empty ok">검토 대기 중인 이상 의심 건이 없습니다.</div>`}
         </div>
@@ -2138,7 +2159,7 @@ function viewInspect() {
     const state = x.st === 'run' ? `<span class="pill"><span class="spin"></span>분석 중</span>`
       : x.st === 'done' ? `<span class="sc"><b>${r.score.toFixed(2)}</b><i class="${r.score >= r.thr ? 'hi' : ''}"><b style="width:${Math.round(r.score * 100)}%"></b></i></span>${r.ai === 'ANOMALY' ? `<span class="vd wait">${ic('alert')}이상 의심</span>` : `<span class="vd ok">${ic('ok')}정상</span>`}`
       : `<span class="small muted">대기</span>`;
-    const act = x.st === 'done' ? `${r.ai === 'ANOMALY' ? `<button class="btn sm outline" onclick="openReview(${r.n})">검토</button>` : ''}`
+    const act = x.st === 'done' ? `${r.ai === 'ANOMALY' ? `<button class="btn sm outline" onclick="openReview(${r.n})" aria-label="${r.id} 검토">검토</button>` : ''}`
       : `<button class="icon-btn" ${U.running ? 'disabled' : ''} onclick="queueRemove(${x.uid})" aria-label="목록에서 빼기" title="목록에서 빼기">${ic('x')}</button>`;
     return `<div class="qrow ${x.st}" data-st="${x.st}"><div class="photo ${x.st === 'run' ? 'scanning' : ''}" role="button" tabindex="0" onclick="${x.st === 'done' ? `openViewer(${r.n})` : `openQueueImg(${x.uid})`}" title="누르면 크게 볼 수 있습니다"><img src="${x.src}" alt="${esc(x.name)}">${x.st === 'done' ? markerHtml(r, true) : ''}</div>
       <div class="qinfo"><b class="qname" title="${esc(x.path ? fsDisplay(x.path) : x.name)}">${esc(x.name)}</b><div class="small muted">${x.path ? `서버 저장소 · ${fmtBytes(x.size)}` : x.sample ? '샘플 이미지' : fmtBytes(x.size)}${x.st === 'done' ? ` · ${r.id} · ${r.ms}ms` : ''}</div>${x.st === 'done' && r.ai === 'ANOMALY' ? `<div class="small" style="color:var(--bad)">의심 영역 ${(r.boxes && r.boxes.length) || 1}곳 — 썸네일의 빨간 박스</div>` : ''}</div>
@@ -2463,7 +2484,7 @@ function bankCardHtml(adm) {
   if (!S.pcbs.some(p => p.id === U.bankPcb)) U.bankPcb = S.pcbs[0].id;
   const cur = U.bankPcb, files = S.banks[cur] || [], imgs = files.filter(f => f.kind === 'image').length, banks = files.length - imgs;
   const sum = S.pcbs.map(p => { const a = S.banks[p.id] || [], im = a.filter(f => f.kind === 'image').length;
-    return `<tr tabindex="0" class="click ${p.id === cur ? 'sel' : ''}" data-pcb="${esc(p.id)}" onclick="setBankPcb(this.dataset.pcb)"><td class="c-main">${pcbTag(p.id)}</td><td class="c-full">공개 Memory Bank ${S.model.active} <span class="muted small">(Industrial PatchCore)</span></td><td data-l="정상 이미지">${im}장</td><td data-l="뱅크 파일">${a.length - im}개</td><td class="c-tag">${a.length ? '<span class="pill orange">자체 데이터 있음 · 학습 연결 예정</span>' : '<span class="pill">공개 뱅크 사용 중</span>'}</td></tr>`; }).join('');
+    return `<tr tabindex="0" class="click ${p.id === cur ? 'sel' : ''}" aria-describedby="hintSelect" data-pcb="${esc(p.id)}" onclick="setBankPcb(this.dataset.pcb)"><td class="c-main">${pcbTag(p.id)}</td><td class="c-full">공개 Memory Bank ${S.model.active} <span class="muted small">(Industrial PatchCore)</span></td><td data-l="정상 이미지">${im}장</td><td data-l="뱅크 파일">${a.length - im}개</td><td class="c-tag">${a.length ? '<span class="pill orange">자체 데이터 있음 · 학습 연결 예정</span>' : '<span class="pill">공개 뱅크 사용 중</span>'}</td></tr>`; }).join('');
   const kindPill = f => f.kind === 'image' ? '<span class="pill green">정상 이미지</span>' : '<span class="pill">Memory Bank 파일</span>';
   const upload = adm ? `<div class="drop dz" role="button" tabindex="0" onclick="document.getElementById('bankInput').click()" onkeydown="if(event.key==='Enter')document.getElementById('bankInput').click()" ondragover="dzOver(event)" ondragleave="dzLeave(event)" ondrop="dzDrop(event,'bank')">${ic('upload', 'lg')}<div class="mt6"><b>${esc(cur)} 데이터뱅크 파일을 끌어다 놓거나 클릭해서 선택</b></div><div class="small dz-note">정상 PCB 사진(PNG · JPG …) 또는 Memory Bank 파일(.zip · .npy · .pt · .pth · .ckpt · .faiss · .pkl · .bin · .json) · 여러 개 동시 선택 가능</div></div>`
     : `<div class="mode-note">${ic('lock', 'lg')}<span><b>조회 전용</b> — 데이터뱅크 업로드·삭제는 관리자만 할 수 있습니다.</span></div>`;
@@ -2554,7 +2575,7 @@ function rvMatch(r, q) {
 /** 상태 탭 HTML. 건수는 현재 검색어를 적용한 결과 기준이다. 기본 탭은 '검토 대기'(해야 할 일만 먼저 보인다). */
 function rvChipsHtml() {
   const base = S.inspections.filter(r => rvMatch(r, U.rvQ)), cnt = id => base.filter(RV_FILTERS[id]).length;
-  const tab = (id, label) => `<button class="${U.rvFilter === id ? 'on' : ''}" role="tab" aria-selected="${U.rvFilter === id}" onclick="rvSetFilter('${id}')">${label}<b>${cnt(id)}</b></button>`;
+  const tab = (id, label) => `<button class="${U.rvFilter === id ? 'on' : ''}" role="tab" aria-selected="${U.rvFilter === id}" aria-label="${label} ${cnt(id)}건" onclick="rvSetFilter('${id}')">${label}<b>${cnt(id)}</b></button>`;
   return tab('pending', '검토 대기') + tab('all', '전체') + tab('normal', '정상') + tab('defect', '불량');
 }
 
@@ -2702,7 +2723,7 @@ function viewReview() {
     <div class="rv-work">
       <aside class="rv-side" aria-label="검토 목록">
         <div class="rv-count" id="rvCount">${rvCountHtml(hits.length, list.length)}</div>
-        <div class="rv-list" id="rvList">${list.map(r => `<button class="rv-item ${r.n === U.rvSel ? 'sel' : ''}" ${r.n === U.rvSel ? 'aria-current="true"' : ''} onclick="rvSelect(${r.n})"><span class="thumb" style="${thumbStyle(r)}"></span><span class="rv-item-b"><span class="rv-h"><b>${r.id}</b>${U.rvFilter === 'pending' ? '' : finalBadge(r)}</span><span class="small muted">${esc(r.pcb)} · AI ${r.score.toFixed(2)} · ${hhmm(r.at)}</span></span></button>`).join('') || '<div class="empty">목록이 비어 있습니다.</div>'}</div>
+        <div class="rv-list" id="rvList">${list.map(r => `<button class="rv-item ${r.n === U.rvSel ? 'sel' : ''}" ${r.n === U.rvSel ? 'aria-current="true"' : ''} onclick="rvSelect(${r.n})"><span class="thumb" style="${thumbStyle(r)}"></span><span class="rv-item-b"><span class="rv-h"><b>${r.id}</b><span class="sr">, </span>${U.rvFilter === 'pending' ? '' : finalBadge(r)}</span><span class="small muted">${esc(r.pcb)} · AI ${r.score.toFixed(2)} · ${hhmm(r.at)}</span></span></button>`).join('') || '<div class="empty">목록이 비어 있습니다.</div>'}</div>
       </aside>
       <section class="rv-stage" id="rvCard" aria-label="검토 상세">${stage}</section>
     </div>`;
@@ -2771,7 +2792,7 @@ function viewHistory() {
   U.hpage = Math.min(U.hpage, pages); const rows = all.slice((U.hpage - 1) * per, U.hpage * per);
   const nAct = [U.hf.q, U.hf.period !== 'all', U.hf.pcb !== 'all', U.hf.hour != null].filter(Boolean).length, hOpen = !!U.hbar || nAct > 0;   // 폰에서는 검색 · 필터를 접어 두고, 걸린 조건이 있으면 펼쳐 보여 준다
   const cnt = k => k === 'all' ? base.length : base.filter(r => finalState(r) === k).length;
-  const tab = (k, l) => `<button class="${cur === k ? 'on' : ''}" role="tab" aria-selected="${cur === k}" onclick="U.hf.result='${k}';U.hpage=1;render()">${l}<b>${cnt(k)}</b></button>`;
+  const tab = (k, l) => `<button class="${cur === k ? 'on' : ''}" role="tab" aria-selected="${cur === k}" aria-label="${l} ${cnt(k)}건" onclick="U.hf.result='${k}';U.hpage=1;render()">${l}<b>${cnt(k)}</b></button>`;
   const sel = (key, label, opts) => `<select class="inp" aria-label="${label}" onchange="U.hf.${key}=this.value;U.hpage=1;render()">${opts.map(([v, l]) => `<option value="${v}" ${U.hf[key] === v ? 'selected' : ''}>${l}</option>`).join('')}</select>`;
   return `${pageHead('이력', '검사 결과 조회 · 검색 · CSV 다운로드', `<button class="btn sm outline" onclick="exportCsv()">${ic('download')}CSV 다운로드</button>`)}
     <div class="tabs hist-tabs" role="tablist" aria-label="최종 판정">${tab('all', '전체')}${tab('PENDING', '검토 대기')}${tab('DEFECT', '불량')}${tab('NORMAL', '정상')}</div>
@@ -2783,7 +2804,7 @@ function viewHistory() {
       ${U.hf.hour != null ? `<button class="pill active" onclick="U.hf.hour=null;U.hpage=1;render()" title="시간 필터 해제">${U.hf.hour}시대 ${ic('x')}</button>` : ''}
     </div>
     <div class="tbl-wrap"><table class="tbl cards"><thead><tr><th>최종 판정</th><th>검사 ID</th><th>PCB 종류</th><th>AI 판정 · 점수</th><th>검사 시각</th>${adm ? '<th class="c-hide">당시 임계값</th><th class="c-hide">모델</th>' : ''}</tr></thead><tbody>
-      ${rows.map(r => `<tr tabindex="0" class="click" onclick="openDetail(${r.n})">
+      ${rows.map(r => `<tr tabindex="0" class="click" aria-describedby="hintDetail" onclick="openDetail(${r.n})">
         <td class="c-tag">${finalBadge(r)}</td>
         <td class="c-main">${r.id}</td>
         <td>${pcbTag(r.pcb)}</td>
